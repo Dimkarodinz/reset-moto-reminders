@@ -8,6 +8,14 @@ motorcycle:
   generation: first_generation
   market: unknown
 
+  # The ECU reports and accepts kilometres on the wire (odometer 0xAE76 = 44662,
+  # read directly as 44662 km in the retained capture). The captured GT Pro is a
+  # km-market bike, so the dashboard displays kilometres too. A future miles bike
+  # would set display_unit: miles here; the app converts only when the two differ.
+  distance_units:
+    wire_unit: km
+    display_unit: km
+
   modules:
     engine_ecu:
       role: engine_management_and_diagnostics

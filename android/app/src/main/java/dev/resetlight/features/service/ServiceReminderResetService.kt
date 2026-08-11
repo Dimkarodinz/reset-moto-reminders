@@ -6,6 +6,8 @@ import dev.resetlight.diagnostics.InstrumentResponseDecoder
 import dev.resetlight.diagnostics.ServiceReminderCommandBuilder
 import dev.resetlight.diagnostics.WriteIntent
 import dev.resetlight.diagnostics.hexOnly
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
 import dev.resetlight.profiles.ServiceReminderOperationProfile
 import java.time.LocalDate
@@ -18,7 +20,7 @@ sealed interface ServiceReminderResetResult {
         val nextServiceDate: LocalDate,
     ) : ServiceReminderResetResult
 
-    data class Blocked(val reason: String) : ServiceReminderResetResult
+    data class Blocked(val reason: UiText) : ServiceReminderResetResult
 }
 
 class ServiceReminderResetFailure(
@@ -58,7 +60,9 @@ class ServiceReminderResetService(
         instrumentProfile.configurationCommands.forEach { command ->
             val response = execute(channel, command, WriteIntent.READ)
             if (!configurationAccepted(command, response)) {
-                return ServiceReminderResetResult.Blocked("Adapter rejected instrument transport command $command")
+                return ServiceReminderResetResult.Blocked(
+                    UiText(UiMessage.INSTRUMENT_REASON_TRANSPORT_REJECTED, command),
+                )
             }
         }
 
@@ -67,7 +71,9 @@ class ServiceReminderResetService(
         val (status, odometer) = try {
             decoder.decodeInitialize(statusResponse) to decoder.decodeOdometer(odometerResponse)
         } catch (parse: DiagnosticParseException) {
-            return ServiceReminderResetResult.Blocked("The instrument returned an unrecognized status; nothing was written.")
+            return ServiceReminderResetResult.Blocked(
+                UiText(UiMessage.SERVICE_RESET_REASON_UNRECOGNIZED_STATUS),
+            )
         }
 
         // Fail closed: only write once the live cluster matches the validated
@@ -79,12 +85,16 @@ class ServiceReminderResetService(
 
         val distanceResponse = execute(channel, commands.distanceRequest, WriteIntent.WRITE)
         if (!isEchoPositive(commands.distanceRequest, distanceResponse)) {
-            return ServiceReminderResetResult.Blocked("The cluster rejected the distance-interval write; the date was not sent.")
+            return ServiceReminderResetResult.Blocked(
+                UiText(UiMessage.SERVICE_RESET_REASON_DISTANCE_REJECTED),
+            )
         }
 
         val dateResponse = execute(channel, commands.dateRequest, WriteIntent.WRITE)
         if (!isEchoPositive(commands.dateRequest, dateResponse)) {
-            return ServiceReminderResetResult.Blocked("The cluster did not confirm the service-date write.")
+            return ServiceReminderResetResult.Blocked(
+                UiText(UiMessage.SERVICE_RESET_REASON_DATE_UNCONFIRMED),
+            )
         }
 
         return ServiceReminderResetResult.Committed(

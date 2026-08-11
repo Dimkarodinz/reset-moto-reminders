@@ -8,6 +8,10 @@ import dev.resetlight.adapter.elm.InitializationStage
 import dev.resetlight.domain.ConnectionFailure
 import dev.resetlight.domain.ConnectionState
 import dev.resetlight.domain.ConnectionStateMachine
+import dev.resetlight.domain.DistanceUnit
+import dev.resetlight.domain.MotorcycleDistanceUnits
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.logging.EventJournal
 import dev.resetlight.diagnostics.DiagnosticReadChannel
 import dev.resetlight.diagnostics.DiagnosticWriteChannel
@@ -66,6 +70,10 @@ class AdapterSessionOwner(
     private val bluetooth: BluetoothFacade,
     private val journal: EventJournal,
     private val scope: CoroutineScope,
+    val distanceUnits: MotorcycleDistanceUnits = MotorcycleDistanceUnits(
+        DistanceUnit.KILOMETERS,
+        DistanceUnit.KILOMETERS,
+    ),
     private val engineReadOnlyCaptureProfile: EngineReadOnlyCaptureProfile? = null,
     private val instrumentReadOnlyCaptureProfile: InstrumentReadOnlyCaptureProfile? = null,
     private val dtcReadProfile: DiagnosticTroubleCodeReadProfile? = null,
@@ -173,7 +181,7 @@ class AdapterSessionOwner(
             running = ReadOnlyCaptureState.Running,
             idle = ReadOnlyCaptureState.Idle,
             failed = ReadOnlyCaptureState.Failed(
-                "Read-only capture stopped after a connection or adapter error.",
+                UiText(UiMessage.CAPTURE_FAILED_ERROR),
             ),
             startedEvent = "read_only_engine_capture_started",
             failedEvent = "read_only_engine_capture_failed",
@@ -213,7 +221,7 @@ class AdapterSessionOwner(
             running = DtcReadState.Running,
             idle = DtcReadState.Idle,
             failed = DtcReadState.Failed(
-                "Reading trouble codes stopped after a connection or adapter error.",
+                UiText(UiMessage.DTC_READ_FAILED_ERROR),
             ),
             startedEvent = "dtc_read_started",
             failedEvent = "dtc_read_failed",
@@ -222,7 +230,11 @@ class AdapterSessionOwner(
                 // usable, so surface the read failure without tearing it down.
                 if (failure is DtcReadFailure.CountMismatch) {
                     mutableDtcReadState.value = DtcReadState.Failed(
-                        "The ECU reported ${failure.reportedCount} codes but returned ${failure.decodedCount}. Try reading again.",
+                        UiText(
+                            UiMessage.DTC_READ_COUNT_MISMATCH,
+                            failure.reportedCount.toString(),
+                            failure.decodedCount.toString(),
+                        ),
                     )
                     journal.record("operation", "dtc_read_failed", outcome = "count_mismatch")
                     true
@@ -258,7 +270,7 @@ class AdapterSessionOwner(
             running = InstrumentReadState.Running,
             idle = InstrumentReadState.Idle,
             failed = InstrumentReadState.Failed(
-                "Reading instrument data stopped after a connection or adapter error.",
+                UiText(UiMessage.INSTRUMENT_READ_FAILED_ERROR),
             ),
             startedEvent = "instrument_read_started",
             failedEvent = "instrument_read_failed",
@@ -304,7 +316,7 @@ class AdapterSessionOwner(
             running = DtcClearUiState.Running,
             idle = DtcClearUiState.Idle,
             failed = DtcClearUiState.Failed(
-                "Clearing trouble codes stopped after a connection or adapter error.",
+                UiText(UiMessage.DTC_CLEAR_FAILED_ERROR),
             ),
             startedEvent = "dtc_clear_started",
             failedEvent = "dtc_clear_failed",
@@ -335,13 +347,16 @@ class AdapterSessionOwner(
      * build; the [ClusterFingerprintGate] inside the service fails closed before
      * any write byte leaves the adapter.
      */
-    fun resetServiceReminder(distanceKm: Int, nextServiceDate: LocalDate) {
+    fun resetServiceReminder(distanceDisplay: Int, nextServiceDate: LocalDate) {
         val instrumentProfile = instrumentReadOnlyCaptureProfile ?: return
         val serviceProfile = serviceReminderProfile ?: return
         val gate = clusterFingerprintGate ?: return
         val id = motorcycleId ?: return
         val session = activeSession.get() ?: return
         if (!writeOperationsAvailable) return
+        // The user enters the interval in the dashboard's display unit; the ECU
+        // stores and accepts kilometres on the wire, so convert before writing.
+        val distanceKm = distanceUnits.displayToWire(distanceDisplay)
         runGatedOperation(
             job = ::serviceResetJob,
             stateFlow = mutableServiceResetState,
@@ -349,7 +364,7 @@ class AdapterSessionOwner(
             running = ServiceResetUiState.Running,
             idle = ServiceResetUiState.Idle,
             failed = ServiceResetUiState.Failed(
-                "Resetting the service reminder stopped after a connection or adapter error.",
+                UiText(UiMessage.SERVICE_RESET_FAILED_ERROR),
             ),
             startedEvent = "service_reset_started",
             failedEvent = "service_reset_failed",

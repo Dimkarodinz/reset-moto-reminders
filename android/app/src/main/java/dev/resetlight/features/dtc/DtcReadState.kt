@@ -1,6 +1,7 @@
 package dev.resetlight.features.dtc
 
 import dev.resetlight.diagnostics.DecodedDtc
+import dev.resetlight.domain.UiText
 
 /**
  * User-facing state of the confirmed-DTC read on the engine ECU. The read runs
@@ -14,5 +15,5 @@ sealed interface DtcReadState {
         val reportedCount: Int,
         val dtcs: List<DecodedDtc>,
     ) : DtcReadState
-    data class Failed(val reason: String) : DtcReadState
+    data class Failed(val reason: UiText) : DtcReadState
 }

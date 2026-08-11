@@ -1,5 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- DTC translation toggle -->
     <string name="dtc_show_original">Показати оригінал (англійською)</string>
-    <string name="dtc_hide_original">Сховати оригінал</string>
+    <string name="dtc_hide_original">Приховати оригінал</string>
+
+    <!-- Distance units (short suffix shown next to a value) -->
+    <string name="distance_unit_km">км</string>
+    <string name="distance_unit_miles">миль</string>
+
+    <!-- Screen structure -->
+    <string name="diagnostics_section_title">Діагностика мотоцикла</string>
+    <string name="reset_disclaimer">Скидання нагадування не виконує обслуговування.</string>
+    <string name="action_cancel">Скасувати</string>
+    <string name="action_read_again">Прочитати знову</string>
+
+    <!-- Connection status -->
+    <string name="status_disconnected_title">Роз\'єднано</string>
+    <string name="status_disconnected_detail_selected">Вибраний адаптер: %1$s</string>
+    <string name="status_disconnected_detail_none">Сполучіть або виберіть адаптер перед підключенням.</string>
+    <string name="status_selecting_title">Виберіть або сполучіть адаптер</string>
+    <string name="status_selecting_detail">Виберіть сполучений адаптер vLinker або сполучіть його в налаштуваннях Bluetooth Android.</string>
+    <string name="status_connecting_title">Підключення</string>
+    <string name="status_connecting_detail">Відкриття з\'єднання Bluetooth.</string>
+    <string name="status_identifying_title">Ідентифікація адаптера</string>
+    <string name="status_identifying_detail">Перевірка відповідності ідентичності адаптера вибраній карті.</string>
+    <string name="status_initializing_title">Ініціалізація адаптера</string>
+    <string name="status_initializing_detail">Застосування послідовності ініціалізації адаптера.</string>
+    <string name="status_ready_title">Адаптер готовий</string>
+    <string name="status_ready_detail">З\'єднання з адаптером готове.</string>
+    <string name="status_disconnecting_title">Роз\'єднання</string>
+    <string name="status_disconnecting_detail">Закриття з\'єднання з адаптером.</string>
+
+    <!-- Connection failures -->
+    <string name="failure_permission_title">Потрібен дозвіл Bluetooth</string>
+    <string name="failure_permission_detail">Надайте дозвіл Bluetooth, який запитує Reset Moto Reminders, потім спробуйте знову.</string>
+    <string name="failure_permission_action">Надати дозвіл</string>
+    <string name="failure_pairing_title">Потрібне сполучення</string>
+    <string name="failure_pairing_detail">Сполучіть vLinker MC-Android у налаштуваннях Bluetooth Android за допомогою PIN 1234, потім поверніться та виберіть його.</string>
+    <string name="failure_pairing_action">Відкрити налаштування Bluetooth</string>
+    <string name="failure_timeout_title">Час очікування з\'єднання вичерпано</string>
+    <string name="failure_timeout_detail">Адаптер не відповів вчасно. Переконайтеся, що він увімкнений і поблизу, потім спробуйте знову.</string>
+    <string name="failure_timeout_action">Спробувати знову</string>
+    <string name="failure_identity_title">Непідтримувана ідентичність адаптера</string>
+    <string name="failure_identity_detail">Підключений пристрій не відповідає вибраній карті адаптера. Роз\'єднайтеся та виберіть правильний адаптер.</string>
+    <string name="failure_identity_action">Вибрати інший адаптер</string>
+    <string name="failure_remote_close_title">Адаптер роз\'єднано</string>
+    <string name="failure_remote_close_detail">Адаптер закрив з\'єднання. Перевірте живлення та діапазон Bluetooth перед повторним підключенням.</string>
+    <string name="failure_remote_close_action">Підключити знову</string>
+    <string name="failure_io_title">Не вдалося підключитися</string>
+    <string name="failure_io_detail">Помилка зв\'язку Bluetooth. Перевірте живлення та діапазон адаптера, потім спробуйте знову.</string>
+    <string name="failure_io_action">Спробувати знову</string>
+
+    <!-- Connection card labels and buttons -->
+    <string name="label_adapter">Адаптер</string>
+    <string name="label_elm_identity">Ідентичність ELM</string>
+    <string name="label_stn_identity">Ідентичність STN</string>
+    <string name="label_adapter_map">Карта адаптера</string>
+    <string name="button_pair_or_select">Сполучити або вибрати адаптер</string>
+    <string name="button_connect">Підключити</string>
+    <string name="button_disconnect">Роз\'єднати</string>
+
+    <!-- Unavailable service card -->
+    <string name="service_card_title">Скидання нагадування про обслуговування</string>
+    <string name="service_card_unavailable_detail">Недоступно, доки профіль мотоцикла не буде перевірено.</string>
+
+    <!-- Read-only ECU capture -->
+    <string name="capture_title_idle">Зчитування даних ECU (лише читання)</string>
+    <string name="capture_title_running">Зчитування даних ECU</string>
+    <string name="capture_title_complete">Зчитування завершено</string>
+    <string name="capture_title_blocked">Зчитування безпечно зупинено</string>
+    <string name="capture_title_failed">Не вдалося зчитати</string>
+    <string name="capture_body_idle">Одноразово зчитує відомі нечутливі ідентифікатори ECU та інформацію про коди несправностей. Ніколи не очищує несправності та не змінює нагадування про обслуговування.</string>
+    <string name="capture_body_running">Залиште запалювання увімкненим, а двигун вимкненим. Не залишайте додаток, доки зчитування не завершиться.</string>
+    <string name="capture_body_complete">Повідомлена кількість кодів несправностей: %1$d. Зареєстровано %2$d відповідей. Роз\'єднайтеся та поверніться з журналами телефону.</string>
+    <string name="capture_body_blocked">%1$s Роз\'єднайтеся та поверніться з журналами телефону.</string>
+    <string name="capture_button">Зчитати дані ECU (лише читання)</string>
+    <string name="capture_failed_error">Зчитування (лише читання) зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="capture_reason_engine_transport_rejected">Адаптер відхилив команду транспорту двигуна %1$s</string>
+    <string name="capture_reason_extended_session_rejected">ECU відхилив розширений діагностичний сеанс; спроба доступу безпеки не виконувалася</string>
+    <string name="capture_reason_dtc_count_unavailable">Кількість кодів несправностей залишалася недоступною в розширеному сеансі; спроба доступу безпеки не виконувалася</string>
+
+    <!-- Trouble-code read -->
+    <string name="dtc_read_title">Коди несправностей</string>
+    <string name="dtc_read_body_idle">Зчитує підтверджені коди несправностей з ECU двигуна. Це нічого не очищує та не змінює.</string>
+    <string name="dtc_read_body_running">Зчитування підтверджених кодів несправностей. Залиште запалювання увімкненим.</string>
+    <string name="dtc_read_body_none">Немає збережених підтверджених кодів несправностей.</string>
+    <string name="dtc_read_body_count">Збережено підтверджених кодів несправностей: %1$d.</string>
+    <string name="dtc_read_button">Зчитати коди несправностей</string>
+    <string name="dtc_read_failed_error">Зчитування кодів несправностей зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="dtc_read_count_mismatch">ECU повідомив %1$s кодів, але повернув %2$s. Спробуйте зчитати знову.</string>
+
+    <!-- Instrument read -->
+    <string name="instrument_read_title">Зчитування панелі приладів (дослідження)</string>
+    <string name="instrument_read_body_idle">Перший контакт із панеллю приладів. Надсилає лише два зафіксовані запити зчитування та декодує одометр. Ніколи не змінює нагадування про обслуговування.</string>
+    <string name="instrument_read_body_running">Зчитування даних панелі приладів. Залиште запалювання увімкненим.</string>
+    <string name="instrument_read_body_complete">Одометр: %1$d %2$s (%3$s). Статус: %4$s. Поверніться з журналами телефону.</string>
+    <string name="instrument_read_body_blocked">%1$s Поверніться з журналами телефону.</string>
+    <string name="instrument_read_button">Зчитати дані панелі приладів</string>
+    <string name="instrument_read_failed_error">Зчитування даних панелі приладів зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="instrument_reason_transport_rejected">Адаптер відхилив команду транспорту панелі приладів %1$s</string>
+    <string name="instrument_reason_unrecognized_response">Панель приладів повернула нерозпізнану відповідь; нічого не було записано.</string>
+
+    <!-- Trouble-code clear -->
+    <string name="dtc_clear_title">Очищення кодів несправностей (дослідження)</string>
+    <string name="dtc_clear_body_idle">Виконує доступ безпеки та очищує підтверджені коди двигуна. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.</string>
+    <string name="dtc_clear_body_running">Очищення кодів несправностей. Залиште запалювання увімкненим і не залишайте додаток.</string>
+    <string name="dtc_clear_body_cleared_none">Очищено. Підтверджених кодів несправностей не залишилося.</string>
+    <string name="dtc_clear_body_cleared_remaining">Очищення завершено, але %1$d код(ів) досі присутні.</string>
+    <string name="dtc_clear_body_blocked">%1$s Нічого не було очищено.</string>
+    <string name="dtc_clear_button">Очистити коди несправностей</string>
+    <string name="dtc_clear_button_again">Очистити знову</string>
+    <string name="dtc_clear_warning">Це надсилає запис у ECU двигуна. Підтвердьте, щоб продовжити.</string>
+    <string name="dtc_clear_confirm">Підтвердити очищення</string>
+    <string name="dtc_clear_failed_error">Очищення кодів несправностей зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="dtc_clear_reason_session_refused">ECU відхилив розширений діагностичний сеанс; нічого не було очищено.</string>
+    <string name="dtc_clear_reason_no_seed">ECU не повернув придатного початкового значення безпеки (seed); нічого не було очищено.</string>
+    <string name="dtc_clear_reason_security_rejected">ECU відхилив доступ безпеки; нічого не було очищено.</string>
+    <string name="dtc_clear_reason_rejected">ECU відхилив запит на очищення; жоден код не було очищено.</string>
+    <string name="dtc_clear_reason_count_unconfirmed">Очищення завершено, але кількість кодів не вдалося підтвердити.</string>
+
+    <!-- Service reminder reset -->
+    <string name="service_reset_title">Скидання нагадування про обслуговування (дослідження)</string>
+    <string name="service_reset_body_idle">Записує новий інтервал обслуговування та дату наступного обслуговування на панель приладів. Скидання нагадування не виконує обслуговування.</string>
+    <string name="service_reset_body_running">Запис нагадування про обслуговування. Залиште запалювання увімкненим і не залишайте додаток.</string>
+    <string name="service_reset_body_committed">Записано. Одометр %1$d %2$s, інтервал %3$d %4$s, наступне обслуговування %5$s.</string>
+    <string name="service_reset_body_blocked">%1$s Нічого не було записано.</string>
+    <string name="service_reset_interval_label">Інтервал обслуговування (%1$s)</string>
+    <string name="service_reset_date_label">Дата наступного обслуговування (YYYY-MM-DD)</string>
+    <string name="service_reset_button">Скинути нагадування</string>
+    <string name="service_reset_button_again">Скинути знову</string>
+    <string name="service_reset_warning">Це записує на панель приладів: інтервал %1$d %2$s, наступне обслуговування %3$s. Підтвердьте, щоб продовжити.</string>
+    <string name="service_reset_confirm">Підтвердити скидання</string>
+    <string name="service_reset_failed_error">Скидання нагадування про обслуговування зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="service_reset_reason_unrecognized_status">Панель приладів повернула нерозпізнаний статус; нічого не було записано.</string>
+    <string name="service_reset_reason_distance_rejected">Панель приладів відхилила запис інтервалу відстані; дата не була надіслана.</string>
+    <string name="service_reset_reason_date_unconfirmed">Панель приладів не підтвердила запис дати обслуговування.</string>
+
+    <!-- Cluster fingerprint gate -->
+    <string name="gate_reason_profile_mismatch">Профіль підключеного мотоцикла не відповідає перевіреній панелі приладів.</string>
+    <string name="gate_reason_status_mismatch">Статус панелі приладів (%1$s) не відповідає перевіреній панелі приладів (%2$s).</string>
+    <string name="gate_reason_authorized">Підключена панель приладів відповідає перевіреному відбитку.</string>
+
+    <!-- Device picker -->
+    <string name="device_picker_title">Виберіть сполучений адаптер</string>
+    <string name="device_picker_empty">Сполученого адаптера vLinker MC-Android не знайдено.</string>
+    <string name="device_picker_pair_hint">Сполучіть у налаштуваннях Android за допомогою PIN 1234, якщо адаптера немає в списку.</string>
+    <string name="device_picker_settings">Налаштування Bluetooth</string>
+    <string name="adapter_default_name">Адаптер vLinker</string>
 </resources>

@@ -1,6 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Reset Moto Reminders</string>
+
+    <!-- DTC translation toggle -->
     <string name="dtc_show_original">Show original (English)</string>
     <string name="dtc_hide_original">Hide original</string>
+
+    <!-- Distance units (short suffix shown next to a value) -->
+    <string name="distance_unit_km">km</string>
+    <string name="distance_unit_miles">mi</string>
+
+    <!-- Screen structure -->
+    <string name="diagnostics_section_title">Motorcycle diagnostics</string>
+    <string name="reset_disclaimer">Resetting a reminder does not perform maintenance.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_read_again">Read again</string>
+
+    <!-- Connection status -->
+    <string name="status_disconnected_title">Disconnected</string>
+    <string name="status_disconnected_detail_selected">Selected adapter: %1$s</string>
+    <string name="status_disconnected_detail_none">Pair or select an adapter before connecting.</string>
+    <string name="status_selecting_title">Select or pair adapter</string>
+    <string name="status_selecting_detail">Choose a bonded vLinker adapter, or pair it in Android Bluetooth settings.</string>
+    <string name="status_connecting_title">Connecting</string>
+    <string name="status_connecting_detail">Opening the Bluetooth connection.</string>
+    <string name="status_identifying_title">Identifying adapter</string>
+    <string name="status_identifying_detail">Checking that the adapter identity matches the selected map.</string>
+    <string name="status_initializing_title">Initializing adapter</string>
+    <string name="status_initializing_detail">Applying the adapter initialization sequence.</string>
+    <string name="status_ready_title">Adapter ready</string>
+    <string name="status_ready_detail">The adapter connection is ready.</string>
+    <string name="status_disconnecting_title">Disconnecting</string>
+    <string name="status_disconnecting_detail">Closing the adapter connection.</string>
+
+    <!-- Connection failures -->
+    <string name="failure_permission_title">Bluetooth permission needed</string>
+    <string name="failure_permission_detail">Allow the Bluetooth permission requested by Reset Moto Reminders, then try again.</string>
+    <string name="failure_permission_action">Grant permission</string>
+    <string name="failure_pairing_title">Pairing required</string>
+    <string name="failure_pairing_detail">Pair vLinker MC-Android in Android Bluetooth settings using PIN 1234, then return and select it.</string>
+    <string name="failure_pairing_action">Open Bluetooth settings</string>
+    <string name="failure_timeout_title">Connection timed out</string>
+    <string name="failure_timeout_detail">The adapter did not respond in time. Check that it is powered and nearby, then try again.</string>
+    <string name="failure_timeout_action">Try again</string>
+    <string name="failure_identity_title">Unsupported adapter identity</string>
+    <string name="failure_identity_detail">The connected device does not match the selected adapter map. Disconnect and select the correct adapter.</string>
+    <string name="failure_identity_action">Select another adapter</string>
+    <string name="failure_remote_close_title">Adapter disconnected</string>
+    <string name="failure_remote_close_detail">The adapter closed the connection. Check power and Bluetooth range before reconnecting.</string>
+    <string name="failure_remote_close_action">Reconnect</string>
+    <string name="failure_io_title">Connection failed</string>
+    <string name="failure_io_detail">Bluetooth communication failed. Check adapter power and range, then try again.</string>
+    <string name="failure_io_action">Try again</string>
+
+    <!-- Connection card labels and buttons -->
+    <string name="label_adapter">Adapter</string>
+    <string name="label_elm_identity">ELM identity</string>
+    <string name="label_stn_identity">STN identity</string>
+    <string name="label_adapter_map">Adapter map</string>
+    <string name="button_pair_or_select">Pair or select adapter</string>
+    <string name="button_connect">Connect</string>
+    <string name="button_disconnect">Disconnect</string>
+
+    <!-- Unavailable service card -->
+    <string name="service_card_title">Service reminder reset</string>
+    <string name="service_card_unavailable_detail">Unavailable until the motorcycle profile is validated.</string>
+
+    <!-- Read-only ECU capture -->
+    <string name="capture_title_idle">Read-only ECU capture</string>
+    <string name="capture_title_running">Reading ECU data</string>
+    <string name="capture_title_complete">Capture complete</string>
+    <string name="capture_title_blocked">Capture stopped safely</string>
+    <string name="capture_title_failed">Capture failed</string>
+    <string name="capture_body_idle">Reads known non-sensitive ECU identifiers and DTC information once. It never clears faults or changes the service reminder.</string>
+    <string name="capture_body_running">Keep the ignition on and engine off. Do not leave the app until the capture finishes.</string>
+    <string name="capture_body_complete">Reported DTC count: %1$d. %2$d responses were logged. Disconnect and return with the phone logs.</string>
+    <string name="capture_body_blocked">%1$s Disconnect and return with the phone logs.</string>
+    <string name="capture_button">Capture read-only ECU data</string>
+    <string name="capture_failed_error">Read-only capture stopped after a connection or adapter error.</string>
+    <string name="capture_reason_engine_transport_rejected">Adapter rejected engine transport command %1$s</string>
+    <string name="capture_reason_extended_session_rejected">ECU rejected the observed extended diagnostic session; security access was not attempted</string>
+    <string name="capture_reason_dtc_count_unavailable">DTC count remained unavailable in the observed extended session; security access was not attempted</string>
+
+    <!-- Trouble-code read -->
+    <string name="dtc_read_title">Trouble codes</string>
+    <string name="dtc_read_body_idle">Reads confirmed diagnostic trouble codes from the engine ECU. This does not clear or change anything.</string>
+    <string name="dtc_read_body_running">Reading confirmed trouble codes. Keep the ignition on.</string>
+    <string name="dtc_read_body_none">No confirmed trouble codes are stored.</string>
+    <string name="dtc_read_body_count">%1$d confirmed trouble code(s) stored.</string>
+    <string name="dtc_read_button">Read trouble codes</string>
+    <string name="dtc_read_failed_error">Reading trouble codes stopped after a connection or adapter error.</string>
+    <string name="dtc_read_count_mismatch">The ECU reported %1$s codes but returned %2$s. Try reading again.</string>
+
+    <!-- Instrument read -->
+    <string name="instrument_read_title">Instrument read (research)</string>
+    <string name="instrument_read_body_idle">First contact with the instrument cluster. Sends only the two observed reads and decodes the odometer. It never changes the service reminder.</string>
+    <string name="instrument_read_body_running">Reading instrument data. Keep the ignition on.</string>
+    <string name="instrument_read_body_complete">Odometer: %1$d %2$s (%3$s). Status: %4$s. Return with the phone logs.</string>
+    <string name="instrument_read_body_blocked">%1$s Return with the phone logs.</string>
+    <string name="instrument_read_button">Read instrument data</string>
+    <string name="instrument_read_failed_error">Reading instrument data stopped after a connection or adapter error.</string>
+    <string name="instrument_reason_transport_rejected">Adapter rejected instrument transport command %1$s</string>
+    <string name="instrument_reason_unrecognized_response">The instrument returned an unrecognized response; nothing was written.</string>
+
+    <!-- Trouble-code clear -->
+    <string name="dtc_clear_title">Clear trouble codes (research)</string>
+    <string name="dtc_clear_body_idle">Runs security access and clears confirmed engine codes. Only clear codes you have already read and understood.</string>
+    <string name="dtc_clear_body_running">Clearing trouble codes. Keep the ignition on and do not leave the app.</string>
+    <string name="dtc_clear_body_cleared_none">Cleared. No confirmed trouble codes remain.</string>
+    <string name="dtc_clear_body_cleared_remaining">Clear completed, but %1$d code(s) are still present.</string>
+    <string name="dtc_clear_body_blocked">%1$s Nothing was cleared.</string>
+    <string name="dtc_clear_button">Clear trouble codes</string>
+    <string name="dtc_clear_button_again">Clear again</string>
+    <string name="dtc_clear_warning">This sends a write to the engine ECU. Confirm to proceed.</string>
+    <string name="dtc_clear_confirm">Confirm clear</string>
+    <string name="dtc_clear_failed_error">Clearing trouble codes stopped after a connection or adapter error.</string>
+    <string name="dtc_clear_reason_session_refused">The ECU refused the extended diagnostic session; nothing was cleared.</string>
+    <string name="dtc_clear_reason_no_seed">The ECU did not return a usable security seed; nothing was cleared.</string>
+    <string name="dtc_clear_reason_security_rejected">The ECU rejected security access; nothing was cleared.</string>
+    <string name="dtc_clear_reason_rejected">The ECU rejected the clear request; no codes were cleared.</string>
+    <string name="dtc_clear_reason_count_unconfirmed">The clear completed but the code count could not be confirmed.</string>
+
+    <!-- Service reminder reset -->
+    <string name="service_reset_title">Reset service reminder (research)</string>
+    <string name="service_reset_body_idle">Writes a new service interval and next-service date to the instrument cluster. Resetting a reminder does not perform maintenance.</string>
+    <string name="service_reset_body_running">Writing the service reminder. Keep the ignition on and do not leave the app.</string>
+    <string name="service_reset_body_committed">Committed. Odometer %1$d %2$s, interval %3$d %4$s, next service %5$s.</string>
+    <string name="service_reset_body_blocked">%1$s Nothing was written.</string>
+    <string name="service_reset_interval_label">Service interval (%1$s)</string>
+    <string name="service_reset_date_label">Next service date (YYYY-MM-DD)</string>
+    <string name="service_reset_button">Reset reminder</string>
+    <string name="service_reset_button_again">Reset again</string>
+    <string name="service_reset_warning">This writes to the instrument cluster: interval %1$d %2$s, next service %3$s. Confirm to proceed.</string>
+    <string name="service_reset_confirm">Confirm reset</string>
+    <string name="service_reset_failed_error">Resetting the service reminder stopped after a connection or adapter error.</string>
+    <string name="service_reset_reason_unrecognized_status">The instrument returned an unrecognized status; nothing was written.</string>
+    <string name="service_reset_reason_distance_rejected">The cluster rejected the distance-interval write; the date was not sent.</string>
+    <string name="service_reset_reason_date_unconfirmed">The cluster did not confirm the service-date write.</string>
+
+    <!-- Cluster fingerprint gate -->
+    <string name="gate_reason_profile_mismatch">Connected motorcycle profile does not match the validated cluster.</string>
+    <string name="gate_reason_status_mismatch">Instrument status (%1$s) does not match the validated cluster (%2$s).</string>
+    <string name="gate_reason_authorized">Connected cluster matches the validated fingerprint.</string>
+
+    <!-- Device picker -->
+    <string name="device_picker_title">Select paired adapter</string>
+    <string name="device_picker_empty">No paired vLinker MC-Android adapter was found.</string>
+    <string name="device_picker_pair_hint">Pair in Android settings with PIN 1234 if the adapter is not listed.</string>
+    <string name="device_picker_settings">Bluetooth settings</string>
+    <string name="adapter_default_name">vLinker adapter</string>
 </resources>

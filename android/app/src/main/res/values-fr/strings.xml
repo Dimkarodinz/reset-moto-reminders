@@ -1,5 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dtc_show_original">Voir l\'original (anglais)</string>
+
+    <!-- DTC translation toggle -->
+    <string name="dtc_show_original">Afficher l\'original (anglais)</string>
     <string name="dtc_hide_original">Masquer l\'original</string>
+
+    <!-- Distance units (short suffix shown next to a value) -->
+    <string name="distance_unit_km">km</string>
+    <string name="distance_unit_miles">mi</string>
+
+    <!-- Screen structure -->
+    <string name="diagnostics_section_title">Diagnostic moto</string>
+    <string name="reset_disclaimer">Réinitialiser un rappel n\'effectue pas l\'entretien.</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_read_again">Relire</string>
+
+    <!-- Connection status -->
+    <string name="status_disconnected_title">Déconnecté</string>
+    <string name="status_disconnected_detail_selected">Adaptateur sélectionné : %1$s</string>
+    <string name="status_disconnected_detail_none">Associez ou sélectionnez un adaptateur avant de vous connecter.</string>
+    <string name="status_selecting_title">Sélectionner ou associer un adaptateur</string>
+    <string name="status_selecting_detail">Choisissez un adaptateur vLinker déjà associé, ou associez-le dans les paramètres Bluetooth d\'Android.</string>
+    <string name="status_connecting_title">Connexion</string>
+    <string name="status_connecting_detail">Ouverture de la connexion Bluetooth.</string>
+    <string name="status_identifying_title">Identification de l\'adaptateur</string>
+    <string name="status_identifying_detail">Vérification que l\'identité de l\'adaptateur correspond au profil sélectionné.</string>
+    <string name="status_initializing_title">Initialisation de l\'adaptateur</string>
+    <string name="status_initializing_detail">Application de la séquence d\'initialisation de l\'adaptateur.</string>
+    <string name="status_ready_title">Adaptateur prêt</string>
+    <string name="status_ready_detail">La connexion de l\'adaptateur est prête.</string>
+    <string name="status_disconnecting_title">Déconnexion</string>
+    <string name="status_disconnecting_detail">Fermeture de la connexion de l\'adaptateur.</string>
+
+    <!-- Connection failures -->
+    <string name="failure_permission_title">Autorisation Bluetooth requise</string>
+    <string name="failure_permission_detail">Accordez l\'autorisation Bluetooth demandée par Reset Moto Reminders, puis réessayez.</string>
+    <string name="failure_permission_action">Accorder l\'autorisation</string>
+    <string name="failure_pairing_title">Association requise</string>
+    <string name="failure_pairing_detail">Associez vLinker MC-Android dans les paramètres Bluetooth d\'Android à l\'aide du PIN 1234, puis revenez et sélectionnez-le.</string>
+    <string name="failure_pairing_action">Ouvrir les paramètres Bluetooth</string>
+    <string name="failure_timeout_title">Délai de connexion dépassé</string>
+    <string name="failure_timeout_detail">L\'adaptateur n\'a pas répondu à temps. Vérifiez qu\'il est alimenté et à proximité, puis réessayez.</string>
+    <string name="failure_timeout_action">Réessayer</string>
+    <string name="failure_identity_title">Identité d\'adaptateur non prise en charge</string>
+    <string name="failure_identity_detail">L\'appareil connecté ne correspond pas au profil d\'adaptateur sélectionné. Déconnectez-vous et sélectionnez le bon adaptateur.</string>
+    <string name="failure_identity_action">Sélectionner un autre adaptateur</string>
+    <string name="failure_remote_close_title">Adaptateur déconnecté</string>
+    <string name="failure_remote_close_detail">L\'adaptateur a fermé la connexion. Vérifiez l\'alimentation et la portée Bluetooth avant de vous reconnecter.</string>
+    <string name="failure_remote_close_action">Se reconnecter</string>
+    <string name="failure_io_title">Échec de la connexion</string>
+    <string name="failure_io_detail">La communication Bluetooth a échoué. Vérifiez l\'alimentation et la portée de l\'adaptateur, puis réessayez.</string>
+    <string name="failure_io_action">Réessayer</string>
+
+    <!-- Connection card labels and buttons -->
+    <string name="label_adapter">Adaptateur</string>
+    <string name="label_elm_identity">Identité ELM</string>
+    <string name="label_stn_identity">Identité STN</string>
+    <string name="label_adapter_map">Profil d\'adaptateur</string>
+    <string name="button_pair_or_select">Associer ou sélectionner un adaptateur</string>
+    <string name="button_connect">Connecter</string>
+    <string name="button_disconnect">Déconnecter</string>
+
+    <!-- Unavailable service card -->
+    <string name="service_card_title">Réinitialisation du rappel d\'entretien</string>
+    <string name="service_card_unavailable_detail">Indisponible tant que le profil de la moto n\'est pas validé.</string>
+
+    <!-- Read-only ECU capture -->
+    <string name="capture_title_idle">Capture ECU en lecture seule</string>
+    <string name="capture_title_running">Lecture des données de l\'ECU</string>
+    <string name="capture_title_complete">Capture terminée</string>
+    <string name="capture_title_blocked">Capture arrêtée en toute sécurité</string>
+    <string name="capture_title_failed">Échec de la capture</string>
+    <string name="capture_body_idle">Lit une fois les identifiants ECU non sensibles connus et les informations sur les codes de défaut. Cela n\'efface jamais les défauts et ne modifie pas le rappel d\'entretien.</string>
+    <string name="capture_body_running">Laissez le contact mis et le moteur éteint. Ne quittez pas l\'application avant la fin de la capture.</string>
+    <string name="capture_body_complete">Nombre de codes de défaut signalés : %1$d. %2$d réponses ont été enregistrées. Déconnectez-vous et revenez avec les journaux du téléphone.</string>
+    <string name="capture_body_blocked">%1$s Déconnectez-vous et revenez avec les journaux du téléphone.</string>
+    <string name="capture_button">Capturer les données ECU en lecture seule</string>
+    <string name="capture_failed_error">La capture en lecture seule s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="capture_reason_engine_transport_rejected">L\'adaptateur a rejeté la commande de transport moteur %1$s</string>
+    <string name="capture_reason_extended_session_rejected">L\'ECU a rejeté la session de diagnostic étendu observée ; l\'accès de sécurité n\'a pas été tenté</string>
+    <string name="capture_reason_dtc_count_unavailable">Le nombre de codes de défaut est resté indisponible dans la session étendue observée ; l\'accès de sécurité n\'a pas été tenté</string>
+
+    <!-- Trouble-code read -->
+    <string name="dtc_read_title">Codes de défaut</string>
+    <string name="dtc_read_body_idle">Lit les codes de défaut confirmés du calculateur moteur (ECU). Cela n\'efface ni ne modifie rien.</string>
+    <string name="dtc_read_body_running">Lecture des codes de défaut confirmés. Laissez le contact mis.</string>
+    <string name="dtc_read_body_none">Aucun code de défaut confirmé n\'est enregistré.</string>
+    <string name="dtc_read_body_count">%1$d code(s) de défaut confirmé(s) enregistré(s).</string>
+    <string name="dtc_read_button">Lire les codes de défaut</string>
+    <string name="dtc_read_failed_error">La lecture des codes de défaut s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="dtc_read_count_mismatch">L\'ECU a signalé %1$s codes mais en a renvoyé %2$s. Essayez de relire.</string>
+
+    <!-- Instrument read -->
+    <string name="instrument_read_title">Lecture du tableau de bord (recherche)</string>
+    <string name="instrument_read_body_idle">Premier contact avec le tableau de bord. N\'envoie que les deux lectures observées et décode le compteur kilométrique. Cela ne modifie jamais le rappel d\'entretien.</string>
+    <string name="instrument_read_body_running">Lecture des données du tableau de bord. Laissez le contact mis.</string>
+    <string name="instrument_read_body_complete">Compteur kilométrique : %1$d %2$s (%3$s). État : %4$s. Revenez avec les journaux du téléphone.</string>
+    <string name="instrument_read_body_blocked">%1$s Revenez avec les journaux du téléphone.</string>
+    <string name="instrument_read_button">Lire les données du tableau de bord</string>
+    <string name="instrument_read_failed_error">La lecture des données du tableau de bord s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="instrument_reason_transport_rejected">L\'adaptateur a rejeté la commande de transport du tableau de bord %1$s</string>
+    <string name="instrument_reason_unrecognized_response">Le tableau de bord a renvoyé une réponse non reconnue ; rien n\'a été écrit.</string>
+
+    <!-- Trouble-code clear -->
+    <string name="dtc_clear_title">Effacer les codes de défaut (recherche)</string>
+    <string name="dtc_clear_body_idle">Exécute l\'accès de sécurité et efface les codes moteur confirmés. N\'effacez que les codes que vous avez déjà lus et compris.</string>
+    <string name="dtc_clear_body_running">Effacement des codes de défaut. Laissez le contact mis et ne quittez pas l\'application.</string>
+    <string name="dtc_clear_body_cleared_none">Effacé. Aucun code de défaut confirmé ne subsiste.</string>
+    <string name="dtc_clear_body_cleared_remaining">Effacement terminé, mais %1$d code(s) sont toujours présents.</string>
+    <string name="dtc_clear_body_blocked">%1$s Rien n\'a été effacé.</string>
+    <string name="dtc_clear_button">Effacer les codes de défaut</string>
+    <string name="dtc_clear_button_again">Effacer à nouveau</string>
+    <string name="dtc_clear_warning">Cela envoie une écriture au calculateur moteur (ECU). Confirmez pour continuer.</string>
+    <string name="dtc_clear_confirm">Confirmer l\'effacement</string>
+    <string name="dtc_clear_failed_error">L\'effacement des codes de défaut s\'est arrêté après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="dtc_clear_reason_session_refused">L\'ECU a refusé la session de diagnostic étendu ; rien n\'a été effacé.</string>
+    <string name="dtc_clear_reason_no_seed">L\'ECU n\'a pas renvoyé de graine de sécurité utilisable ; rien n\'a été effacé.</string>
+    <string name="dtc_clear_reason_security_rejected">L\'ECU a rejeté l\'accès de sécurité ; rien n\'a été effacé.</string>
+    <string name="dtc_clear_reason_rejected">L\'ECU a rejeté la demande d\'effacement ; aucun code n\'a été effacé.</string>
+    <string name="dtc_clear_reason_count_unconfirmed">L\'effacement s\'est terminé mais le nombre de codes n\'a pas pu être confirmé.</string>
+
+    <!-- Service reminder reset -->
+    <string name="service_reset_title">Réinitialiser le rappel d\'entretien (recherche)</string>
+    <string name="service_reset_body_idle">Écrit un nouvel intervalle d\'entretien et une nouvelle date de prochain entretien sur le tableau de bord. Réinitialiser un rappel n\'effectue pas l\'entretien.</string>
+    <string name="service_reset_body_running">Écriture du rappel d\'entretien. Laissez le contact mis et ne quittez pas l\'application.</string>
+    <string name="service_reset_body_committed">Validé. Compteur kilométrique %1$d %2$s, intervalle %3$d %4$s, prochain entretien %5$s.</string>
+    <string name="service_reset_body_blocked">%1$s Rien n\'a été écrit.</string>
+    <string name="service_reset_interval_label">Intervalle d\'entretien (%1$s)</string>
+    <string name="service_reset_date_label">Date du prochain entretien (YYYY-MM-DD)</string>
+    <string name="service_reset_button">Réinitialiser le rappel</string>
+    <string name="service_reset_button_again">Réinitialiser à nouveau</string>
+    <string name="service_reset_warning">Cela écrit sur le tableau de bord : intervalle %1$d %2$s, prochain entretien %3$s. Confirmez pour continuer.</string>
+    <string name="service_reset_confirm">Confirmer la réinitialisation</string>
+    <string name="service_reset_failed_error">La réinitialisation du rappel d\'entretien s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="service_reset_reason_unrecognized_status">Le tableau de bord a renvoyé un état non reconnu ; rien n\'a été écrit.</string>
+    <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'écriture de l\'intervalle de distance ; la date n\'a pas été envoyée.</string>
+    <string name="service_reset_reason_date_unconfirmed">Le tableau de bord n\'a pas confirmé l\'écriture de la date d\'entretien.</string>
+
+    <!-- Cluster fingerprint gate -->
+    <string name="gate_reason_profile_mismatch">Le profil de la moto connectée ne correspond pas au tableau de bord validé.</string>
+    <string name="gate_reason_status_mismatch">L\'état du tableau de bord (%1$s) ne correspond pas au tableau de bord validé (%2$s).</string>
+    <string name="gate_reason_authorized">Le tableau de bord connecté correspond à l\'empreinte validée.</string>
+
+    <!-- Device picker -->
+    <string name="device_picker_title">Sélectionner l\'adaptateur associé</string>
+    <string name="device_picker_empty">Aucun adaptateur vLinker MC-Android associé n\'a été trouvé.</string>
+    <string name="device_picker_pair_hint">Associez-le dans les paramètres d\'Android avec le PIN 1234 si l\'adaptateur n\'est pas répertorié.</string>
+    <string name="device_picker_settings">Paramètres Bluetooth</string>
+    <string name="adapter_default_name">Adaptateur vLinker</string>
 </resources>

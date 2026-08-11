@@ -1,5 +1,7 @@
 package dev.resetlight.profiles
 
+import dev.resetlight.domain.DistanceUnit
+import dev.resetlight.domain.MotorcycleDistanceUnits
 import java.io.InputStream
 
 class EcuProfileLoader {
@@ -27,6 +29,7 @@ class EcuProfileLoader {
             manufacturer = motorcycle.child("manufacturer").string(),
             model = motorcycle.child("model").string(),
             modelYear = motorcycle.child("model_year").integer(),
+            distanceUnits = loadDistanceUnits(motorcycle.child("distance_units")),
             engineEcu = loadModule("engine_ecu", engine),
             instrumentCluster = loadModule("instrument_cluster", instrument),
             engineReadOnlyCapture = loadEngineReadOnlyCapture(engine, dtcOperations.read),
@@ -130,6 +133,15 @@ class EcuProfileLoader {
                     .hexString(),
             ),
         )
+    }
+
+    private fun loadDistanceUnits(node: YamlNode): MotorcycleDistanceUnits = try {
+        MotorcycleDistanceUnits(
+            wire = DistanceUnit.fromProfileValue(node.child("wire_unit").string()),
+            display = DistanceUnit.fromProfileValue(node.child("display_unit").string()),
+        )
+    } catch (error: IllegalArgumentException) {
+        throw ProfileLoadException(error.message ?: "Invalid distance units", error)
     }
 
     private fun loadInstrumentReadOnlyCapture(instrument: YamlNode): InstrumentReadOnlyCaptureProfile {

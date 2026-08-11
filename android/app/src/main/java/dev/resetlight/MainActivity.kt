@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import dev.resetlight.domain.ConnectionState
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
                 var selectedAddress by rememberSaveable { mutableStateOf<String?>(null) }
                 var showDevicePicker by remember { mutableStateOf(false) }
                 val selected = devices.firstOrNull { it.address == selectedAddress }
+                val adapterDefaultName = stringResource(R.string.adapter_default_name)
 
                 ConnectionScreen(
                     connectionState = connectionState,
@@ -58,9 +60,10 @@ class MainActivity : ComponentActivity() {
                     instrumentReadState = instrumentReadState,
                     dtcClearState = dtcClearState,
                     serviceResetState = serviceResetState,
+                    distanceUnits = owner.distanceUnits,
                     researchCaptureEnabled = BuildConfig.RESEARCH_BUILD,
                     writeOperationsEnabled = owner.writeOperationsAvailable,
-                    selectedAdapterName = selected?.displayName(devices),
+                    selectedAdapterName = selected?.displayName(devices, adapterDefaultName),
                     onPairOrSelect = {
                         if (hasBluetoothPermission()) {
                             owner.refreshBondedDevices()
@@ -156,30 +159,31 @@ private fun DevicePickerDialog(
     onPairInSettings: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val defaultName = stringResource(R.string.adapter_default_name)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select paired adapter") },
+        title = { Text(stringResource(R.string.device_picker_title)) },
         text = {
             androidx.compose.foundation.layout.Column {
-                if (devices.isEmpty()) Text("No paired vLinker MC-Android adapter was found.")
+                if (devices.isEmpty()) Text(stringResource(R.string.device_picker_empty))
                 devices.forEach { device ->
                     TextButton(onClick = { onSelected(device) }) {
-                        Text(device.displayName(devices))
+                        Text(device.displayName(devices, defaultName))
                     }
                 }
-                Text("Pair in Android settings with PIN 1234 if the adapter is not listed.")
+                Text(stringResource(R.string.device_picker_pair_hint))
             }
         },
         confirmButton = {
-            TextButton(onClick = onPairInSettings) { Text("Bluetooth settings") }
+            TextButton(onClick = onPairInSettings) { Text(stringResource(R.string.device_picker_settings)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }
 
-private fun BondedDevice.displayName(all: List<BondedDevice>): String {
-    val base = name ?: "vLinker adapter"
+private fun BondedDevice.displayName(all: List<BondedDevice>, defaultName: String): String {
+    val base = name ?: defaultName
     return if (all.count { it.name == name } > 1) "$base • …${address.takeLast(5)}" else base
 }

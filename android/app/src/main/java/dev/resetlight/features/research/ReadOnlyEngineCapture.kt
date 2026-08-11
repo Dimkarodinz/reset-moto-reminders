@@ -1,6 +1,8 @@
 package dev.resetlight.features.research
 
 import dev.resetlight.diagnostics.DiagnosticReadChannel
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.EngineReadOnlyCaptureProfile
 import kotlinx.coroutines.CancellationException
 
@@ -12,8 +14,8 @@ sealed interface ReadOnlyCaptureState {
         val extendedSessionUsed: Boolean,
         val responseCount: Int,
     ) : ReadOnlyCaptureState
-    data class Blocked(val reason: String) : ReadOnlyCaptureState
-    data class Failed(val reason: String) : ReadOnlyCaptureState
+    data class Blocked(val reason: UiText) : ReadOnlyCaptureState
+    data class Failed(val reason: UiText) : ReadOnlyCaptureState
 }
 
 data class ResearchCaptureResponse(
@@ -36,7 +38,7 @@ sealed class ReadOnlyEngineCaptureResult {
     ) : ReadOnlyEngineCaptureResult()
 
     data class Blocked(
-        val reason: String,
+        val reason: UiText,
         override val responses: List<ResearchCaptureResponse>,
         override val extendedSessionUsed: Boolean,
     ) : ReadOnlyEngineCaptureResult() {
@@ -61,7 +63,7 @@ class ReadOnlyEngineCapture(
             val response = execute("configure_engine_transport", command, responses)
             if (!configurationAccepted(command, response)) {
                 return ReadOnlyEngineCaptureResult.Blocked(
-                    reason = "Adapter rejected engine transport command $command",
+                    reason = UiText(UiMessage.CAPTURE_REASON_ENGINE_TRANSPORT_REJECTED, command),
                     responses = responses,
                     extendedSessionUsed = false,
                 )
@@ -88,7 +90,7 @@ class ReadOnlyEngineCapture(
         )
         if (!normalizedHex(sessionResponse).contains("5003")) {
             return ReadOnlyEngineCaptureResult.Blocked(
-                reason = "ECU rejected the observed extended diagnostic session; security access was not attempted",
+                reason = UiText(UiMessage.CAPTURE_REASON_EXTENDED_SESSION_REJECTED),
                 responses = responses,
                 extendedSessionUsed = true,
             )
@@ -101,7 +103,7 @@ class ReadOnlyEngineCapture(
         )
         val extendedCount = parseDtcCount(extendedCountResponse)
             ?: return ReadOnlyEngineCaptureResult.Blocked(
-                reason = "DTC count remained unavailable in the observed extended session; security access was not attempted",
+                reason = UiText(UiMessage.CAPTURE_REASON_DTC_COUNT_UNAVAILABLE),
                 responses = responses,
                 extendedSessionUsed = true,
             )

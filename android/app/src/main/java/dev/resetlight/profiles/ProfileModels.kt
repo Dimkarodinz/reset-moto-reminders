@@ -1,5 +1,6 @@
 package dev.resetlight.profiles
 
+import dev.resetlight.domain.MotorcycleDistanceUnits
 import java.util.UUID
 
 @JvmInline
@@ -79,6 +80,7 @@ data class EcuProfile(
     val manufacturer: String,
     val model: String,
     val modelYear: Int,
+    val distanceUnits: MotorcycleDistanceUnits,
     val engineEcu: MotorcycleModuleProfile,
     val instrumentCluster: MotorcycleModuleProfile,
     val engineReadOnlyCapture: EngineReadOnlyCaptureProfile,
