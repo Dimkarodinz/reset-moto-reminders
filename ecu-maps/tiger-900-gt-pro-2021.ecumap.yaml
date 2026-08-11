@@ -1,0 +1,461 @@
+schema_version: 3
+
+motorcycle:
+  id: triumph-tiger-900-gt-pro-2021
+  manufacturer: Triumph
+  model: Tiger 900 GT Pro
+  model_year: 2021
+  generation: first_generation
+  market: unknown
+
+  modules:
+    engine_ecu:
+      role: engine_management_and_diagnostics
+      family: Triumph Keihin ECU
+      supplier: Keihin
+      identity:
+        hardware_family: unknown
+        part_number: unknown
+        software_version: unknown
+
+      transport:
+        knowledge_status: observed_and_project_app_replay_validated
+        minimal_configuration_confirmed: false
+        protocol: ISO 15765-4 CAN
+        can_id_format: 29-bit
+        bitrate_kbit_s: 500
+        request_can_id: "0x18DAD5F1"
+        response_can_id: "0x18DAF1D5"
+        elm_protocol_command: ATTP7
+        observed_elm_adapter_configuration:
+          - ATWS
+          - ATE0
+          - ATL0
+          - ATS0
+          - ATH1
+          - ATTP7
+          - ATV0
+          - ATCAF0
+          - ATCFC1
+          - ATCP18
+          - ATSHDAD5F1
+
+      commands:
+        connect:
+          knowledge_status: observed
+          minimal_sequence_confirmed: false
+          required_for_reading_dtcs: not_required_for_default_session_dtc_count_read
+          required_for_reading_dtcs_evidence: project_app_capture_2026-08-10_zero_count_default_session
+          observed_sequence:
+            - name: enter_extended_diagnostic_session
+              uds_request: "1003"
+              elm_request: "021003"
+              observed_response_prefix: "5003"
+              meaning: UDS DiagnosticSessionControl, extended session
+
+            - name: request_security_seed
+              uds_request: "2701"
+              elm_request: "022701"
+              observed_response_pattern: "6701<two-byte-seed>"
+              meaning: UDS SecurityAccess, request seed
+              dynamic_fields:
+                seed: changes_between_sessions
+
+            - name: send_security_key
+              uds_request_pattern: "2702<two-byte-key>"
+              elm_request_pattern: "042702<two-byte-key>"
+              observed_response: "6702"
+              meaning: UDS SecurityAccess, send key
+              dynamic_fields:
+                key: must_be_derived_from_the_current_seed
+
+          seed_key_derivation:
+            knowledge_status: confirmed_for_captured_engine_ecu
+            algorithm_family: unsigned_16_bit_multiply_modulo_2_16
+            multiplier: "0x4B48"
+            expression: "key = (seed * 0x4B48) mod 0x10000"
+            seed_byte_order: big_endian
+            key_byte_order: big_endian
+            validated_pair_count: 6
+            validated_pairs:
+              - seed: "188B"
+                key: "A018"
+              - seed: "871C"
+                key: "33E0"
+              - seed: "FBBD"
+                key: "2C28"
+              - seed: "2A7B"
+                key: "FB98"
+              - seed: "7108"
+                key: "2240"
+              - seed: "89DE"
+                key: "D070"
+            application_usage: disabled_pending_scoped_operation_and_exact_module_identity
+            required_for_default_session_dtc_count_read: false
+            compatibility_scope: captured_2021_tiger_900_gt_pro_engine_ecu_only
+
+        read_module_identifiers:
+          knowledge_status: observed
+          observed_in_multiple_sessions: true
+          non_sensitive_values_project_app_replay: matched_byte_identical_2026-08-10
+          required_for_reading_dtcs: not_required_for_default_session_dtc_count_read
+          required_for_reading_dtcs_evidence: project_app_capture_2026-08-10_zero_count_default_session
+          observed_sequence:
+            - name: read_did_f1a0
+              uds_request: "22F1A0"
+              elm_request: "0322F1A0"
+              sensitive_response: false
+              observed_response: "62F1A0000000"
+              meaning: unknown
+
+            - name: read_did_f1a2
+              uds_request: "22F1A2"
+              elm_request: "0322F1A2"
+              sensitive_response: false
+              observed_response: "62F1A2000006"
+              meaning: unknown
+
+            - name: read_did_f1ae
+              uds_request: "22F1AE"
+              elm_request: "0322F1AE"
+              sensitive_response: false
+              observed_response: "62F1AE0004"
+              meaning: unknown
+
+            - name: read_ecu_serial_number
+              uds_request: "22F18C"
+              elm_request: "0322F18C"
+              sensitive_response: true
+              observed_response_pattern: "62F18C<five-byte-value>"
+              observed_value: redacted
+              meaning: standard UDS ECU serial-number identifier
+              meaning_status: standard_identifier_not_triumph_validated
+
+            - name: read_programming_date
+              uds_request: "22F199"
+              elm_request: "0322F199"
+              sensitive_response: false
+              observed_response: "62F199250509"
+              decoded_response:
+                raw_date: "25 05 09"
+                probable_date: "2025-05-09"
+                interpretation_status: inferred_from_standard_identifier_format
+
+            - name: read_calibration_date
+              uds_request: "22F19B"
+              elm_request: "0322F19B"
+              sensitive_response: false
+              observed_response: "62F19B250509"
+              decoded_response:
+                raw_date: "25 05 09"
+                probable_date: "2025-05-09"
+                interpretation_status: inferred_from_standard_identifier_format
+
+            - name: read_vehicle_identification_number
+              uds_request: "22F190"
+              elm_request: "0322F190"
+              sensitive_response: true
+              observed_response_pattern: "62F190<17-byte-vin>"
+              observed_value: redacted
+              meaning: standard UDS vehicle-identification-number identifier
+
+            - name: read_did_f1a7
+              uds_request: "22F1A7"
+              elm_request: "0322F1A7"
+              sensitive_response: false
+              observed_response: "62F1A7202001"
+              meaning: unknown
+
+        read_diagnostic_trouble_codes:
+          knowledge_status: observed
+          explicit_read_observations: 3
+          zero_count_observations: 2
+          profile_validation: count_read_validated_by_project_app_in_default_session
+          detail_read_validation: pending_first_nonzero_project_app_read
+          executable_template: replay_only
+          request_sequence:
+            - name: count_confirmed_dtcs
+              uds_service: "0x19"
+              uds_subfunction: "0x01"
+              status_mask: "0x08"
+              uds_request: "190108"
+              elm_request: "03190108"
+              observed_response_pattern: "59010C00<two-byte-count>"
+
+            - name: read_confirmed_dtcs
+              uds_service: "0x19"
+              uds_subfunction: "0x02"
+              status_mask: "0x08"
+              uds_request: "190208"
+              elm_request: "03190208"
+              observed_condition: matching_dtc_count_is_nonzero
+              condition_status: observed
+
+          observations:
+            - state: one_confirmed_dtc
+              captured_on:
+                - "2026-08-07"
+                - "2026-08-08"
+              count_response: "59010C000001"
+              read_response: "59020C15770008"
+              decoded_response:
+                status_availability_mask: "0x0C"
+                dtc_format_identifier: "0x00"
+                matching_dtc_count: 1
+                dtcs:
+                  - raw_code: "0x157700"
+                    display_code: P1577-00
+                    display_code_status: inferred
+                    status_byte: "0x08"
+                    status: confirmedDTC
+                    description_key: P1577-00
+                    description_status: available_in_dtc_dictionary
+
+            - state: no_confirmed_dtcs
+              captured_on: "2026-08-08"
+              context: observed_after_clear_diagnostic_trouble_codes
+              count_response: "59010C000000"
+              detailed_read_sent: false
+              decoded_response:
+                status_availability_mask: "0x0C"
+                dtc_format_identifier: "0x00"
+                matching_dtc_count: 0
+
+            - state: no_confirmed_dtcs
+              captured_on: "2026-08-10"
+              context: first_project_app_capture_default_session_no_1003_no_security_access
+              source: project_app_read_only_capture
+              count_response: "59010C000000"
+              detailed_read_sent: false
+              decoded_response:
+                status_availability_mask: "0x0C"
+                dtc_format_identifier: "0x00"
+                matching_dtc_count: 0
+
+        clear_diagnostic_trouble_codes:
+          knowledge_status: observed
+          successful_observations: 1
+          profile_validation: pending
+          executable_template: replay_only
+          observed_context:
+            diagnostic_session: extended
+            security_access: completed
+            prerequisites_minimality_confirmed: false
+            engine_state: engine_off
+          request:
+            uds_service: "0x14"
+            group_of_dtc: "0xFFFFFF"
+            group_meaning: all_dtc_groups_on_target_ecu
+            group_meaning_status: standard_uds_encoding
+            uds_request: "14FFFFFF"
+            elm_request: "0414FFFFFF"
+          observed_response_sequence:
+            - response: "7F1478"
+              type: negative_response
+              negative_response_code: "0x78"
+              meaning: request_correctly_received_response_pending
+              implementation_action: wait_for_final_response_without_resending_request
+            - response: "54"
+              type: positive_response
+              meaning: clear_diagnostic_information_completed
+          observed_postcondition:
+            verification_uds_request: "190108"
+            verification_elm_request: "03190108"
+            observed_response: "59010C000000"
+            decoded_response:
+              status_availability_mask: "0x0C"
+              dtc_format_identifier: "0x00"
+              matching_dtc_count: 0
+
+    instrument_cluster:
+      role: service_reminder_storage_and_reset
+      family: Triumph Tiger 900 first-generation TFT instrument
+      supplier: unknown
+      identity:
+        hardware_family: unknown
+        part_number: unknown
+        software_version: unknown
+
+      transport:
+        knowledge_status: observed
+        minimal_configuration_confirmed: false
+        protocol: ISO 15765-4 CAN
+        can_id_format: 11-bit
+        bitrate_kbit_s: 500
+        request_can_id: "0x701"
+        response_can_id: "0x704"
+        elm_protocol_command: ATTP6
+        observed_elm_adapter_configuration:
+          - ATWS
+          - ATE0
+          - ATL0
+          - ATS0
+          - ATH1
+          - ATTP6
+          - ATCAF0
+          - ATCFC0
+          - ATCRA704
+          - ATSH701
+
+      commands:
+        reset_service_reminder:
+          knowledge_status: observed
+          successful_observations: 2
+          profile_validation: pending
+          executable_template: replay_only
+          replay_template:
+            knowledge_status: captured_and_static_implementation_corroborated
+            initialize_request: "5E01"
+            initialize_expected_status_ascii: "043"
+            initialize_expected_status_ascii_status: observed_identical_across_two_captures
+            odometer_request: "0D01"
+            odometer_request_semantics: unknown
+            distance:
+              request_prefix_km: "33"
+              raw_unit_km: 100
+              minimum_raw: 1
+              maximum_raw: 255
+            date:
+              request_prefix: "5C"
+              year_base: 2000
+              fixed_suffix: "016E0000"
+              fixed_suffix_semantics: unknown
+          confirmed_field_encodings:
+            distance_interval:
+              request_prefix_km: "0x33"
+              raw_unit_km: 100
+              status: confirmed_by_two_observations_and_static_implementation
+              evidence:
+                - raw: "0x64"
+                  interval_km: 10000
+                - raw: "0x50"
+                  interval_km: 8000
+
+            next_service_date:
+              request_prefix: "0x5C"
+              year:
+                byte_offset_after_prefix: 0
+                formula: 2000_plus_raw_byte
+                status: confirmed_by_static_implementation
+              month:
+                byte_offset_after_prefix: 1
+                encoding: direct_numeric
+                status: confirmed_by_static_implementation
+              day:
+                byte_offset_after_prefix: 2
+                encoding: direct_numeric
+                status: confirmed_across_two_observations
+                evidence:
+                  - raw: "0x07"
+                    day: 7
+                  - raw: "0x08"
+                    day: 8
+              interval_days:
+                byte_offsets_after_prefix: [3, 4]
+                byte_order: big_endian
+                observed_raw: "0x016E"
+                observed_value: 366
+                meaning: unknown
+                generation: fixed_literal_in_observed_tool_implementation
+                generation_status: corroborated
+              trailing_bytes:
+                byte_offsets_after_prefix: [5, 6]
+                observed_raw: "00 00"
+                meaning: unknown
+                generation: fixed_literal_in_observed_tool_implementation
+                generation_status: corroborated
+
+          observations:
+            - captured_on: "2026-08-07"
+              observed_input:
+                current_date: "2026-08-07"
+                current_odometer_km: 44662
+                requested_next_service_date: "2027-08-07"
+                requested_distance_interval_km: 10000
+                calculated_next_service_odometer_km: 54662
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                  decoded_response:
+                    positive_response_service: "0xDE"
+                    payload_ascii: "043"
+                    meaning: unknown
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AE76000000"
+                  decoded_response:
+                    positive_response_service: "0x8D"
+                    odometer_raw: "0xAE76"
+                    odometer_km: 44662
+                    operation: unknown_whether_read_only_or_capture_last_service
+                    unknown_prefix: "01 00"
+                    unknown_suffix: "00 00 00"
+                - name: set_distance_interval
+                  request: "3364"
+                  observed_response: "B364000000000000"
+                  encoding:
+                    interval_raw: "0x64"
+                    interval_km: 10000
+                - name: set_or_commit_service_date
+                  request: "5C1B0807016E0000"
+                  observed_response: "DC1B0807016E0000"
+                  encoding:
+                    year_raw: "0x1B"
+                    year: 2027
+                    month_raw: "0x08"
+                    month: 8
+                    day_raw: "0x07"
+                    day: 7
+                    interval_days_raw: "0x016E"
+                    interval_days: 366
+                    interval_days_meaning: unknown
+                    trailing_bytes: "00 00"
+                    trailing_bytes_meaning: unknown
+
+            - captured_on: "2026-08-08"
+              observed_input:
+                current_date: "2026-08-08"
+                current_odometer_km: 44662
+                requested_next_service_date: "2027-08-08"
+                requested_distance_interval_km: 8000
+                calculated_next_service_odometer_km: 52662
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                  decoded_response:
+                    positive_response_service: "0xDE"
+                    payload_ascii: "043"
+                    meaning: unknown
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AE76000000"
+                  decoded_response:
+                    positive_response_service: "0x8D"
+                    odometer_raw: "0xAE76"
+                    odometer_km: 44662
+                    operation: unknown_whether_read_only_or_capture_last_service
+                    unknown_prefix: "01 00"
+                    unknown_suffix: "00 00 00"
+                - name: set_distance_interval
+                  request: "3350"
+                  observed_response: "B350000000000000"
+                  encoding:
+                    interval_raw: "0x50"
+                    interval_km: 8000
+                - name: set_or_commit_service_date
+                  request: "5C1B0808016E0000"
+                  observed_response: "DC1B0808016E0000"
+                  encoding:
+                    year_raw: "0x1B"
+                    year: 2027
+                    month_raw: "0x08"
+                    month: 8
+                    day_raw: "0x08"
+                    day: 8
+                    interval_days_raw: "0x016E"
+                    interval_days: 366
+                    interval_days_meaning: unknown
+                    trailing_bytes: "00 00"
+                    trailing_bytes_meaning: unknown

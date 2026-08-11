@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reset-light.invalid/schemas/adaptermap.schema.json",
+  "title": "Reset Moto Reminders adapter map",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "adapter"],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "variant",
+        "manufacturer_brand",
+        "identity",
+        "platform_support",
+        "transport",
+        "operations",
+        "integration_boundary",
+        "validation"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "family": { "type": "string", "minLength": 1 },
+        "variant": { "type": "string", "minLength": 1 },
+        "manufacturer_brand": { "type": "string", "minLength": 1 },
+        "identity": { "$ref": "#/$defs/identity" },
+        "platform_support": { "$ref": "#/$defs/platformSupport" },
+        "transport": { "$ref": "#/$defs/transport" },
+        "operations": { "$ref": "#/$defs/operations" },
+        "integration_boundary": { "$ref": "#/$defs/integrationBoundary" },
+        "validation": { "$ref": "#/$defs/validation" }
+      }
+    }
+  },
+  "$defs": {
+    "statusValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status"],
+      "properties": {
+        "value": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bluetooth_name", "adapter_protocol", "device_information", "private_identifiers"],
+      "properties": {
+        "bluetooth_name": { "$ref": "#/$defs/statusValue" },
+        "adapter_protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elm_compatibility_version", "stn_chip_identity"],
+          "properties": {
+            "elm_compatibility_version": { "$ref": "#/$defs/statusValue" },
+            "stn_chip_identity": { "$ref": "#/$defs/statusValue" }
+          }
+        },
+        "device_information": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "values"],
+          "properties": {
+            "status": { "type": "string", "minLength": 1 },
+            "values": { "type": "object" }
+          }
+        },
+        "private_identifiers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bluetooth_address", "serial_number"],
+          "properties": {
+            "bluetooth_address": { "enum": ["redacted", "not_observed"] },
+            "serial_number": { "enum": ["redacted", "not_observed"] }
+          }
+        }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatible", "api", "knowledge_status"],
+      "properties": {
+        "compatible": { "type": "boolean" },
+        "api": { "type": "string", "minLength": 1 },
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "platformSupport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["android", "ios"],
+      "properties": {
+        "android": { "$ref": "#/$defs/platform" },
+        "ios": { "$ref": "#/$defs/platform" }
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "service_uuid": { "type": "string", "minLength": 1 },
+        "characteristic_uuid": { "type": "string", "minLength": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "knowledge_status", "advertised_name", "primary_service_uuid", "details"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "advertised_name": { "type": "string", "minLength": 1 },
+        "primary_service_uuid": { "type": "string", "minLength": 1 },
+        "details": { "type": "object" }
+      }
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "knowledge_status", "command_endpoint", "response_endpoint", "alternate_channels", "details"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "command_endpoint": { "$ref": "#/$defs/endpoint" },
+        "response_endpoint": { "$ref": "#/$defs/endpoint" },
+        "alternate_channels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "knowledge_status", "command_endpoint", "response_endpoint"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "knowledge_status": { "type": "string", "minLength": 1 },
+              "command_endpoint": { "$ref": "#/$defs/endpoint" },
+              "response_endpoint": { "$ref": "#/$defs/endpoint" }
+            }
+          }
+        },
+        "details": { "type": "object" }
+      }
+    },
+    "framing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "knowledge_status",
+        "command_encoding",
+        "command_terminator_hex",
+        "response_line_terminator_hex",
+        "response_completion_prompt",
+        "responses_may_fragment",
+        "reassemble_until_prompt"
+      ],
+      "properties": {
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "command_encoding": { "type": "string", "minLength": 1 },
+        "command_terminator_hex": { "type": "string", "pattern": "^[0-9A-F]+$" },
+        "response_line_terminator_hex": { "type": "string", "pattern": "^[0-9A-F]+$" },
+        "response_completion_prompt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ascii", "hex"],
+          "properties": {
+            "ascii": { "type": "string", "minLength": 1 },
+            "hex": { "type": "string", "pattern": "^[0-9A-F]+$" }
+          }
+        },
+        "responses_may_fragment": { "type": "boolean" },
+        "reassemble_until_prompt": { "type": "boolean" }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "knowledge_status", "observed_in_multiple_sessions", "discovery", "channel", "framing", "details"],
+      "properties": {
+        "kind": { "enum": ["bluetooth_classic_rfcomm", "bluetooth_low_energy_gatt"] },
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "observed_in_multiple_sessions": { "type": "boolean" },
+        "discovery": { "$ref": "#/$defs/discovery" },
+        "channel": { "$ref": "#/$defs/channel" },
+        "framing": { "$ref": "#/$defs/framing" },
+        "details": { "type": "object" }
+      }
+    },
+    "connectOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_status", "sequence"],
+      "properties": {
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "sequence": { "type": "array", "items": { "type": "object" }, "minItems": 1 }
+      }
+    },
+    "identifyOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_status", "channel", "prerequisites", "command", "response", "alternate_attempts"],
+      "properties": {
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "channel": { "type": "string", "minLength": 1 },
+        "prerequisites": { "type": "array", "items": { "type": "string" } },
+        "command": { "type": "object" },
+        "response": { "type": "object" },
+        "alternate_attempts": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "initializeOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_status", "motorcycle_specific_configuration_excluded", "wait_for_prompt_after_every_command", "sequence"],
+      "properties": {
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "motorcycle_specific_configuration_excluded": { "type": "boolean" },
+        "wait_for_prompt_after_every_command": { "type": "boolean" },
+        "sequence": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "disconnectOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_status", "sequence"],
+      "properties": {
+        "knowledge_status": { "type": "string", "minLength": 1 },
+        "sequence": { "type": "array", "items": { "type": "object" }, "minItems": 1 },
+        "details": { "type": "object" }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["connect", "identify_adapter", "initialize_adapter", "disconnect"],
+      "properties": {
+        "connect": { "$ref": "#/$defs/connectOperation" },
+        "identify_adapter": { "$ref": "#/$defs/identifyOperation" },
+        "initialize_adapter": { "$ref": "#/$defs/initializeOperation" },
+        "disconnect": { "$ref": "#/$defs/disconnectOperation" }
+      }
+    },
+    "integrationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter_map_responsibility", "ecu_map_responsibility"],
+      "properties": {
+        "adapter_map_responsibility": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "ecu_map_responsibility": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transport_profile",
+        "command_channel",
+        "adapter_identity",
+        "common_initialization",
+        "response_fragmentation",
+        "independent_replay",
+        "production_ready"
+      ],
+      "properties": {
+        "transport_profile": { "type": "string", "minLength": 1 },
+        "command_channel": { "type": "string", "minLength": 1 },
+        "adapter_identity": { "type": "string", "minLength": 1 },
+        "common_initialization": { "type": "string", "minLength": 1 },
+        "response_fragmentation": { "type": "string", "minLength": 1 },
+        "independent_replay": { "type": "string", "minLength": 1 },
+        "production_ready": { "type": "boolean" }
+      }
+    }
+  }
+}

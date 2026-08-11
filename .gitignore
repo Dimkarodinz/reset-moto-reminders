@@ -1,0 +1,12 @@
+# Private captures may include Bluetooth addresses, serials and diagnostic traffic.
+logs/
+
+# Android local/build state
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab

@@ -1,0 +1,284 @@
+schema_version: 2
+
+adapter:
+  id: vlinker-mc-ios
+  family: vlinker-mc
+  variant: ios
+  manufacturer_brand: Vgate
+
+  identity:
+    bluetooth_name:
+      value: vLinker MC-IOS
+      status: observed
+    adapter_protocol:
+      elm_compatibility_version:
+        value: unknown
+        status: not_observed
+      stn_chip_identity:
+        value: unknown
+        status: not_observed
+    device_information:
+      status: observed
+      values:
+        manufacturer_name: JINXUSOLU
+        model_number: JXSL-MIC65LE
+        hardware_revision: "2.1"
+        firmware_revision: empty
+        software_revision: "5.8.2,20260330"
+        system_id_hex: "0000000000000000"
+        regulatory_certification_data: empty
+        pnp_id:
+          vendor_id_source: 0
+          vendor_id: 0
+          product_id: 0
+          product_version: 0
+    private_identifiers:
+      bluetooth_address: redacted
+      serial_number: redacted
+
+  platform_support:
+    android:
+      compatible: true
+      api: bluetooth_low_energy_gatt
+      knowledge_status: observed_with_nrf_connect
+    ios:
+      compatible: true
+      api: core_bluetooth
+      knowledge_status: expected_not_project_tested
+
+  transport:
+    kind: bluetooth_low_energy_gatt
+    knowledge_status: observed
+    observed_in_multiple_sessions: false
+
+    discovery:
+      kind: ble_advertisement
+      knowledge_status: observed
+      advertised_name: vLinker MC-IOS
+      primary_service_uuid: "0x18F0"
+      details:
+        advertised_service_uuids: ["0x18F0"]
+        flags_hex: "06"
+        observed_tx_power_dbm: 4
+        observed_rssi_dbm: -43
+        manufacturer_data: not_observed
+        service_data: not_observed
+
+    channel:
+      kind: gatt_characteristics
+      knowledge_status: proposed_unverified
+      command_endpoint:
+        type: gatt_characteristic
+        service_uuid: "0x18F0"
+        characteristic_uuid: "0x2AF1"
+        properties: [write, write_without_response]
+      response_endpoint:
+        type: gatt_characteristic
+        service_uuid: "0x18F0"
+        characteristic_uuid: "0x2AF0"
+        properties: [notify, indicate]
+      alternate_channels:
+        - name: custom_bidirectional_characteristic
+          knowledge_status: proposed_unverified
+          command_endpoint:
+            type: gatt_characteristic
+            service_uuid: e7810a71-73ae-499d-8c15-faa9aef0c3f2
+            characteristic_uuid: bef8d6c9-9c21-4c9e-b632-bd58c1009f9f
+            properties: [write, write_without_response]
+          response_endpoint:
+            type: same_gatt_characteristic
+            service_uuid: e7810a71-73ae-499d-8c15-faa9aef0c3f2
+            characteristic_uuid: bef8d6c9-9c21-4c9e-b632-bd58c1009f9f
+            properties: [notify, indicate]
+      details:
+        primary_notifications:
+          characteristic_uuid: "0x2AF0"
+          cccd_uuid: "0x2902"
+          observed_cccd_handle: "0x000E"
+          observed_att_write_type: request
+          observed_value_hex: "0100"
+          observed_result: ATT Write Response
+        alternate_notifications:
+          characteristic_uuid: bef8d6c9-9c21-4c9e-b632-bd58c1009f9f
+          cccd_uuid: "0x2902"
+          observed_cccd_handle: "0x0028"
+          observed_att_write_type: request
+          observed_value_hex: "0100"
+          observed_result: ATT Write Response
+
+    framing:
+      knowledge_status: expected_unverified
+      command_encoding: ASCII
+      command_terminator_hex: "0D"
+      response_line_terminator_hex: "0D"
+      response_completion_prompt:
+        ascii: ">"
+        hex: "3E"
+      responses_may_fragment: true
+      reassemble_until_prompt: true
+
+    details:
+      att:
+        observed_effective_mtu: 23
+        mtu_status: inferred_from_absence_of_mtu_exchange
+        ios_write_size_source: CBPeripheral.maximumWriteValueLength
+        observed_connection_updates:
+          - interval_ms: 7.5
+            latency: 0
+            supervision_timeout_ms: 5000
+          - interval_ms: 45
+            latency: 0
+            supervision_timeout_ms: 5000
+        connection_parameters_are_os_managed: true
+      gatt:
+        handles_are_observational_only: true
+        services:
+          - uuid: "0x1801"
+            name: Generic Attribute
+            observed_handle_range: ["0x0001", "0x0003"]
+            characteristics:
+              - uuid: "0x2A05"
+                name: Service Changed
+                declaration_handle: "0x0002"
+                value_handle: "0x0003"
+                properties: [read]
+          - uuid: "0x1800"
+            name: Generic Access
+            observed_handle_range: ["0x0004", "0x000A"]
+            characteristics:
+              - uuid: "0x2A00"
+                name: Device Name
+                value_handle: "0x0006"
+                properties: [read]
+                observed_value: vLinker MC-IOS
+              - uuid: "0x2A01"
+                name: Appearance
+                value_handle: "0x0008"
+                properties: [read]
+                observed_value: 128
+              - uuid: "0x2A04"
+                name: Peripheral Preferred Connection Parameters
+                value_handle: "0x000A"
+                properties: [read]
+                observed_value_hex: "FFFFFFFF0000FFFF"
+          - uuid: "0x18F0"
+            name: Vendor service, primary transport candidate
+            observed_handle_range: ["0x000B", "0x0011"]
+            characteristics:
+              - uuid: "0x2AF0"
+                role_candidate: adapter_response
+                declaration_handle: "0x000C"
+                value_handle: "0x000D"
+                properties: [notify, indicate]
+                descriptors:
+                  - uuid: "0x2902"
+                    observed_handle: "0x000E"
+                    role: client_characteristic_configuration
+              - uuid: "0x2AF1"
+                role_candidate: adapter_command
+                declaration_handle: "0x000F"
+                value_handle: "0x0010"
+                properties: [write, write_without_response]
+                descriptors:
+                  - uuid: "0x2902"
+                    observed_handle: "0x0011"
+                    role: observed_but_not_usable_for_response_notifications
+          - uuid: "0x180A"
+            name: Device Information
+            observed_handle_range: ["0x0012", "0x0024"]
+            characteristics:
+              - { uuid: "0x2A29", name: Manufacturer Name, value_handle: "0x0014", properties: [read], observed_value: JINXUSOLU }
+              - { uuid: "0x2A24", name: Model Number, value_handle: "0x0016", properties: [read], observed_value: JXSL-MIC65LE }
+              - { uuid: "0x2A25", name: Serial Number, value_handle: "0x0018", properties: [read], observed_value: redacted }
+              - { uuid: "0x2A27", name: Hardware Revision, value_handle: "0x001A", properties: [read], observed_value: "2.1" }
+              - { uuid: "0x2A26", name: Firmware Revision, value_handle: "0x001C", properties: [read], observed_value: empty }
+              - { uuid: "0x2A28", name: Software Revision, value_handle: "0x001E", properties: [read], observed_value: "5.8.2,20260330" }
+              - { uuid: "0x2A23", name: System ID, value_handle: "0x0020", properties: [read], observed_value_hex: "0000000000000000" }
+              - { uuid: "0x2A2A", name: Regulatory Certification Data List, value_handle: "0x0022", properties: [read], observed_value: empty }
+              - { uuid: "0x2A50", name: PnP ID, value_handle: "0x0024", properties: [read], observed_value_hex: "00000000000000" }
+          - uuid: e7810a71-73ae-499d-8c15-faa9aef0c3f2
+            name: Vendor service, fallback transport candidate
+            observed_handle_range: ["0x0025", "0x0028"]
+            characteristics:
+              - uuid: bef8d6c9-9c21-4c9e-b632-bd58c1009f9f
+                role_candidate: bidirectional_adapter_transport
+                declaration_handle: "0x0026"
+                value_handle: "0x0027"
+                properties: [read, write, write_without_response, notify, indicate]
+                descriptors:
+                  - uuid: "0x2902"
+                    observed_handle: "0x0028"
+                    role: client_characteristic_configuration
+
+  operations:
+    connect:
+      knowledge_status: observed_through_notification_enablement
+      sequence:
+        - step: discover_or_select_bluetooth_device
+          match:
+            primary_service_uuid: "0x18F0"
+            additional_name_check: vLinker MC-IOS
+        - step: open_primary_channel
+          api: bluetooth_low_energy_gatt
+          service_uuid: "0x18F0"
+        - step: enable_primary_response_notifications
+          characteristic_uuid: "0x2AF0"
+          platform_operation: set_notifications_enabled
+          observed_result: success
+
+    identify_adapter:
+      knowledge_status: proposed_unverified
+      channel: primary
+      prerequisites:
+        - primary_response_notifications_enabled
+      command:
+        text: ATI
+        encoding: ASCII
+        terminator_hex: "0D"
+        complete_payload_hex: "4154490D"
+        preferred_write_type: with_response
+      response:
+        completion_prompt_hex: "3E"
+        expected_pattern: "<adapter identity text><0x3E prompt>"
+        identity_value: unknown
+      alternate_attempts:
+        - channel: custom_bidirectional_characteristic
+          usage: separate_adapter_only_attempt_after_primary_path_is_captured_as_no_response
+          prerequisites:
+            - alternate_response_notifications_enabled
+          command:
+            text: ATI
+            complete_payload_hex: "4154490D"
+            preferred_write_type: with_response
+
+    initialize_adapter:
+      knowledge_status: blocked_pending_identity_transport_proof
+      motorcycle_specific_configuration_excluded: true
+      wait_for_prompt_after_every_command: true
+      sequence: []
+
+    disconnect:
+      knowledge_status: implementation_guidance
+      sequence:
+        - step: stop_adapter_command_queue
+        - step: cancel_gatt_connection
+
+  integration_boundary:
+    adapter_map_responsibility:
+      - Bluetooth discovery and connection
+      - Adapter channel selection
+      - ASCII command framing and response reassembly
+      - Common adapter initialization and identity
+    ecu_map_responsibility:
+      - ELM protocol selection such as ATTP6 or ATTP7
+      - CAN receive filters and transmit headers
+      - UDS and motorcycle-module requests
+
+  validation:
+    transport_profile: captured_once
+    command_channel: unconfirmed
+    adapter_identity: not_observed
+    common_initialization: pending
+    response_fragmentation: unconfirmed
+    independent_replay: pending
+    production_ready: false

@@ -1,0 +1,122 @@
+package dev.resetlight.features.dtc
+
+import dev.resetlight.diagnostics.DiagnosticParseException
+import dev.resetlight.diagnostics.DiagnosticWriteChannel
+import dev.resetlight.diagnostics.DtcResponseDecoder
+import dev.resetlight.diagnostics.EngineSeedKeyDerivation
+import dev.resetlight.diagnostics.hexOnly
+import dev.resetlight.diagnostics.UdsResponse
+import dev.resetlight.diagnostics.UdsResponseParser
+import dev.resetlight.diagnostics.WriteIntent
+import dev.resetlight.profiles.DiagnosticTroubleCodeClearProfile
+import dev.resetlight.profiles.DtcDescriptionLookup
+import dev.resetlight.profiles.EngineSecurityAccessProfile
+import kotlinx.coroutines.CancellationException
+
+sealed interface DtcClearResult {
+    data class Cleared(val remainingCount: Int) : DtcClearResult
+    data class Blocked(val reason: String) : DtcClearResult
+}
+
+class DtcClearFailure(
+    val request: String,
+    cause: Throwable,
+) : Exception("DTC clear failed while sending $request", cause)
+
+/**
+ * Clears confirmed DTCs on the engine ECU. The only observed clear ran inside
+ * the extended session after SecurityAccess, so this replays exactly that
+ * sequence: `1003` → `2701` seed → derived `2702` key → `14FFFFFF` → verify a
+ * zero count. It is instantiated only from the research build behind the
+ * exact-cluster fingerprint gate and an explicit confirmation; a refused
+ * session or key returns [DtcClearResult.Blocked] without sending the clear.
+ *
+ * The maximum number of `response-pending` (`0x78`) negatives tolerated while
+ * awaiting the final clear response is bounded so a stuck ECU cannot spin.
+ */
+class DtcClearService(
+    private val clearProfile: DiagnosticTroubleCodeClearProfile,
+    private val securityProfile: EngineSecurityAccessProfile,
+    private val derivation: EngineSeedKeyDerivation,
+    private val channel: DiagnosticWriteChannel,
+) {
+    suspend fun clear(): DtcClearResult {
+        val sessionResponse = execute(securityProfile.extendedSessionElmRequest, WriteIntent.READ)
+        if (!sessionResponse.startsWithHex(securityProfile.extendedSessionPositivePrefix)) {
+            return DtcClearResult.Blocked("The ECU refused the extended diagnostic session; nothing was cleared.")
+        }
+
+        val seedResponse = execute(securityProfile.seedRequestElmRequest, WriteIntent.READ)
+        val keyRequest = try {
+            derivation.keyRequestFor(seedResponse.hexOnly(), securityProfile.keyRequestElmPrefix)
+        } catch (parse: DiagnosticParseException) {
+            return DtcClearResult.Blocked("The ECU did not return a usable security seed; nothing was cleared.")
+        }
+        val keyResponse = execute(keyRequest, WriteIntent.WRITE)
+        if (!keyResponse.isPositive(SECURITY_ACCESS_POSITIVE)) {
+            return DtcClearResult.Blocked("The ECU rejected security access; nothing was cleared.")
+        }
+
+        val clearResponse = awaitFinalClearResponse()
+        if (!clearResponse.isPositive(CLEAR_POSITIVE)) {
+            return DtcClearResult.Blocked("The ECU rejected the clear request; no codes were cleared.")
+        }
+
+        val verification = execute(clearProfile.verificationElmRequest, WriteIntent.READ)
+        val remaining = remainingCount(verification)
+            ?: return DtcClearResult.Blocked("The clear completed but the code count could not be confirmed.")
+        return DtcClearResult.Cleared(remaining)
+    }
+
+
+    private suspend fun awaitFinalClearResponse(): String {
+        var response = execute(clearProfile.elmRequest, WriteIntent.WRITE)
+        var pendingWaits = 0
+        while (isResponsePending(response) && pendingWaits < MAX_PENDING_WAITS) {
+            pendingWaits++
+            response = execute(clearProfile.elmRequest, WriteIntent.WRITE)
+        }
+        return response
+    }
+
+    private fun remainingCount(verification: String): Int? =
+        try {
+            DtcResponseDecoder(EMPTY_DESCRIPTIONS).decodeCount(verification.hexOnly()).matchingCount
+        } catch (parse: DiagnosticParseException) {
+            null
+        }
+
+    private fun isResponsePending(response: String): Boolean = try {
+        val parsed = UdsResponseParser.parse(response.hexOnly())
+        parsed is UdsResponse.Negative && parsed.pending
+    } catch (parse: DiagnosticParseException) {
+        false
+    }
+
+    private fun String.isPositive(service: Int): Boolean = try {
+        val parsed = UdsResponseParser.parse(hexOnly())
+        parsed is UdsResponse.Positive && parsed.service == service
+    } catch (parse: DiagnosticParseException) {
+        false
+    }
+
+    private fun String.startsWithHex(prefix: String): Boolean = hexOnly().startsWith(prefix.uppercase())
+
+    private suspend fun execute(request: String, intent: WriteIntent): String = try {
+        channel.execute(request, intent)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (failure: Throwable) {
+        throw DtcClearFailure(request, failure)
+    }
+
+    private companion object {
+        const val SECURITY_ACCESS_POSITIVE = 0x67
+        const val CLEAR_POSITIVE = 0x54
+        const val MAX_PENDING_WAITS = 10
+
+        val EMPTY_DESCRIPTIONS = DtcDescriptionLookup { code ->
+            dev.resetlight.profiles.DtcMessage(code, dev.resetlight.profiles.DtcMessageStatus.UNKNOWN)
+        }
+    }
+}
