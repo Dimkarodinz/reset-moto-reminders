@@ -121,6 +121,31 @@ internal fun YamlNode.profileValue(): ProfileValue<String> = ProfileValue(
     status = child("status").status(),
 )
 
+/**
+ * Parses a `generic_subsystem_messages` mapping: one `{code}`-bearing template
+ * per DTC subsystem letter, keyed by [DTC_SUBSYSTEMS] with all four required.
+ */
+internal fun YamlNode.genericSubsystemMessages(): Map<Char, String> {
+    val messages = mapping()
+        .mapKeys { (key, _) ->
+            if (key.length != 1 || key[0] !in DTC_SUBSYSTEMS) {
+                throw ProfileLoadException("Unsupported generic DTC subsystem $key")
+            }
+            key[0]
+        }
+        .mapValues { (_, node) ->
+            node.string().also { template ->
+                if ("{code}" !in template) {
+                    throw ProfileLoadException("Generic DTC messages must contain {code}")
+                }
+            }
+        }
+    if (messages.keys != DTC_SUBSYSTEMS) {
+        throw ProfileLoadException("Generic DTC messages must define $DTC_SUBSYSTEMS")
+    }
+    return messages
+}
+
 private fun String.childPath(key: String): String =
     if (this == "profile") key else "$this.$key"
 

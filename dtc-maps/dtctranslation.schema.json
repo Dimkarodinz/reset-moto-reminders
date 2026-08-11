@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reset-light.example/schemas/dtctranslation.schema.json",
+  "title": "Reset Moto Reminders diagnostic trouble code translation overlay",
+  "description": "A display-only translation of an English DTC dictionary. It never resolves DTC meaning; the English dictionary stays authoritative and supplies any message this overlay omits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "translation",
+    "messages",
+    "reference_messages"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "translation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "locale",
+        "base_dictionary",
+        "generic_subsystem_messages",
+        "unknown_message"
+      ],
+      "properties": {
+        "locale": {
+          "enum": ["es", "uk", "fr", "de"]
+        },
+        "base_dictionary": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "generic_subsystem_messages": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["P", "C", "B", "U"],
+          "properties": {
+            "P": { "$ref": "#/$defs/genericMessage" },
+            "C": { "$ref": "#/$defs/genericMessage" },
+            "B": { "$ref": "#/$defs/genericMessage" },
+            "U": { "$ref": "#/$defs/genericMessage" }
+          }
+        },
+        "unknown_message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "messages": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[PCBU][0-9A-F]{4}(?:-[0-9A-F]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "reference_messages": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[PCBU][0-9A-F]{4}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "genericMessage": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\{code\\}"
+    }
+  }
+}

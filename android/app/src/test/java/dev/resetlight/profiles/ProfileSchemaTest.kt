@@ -33,6 +33,28 @@ class ProfileSchemaTest {
     }
 
     @Test
+    fun `canonical DTC translations satisfy the translation schema`() {
+        TRANSLATION_LOCALES.forEach { locale ->
+            assertValid("dtctranslation.schema.json", "triumph-tiger-900-gt-pro-2021.$locale.dtctranslation.yaml")
+        }
+    }
+
+    @Test
+    fun `DTC translations cover every English reference code`() {
+        val root = File("build/generated/profileAssets/profiles")
+        val referenceKeys = yaml.readTree(
+            File(root, "triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml"),
+        ).path("reference_entries").fieldNames().asSequence().toSet()
+
+        TRANSLATION_LOCALES.forEach { locale ->
+            val translated = yaml.readTree(
+                File(root, "triumph-tiger-900-gt-pro-2021.$locale.dtctranslation.yaml"),
+            ).path("reference_messages").fieldNames().asSequence().toSet()
+            assertEquals("$locale reference coverage", referenceKeys, translated)
+        }
+    }
+
+    @Test
     fun `DTC schema rejects a lowercase code`() {
         val root = File("build/generated/profileAssets/profiles")
         val schema = factory.getSchema(json.readTree(File(root, "dtcmap.schema.json")))
@@ -76,5 +98,9 @@ class ProfileSchemaTest {
         val schema = factory.getSchema(json.readTree(File(root, schemaName)))
         val errors = schema.validate(yaml.readTree(File(root, mapName)))
         assertTrue(errors.joinToString("\n"), errors.isEmpty())
+    }
+
+    private companion object {
+        val TRANSLATION_LOCALES = DtcTranslationLoader.SUPPORTED_LOCALES
     }
 }

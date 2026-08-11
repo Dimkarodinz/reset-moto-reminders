@@ -6,8 +6,12 @@ import dev.resetlight.features.service.ClusterFingerprintGate
 import dev.resetlight.logging.EventJournal
 import dev.resetlight.logging.FileJournalSink
 import dev.resetlight.profiles.AdapterProfileLoader
+import dev.resetlight.profiles.DtcDescriptionLookup
 import dev.resetlight.profiles.DtcMapLoader
+import dev.resetlight.profiles.DtcTranslationLoader
 import dev.resetlight.profiles.EcuProfileLoader
+import dev.resetlight.profiles.LocalizedDtcDescriptions
+import java.util.Locale
 import dev.resetlight.transport.bluetooth.AndroidBluetoothFacade
 import java.io.File
 import java.time.Instant
@@ -27,7 +31,22 @@ class AppContainer(context: Context) {
     val dtcDictionary = applicationContext.assets
         .open("profiles/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
         .use(DtcMapLoader()::load)
-    val dtcDescriptions = dtcDictionary
+
+    /**
+     * English is authoritative and the default. For a supported non-English
+     * phone locale, overlay the matching translation; the English dictionary
+     * still resolves every code and supplies any message the overlay omits. A
+     * missing or unreadable overlay silently falls back to English.
+     */
+    val dtcDescriptions: DtcDescriptionLookup = run {
+        val language = Locale.getDefault().language
+        if (language !in DtcTranslationLoader.SUPPORTED_LOCALES) return@run dtcDictionary
+        val asset = "profiles/triumph-tiger-900-gt-pro-2021.$language.dtctranslation.yaml"
+        val translation = runCatching {
+            applicationContext.assets.open(asset).use(DtcTranslationLoader()::load)
+        }.getOrNull() ?: return@run dtcDictionary
+        LocalizedDtcDescriptions(dtcDictionary, translation)
+    }
     private val journalFile = File(
         applicationContext.filesDir,
         "diagnostic-logs/session-${Instant.now().toEpochMilli()}.jsonl",

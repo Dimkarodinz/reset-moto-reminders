@@ -58,6 +58,10 @@ val ecuMapSource = rootProject.file("../ecu-maps/tiger-900-gt-pro-2021.ecumap.ya
 val ecuSchemaSource = rootProject.file("../ecu-maps/ecumap.schema.json")
 val dtcMapSource = rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
 val dtcSchemaSource = rootProject.file("../dtc-maps/dtcmap.schema.json")
+val dtcTranslationSchemaSource = rootProject.file("../dtc-maps/dtctranslation.schema.json")
+val dtcTranslationSources = listOf("es", "uk", "fr", "de").map { locale ->
+    rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.$locale.dtctranslation.yaml")
+}
 
 val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     inputs.files(
@@ -67,6 +71,8 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         ecuSchemaSource,
         dtcMapSource,
         dtcSchemaSource,
+        dtcTranslationSchemaSource,
+        *dtcTranslationSources.toTypedArray(),
     )
     from(
         adapterMapSource,
@@ -75,6 +81,8 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         ecuSchemaSource,
         dtcMapSource,
         dtcSchemaSource,
+        dtcTranslationSchemaSource,
+        *dtcTranslationSources.toTypedArray(),
     )
     into(generatedProfiles.map { it.dir("profiles") })
     doFirst {
@@ -87,10 +95,16 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         require(Regex("(?m)^schema_version:\\s*3\\s*$").containsMatchIn(dtcMapSource.readText())) {
             "Unsupported or missing DTC-map schema_version"
         }
+        dtcTranslationSources.forEach { source ->
+            require(Regex("(?m)^schema_version:\\s*1\\s*$").containsMatchIn(source.readText())) {
+                "Unsupported or missing DTC-translation schema_version in ${source.name}"
+            }
+        }
         require(
             adapterSchemaSource.isFile &&
                 ecuSchemaSource.isFile &&
-                dtcSchemaSource.isFile
+                dtcSchemaSource.isFile &&
+                dtcTranslationSchemaSource.isFile
         ) {
             "All profile JSON Schemas must exist before maps are packaged"
         }
