@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dtc_show_original">Voir l\'original (anglais)</string>
+    <string name="dtc_hide_original">Masquer l\'original</string>
+</resources>

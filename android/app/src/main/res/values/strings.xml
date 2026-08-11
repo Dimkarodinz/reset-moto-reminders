@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Reset Moto Reminders</string>
+    <string name="app_name" translatable="false">Reset Moto Reminders</string>
+    <string name="dtc_show_original">Show original (English)</string>
+    <string name="dtc_hide_original">Hide original</string>
 </resources>

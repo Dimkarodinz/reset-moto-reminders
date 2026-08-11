@@ -63,7 +63,7 @@ class DtcMapLoader {
             )
         }
         val referenceEntries = root.child("reference_entries").mapping().map { (key, node) ->
-            if (!BASE_CODE.matches(key)) {
+            if (!DTC_BASE_CODE.matches(key)) {
                 throw ProfileLoadException("DTC reference key $key must be an uppercase base code")
             }
             key to node.string()
@@ -76,24 +76,7 @@ class DtcMapLoader {
             )
         }
 
-        val genericFallbackMessages = lookup.child("generic_subsystem_messages")
-            .mapping()
-            .mapKeys { (key, _) ->
-                if (key.length != 1 || key[0] !in DTC_SYSTEMS) {
-                    throw ProfileLoadException("Unsupported generic DTC subsystem $key")
-                }
-                key[0]
-            }
-            .mapValues { (_, node) ->
-                node.string().also { template ->
-                    if ("{code}" !in template) {
-                        throw ProfileLoadException("Generic DTC messages must contain {code}")
-                    }
-                }
-            }
-        if (genericFallbackMessages.keys != DTC_SYSTEMS) {
-            throw ProfileLoadException("Generic DTC messages must define $DTC_SYSTEMS")
-        }
+        val genericFallbackMessages = lookup.child("generic_subsystem_messages").genericSubsystemMessages()
 
         return DtcDictionary(
             schemaVersion = schemaVersion,
@@ -117,7 +100,7 @@ class DtcMapLoader {
     }
 
     private fun validateEntry(key: String, baseCode: String, rawUdsCode: String?) {
-        if (!BASE_CODE.matches(baseCode)) {
+        if (!DTC_BASE_CODE.matches(baseCode)) {
             throw ProfileLoadException("DTC base code $baseCode is invalid")
         }
         if (key.length == 8) {
@@ -170,8 +153,6 @@ class DtcMapLoader {
             "generic_subsystem",
             "invalid_fallback",
         )
-        val DTC_SYSTEMS = setOf('P', 'C', 'B', 'U')
-        val BASE_CODE = Regex("^[PCBU][0-9A-F]{4}$")
         val RAW_CODE = Regex("^0x[0-9A-F]{6}$")
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import dev.resetlight.R
+import dev.resetlight.diagnostics.DecodedDtc
 import dev.resetlight.domain.ConnectionState
 import dev.resetlight.features.dtc.DtcClearUiState
 import dev.resetlight.features.dtc.DtcReadState
@@ -260,7 +263,7 @@ private fun DtcReadCard(
             )
             if (dtcReadState is DtcReadState.Complete) {
                 dtcReadState.dtcs.forEach { dtc ->
-                    LabelValue(dtc.displayCode, dtc.message.message)
+                    DtcRow(dtc)
                 }
             }
             if (dtcReadState is DtcReadState.Running) {
@@ -574,6 +577,37 @@ private fun LabelValue(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(text = value, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+/**
+ * One decoded trouble code. When the message has been localized, the
+ * authoritative English wording is available via [DtcMessage.originalMessage];
+ * a toggle reveals it so the user can always fall back to the source text.
+ */
+@Composable
+private fun DtcRow(dtc: DecodedDtc) {
+    var showOriginal by rememberSaveable(dtc.displayCode) { mutableStateOf(false) }
+    val original = dtc.message.originalMessage
+    Column {
+        LabelValue(dtc.displayCode, dtc.message.message)
+        if (original != null) {
+            if (showOriginal) {
+                Text(
+                    text = original,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                text = stringResource(
+                    if (showOriginal) R.string.dtc_hide_original else R.string.dtc_show_original,
+                ),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { showOriginal = !showOriginal },
+            )
+        }
     }
 }
 

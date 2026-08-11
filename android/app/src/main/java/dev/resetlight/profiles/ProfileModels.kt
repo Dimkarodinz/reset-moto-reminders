@@ -214,10 +214,73 @@ data class DtcMessage(
     val baseCode: String = "",
     val rawUdsCode: String? = null,
     val evidence: DtcMessageEvidence? = null,
+    /**
+     * The authoritative English wording when [message] has been replaced by a
+     * localized translation, otherwise null. The English dictionary always
+     * resolves a code's meaning; a translation only overlays the display text,
+     * so this field lets the UI offer "show original" without re-resolving.
+     */
+    val originalMessage: String? = null,
 )
 
 fun interface DtcDescriptionLookup {
     fun descriptionFor(code: String): DtcMessage
+}
+
+/**
+ * A display-only translation overlay for a [DtcDictionary]. It never resolves
+ * DTC meaning: the English dictionary stays authoritative and any message this
+ * overlay omits falls back to English. Keys mirror the English dictionary —
+ * [messages] by exact entry code, [referenceMessages] by base code.
+ */
+data class DtcTranslation(
+    val schemaVersion: Int,
+    val locale: String,
+    val baseDictionaryId: String,
+    val genericSubsystemMessages: Map<Char, String>,
+    val unknownMessage: String,
+    val messages: Map<String, String>,
+    val referenceMessages: Map<String, String>,
+    val sourceSha256: String,
+)
+
+/**
+ * Wraps the English [base] dictionary with a [translation] overlay. Every code
+ * is resolved against English first (that decides which tier and meaning
+ * applies), then the matching translated string is layered on top; a missing
+ * translation leaves the English wording in place. When a translation is
+ * applied, the English text is preserved in [DtcMessage.originalMessage].
+ */
+class LocalizedDtcDescriptions(
+    private val base: DtcDictionary,
+    private val translation: DtcTranslation,
+) : DtcDescriptionLookup {
+    init {
+        require(translation.baseDictionaryId == base.id) {
+            "Translation base_dictionary ${translation.baseDictionaryId} does not match dictionary ${base.id}"
+        }
+    }
+
+    override fun descriptionFor(code: String): DtcMessage {
+        val english = base.descriptionFor(code)
+        val translated = translationFor(code.uppercaseAscii(), english)
+        return if (translated == null || translated == english.message) {
+            english
+        } else {
+            english.copy(message = translated, originalMessage = english.message)
+        }
+    }
+
+    private fun translationFor(normalized: String, english: DtcMessage): String? = when (english.status) {
+        DtcMessageStatus.THIRD_PARTY_REFERENCE -> translation.referenceMessages[english.baseCode]
+        DtcMessageStatus.GENERIC_CLASSIFICATION ->
+            translation.genericSubsystemMessages[normalized.firstOrNull()]?.replace("{code}", normalized)
+        DtcMessageStatus.UNKNOWN -> translation.unknownMessage
+        // In this branch the English message came from an exact- or base-code
+        // entry, so normalized.take(5) always equals english.baseCode — one
+        // fallback tier, not two.
+        else -> translation.messages[normalized] ?: translation.messages[english.baseCode]
+    }
 }
 
 data class DtcReferenceMetadata(
@@ -296,11 +359,20 @@ data class DtcDictionary(
     }
 
     private companion object {
-        val DTC_CODE = Regex("^[PCBU][0-9A-F]{4}(?:-[0-9A-F]{2})?$")
+        val DTC_CODE = DTC_EXACT_OR_BASE_CODE
     }
 }
 
-private fun String.uppercaseAscii(): String = buildString(length) {
+/** The four DTC subsystem letters (Powertrain, Chassis, Body, Network). */
+internal val DTC_SUBSYSTEMS = setOf('P', 'C', 'B', 'U')
+
+/** A five-character DTC base code, e.g. `P1577`. */
+internal val DTC_BASE_CODE = Regex("^[PCBU][0-9A-F]{4}$")
+
+/** A DTC code with an optional two-digit failure-type suffix, e.g. `P1577-00`. */
+internal val DTC_EXACT_OR_BASE_CODE = Regex("^[PCBU][0-9A-F]{4}(?:-[0-9A-F]{2})?$")
+
+internal fun String.uppercaseAscii(): String = buildString(length) {
     this@uppercaseAscii.forEach { character ->
         append(if (character in 'a'..'z') character - 32 else character)
     }
