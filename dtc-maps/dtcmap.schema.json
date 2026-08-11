@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reset-light.example/schemas/dtcmap.schema.json",
+  "title": "Reset Moto Reminders diagnostic trouble code dictionary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dictionary",
+    "entries",
+    "reference_entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 3
+    },
+    "dictionary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "locale",
+        "applicability",
+        "lookup",
+        "reference_catalog"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "locale": {
+          "const": "en"
+        },
+        "applicability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "manufacturer",
+            "motorcycle_profile_ids",
+            "module",
+            "ecu_family"
+          ],
+          "properties": {
+            "manufacturer": {
+              "const": "Triumph"
+            },
+            "motorcycle_profile_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            },
+            "module": {
+              "const": "engine_ecu"
+            },
+            "ecu_family": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "reference_catalog": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "usage",
+            "compatibility_status",
+            "source_kind",
+            "source_name",
+            "source_version",
+            "wording",
+            "declared_entry_count"
+          ],
+          "properties": {
+            "usage": { "const": "third_party_reference_only" },
+            "compatibility_status": { "const": "reference_only_unvalidated" },
+            "source_kind": { "const": "third_party_tool" },
+            "source_name": { "type": "string", "minLength": 1 },
+            "source_version": { "type": "string", "minLength": 1 },
+            "wording": { "const": "project_paraphrase" },
+            "declared_entry_count": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "lookup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normalization",
+            "order",
+            "generic_subsystem_messages",
+            "unknown_message"
+          ],
+          "properties": {
+            "normalization": {
+              "const": "uppercase_ascii"
+            },
+            "order": {
+              "const": [
+                "exact_code",
+                "validated_base_code",
+                "reference_base_code",
+                "generic_subsystem",
+                "invalid_fallback"
+              ]
+            },
+            "generic_subsystem_messages": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["P", "C", "B", "U"],
+              "properties": {
+                "P": { "$ref": "#/$defs/genericMessage" },
+                "C": { "$ref": "#/$defs/genericMessage" },
+                "B": { "$ref": "#/$defs/genericMessage" },
+                "U": { "$ref": "#/$defs/genericMessage" }
+              }
+            },
+            "unknown_message": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[PCBU][0-9A-F]{4}(?:-[0-9A-F]{2})?$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entry"
+      }
+    },
+    "reference_entries": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[PCBU][0-9A-F]{4}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "genericMessage": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\{code\\}"
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message",
+        "message_status",
+        "base_code",
+        "evidence"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message_status": {
+          "enum": [
+            "oem_confirmed",
+            "third_party_corroborated",
+            "third_party_reference",
+            "inferred"
+          ]
+        },
+        "base_code": {
+          "type": "string",
+          "pattern": "^[PCBU][0-9A-F]{4}$"
+        },
+        "raw_uds_code": {
+          "type": "string",
+          "pattern": "^0x[0-9A-F]{6}$"
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "vehicle_observed",
+            "message_source_kind",
+            "message_source_name",
+            "message_source_version",
+            "wording",
+            "oem_confirmed"
+          ],
+          "properties": {
+            "vehicle_observed": {
+              "type": "boolean"
+            },
+            "message_source_kind": {
+              "enum": [
+                "oem",
+                "public_standard",
+                "third_party_tool",
+                "controlled_observation"
+              ]
+            },
+            "message_source_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message_source_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "wording": {
+              "enum": [
+                "project_original",
+                "project_paraphrase"
+              ]
+            },
+            "oem_confirmed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}
