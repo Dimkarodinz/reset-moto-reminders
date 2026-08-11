@@ -8,6 +8,8 @@ import dev.resetlight.diagnostics.hexOnly
 import dev.resetlight.diagnostics.UdsResponse
 import dev.resetlight.diagnostics.UdsResponseParser
 import dev.resetlight.diagnostics.WriteIntent
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.DiagnosticTroubleCodeClearProfile
 import dev.resetlight.profiles.DtcDescriptionLookup
 import dev.resetlight.profiles.EngineSecurityAccessProfile
@@ -15,7 +17,7 @@ import kotlinx.coroutines.CancellationException
 
 sealed interface DtcClearResult {
     data class Cleared(val remainingCount: Int) : DtcClearResult
-    data class Blocked(val reason: String) : DtcClearResult
+    data class Blocked(val reason: UiText) : DtcClearResult
 }
 
 class DtcClearFailure(
@@ -43,28 +45,28 @@ class DtcClearService(
     suspend fun clear(): DtcClearResult {
         val sessionResponse = execute(securityProfile.extendedSessionElmRequest, WriteIntent.READ)
         if (!sessionResponse.startsWithHex(securityProfile.extendedSessionPositivePrefix)) {
-            return DtcClearResult.Blocked("The ECU refused the extended diagnostic session; nothing was cleared.")
+            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SESSION_REFUSED))
         }
 
         val seedResponse = execute(securityProfile.seedRequestElmRequest, WriteIntent.READ)
         val keyRequest = try {
             derivation.keyRequestFor(seedResponse.hexOnly(), securityProfile.keyRequestElmPrefix)
         } catch (parse: DiagnosticParseException) {
-            return DtcClearResult.Blocked("The ECU did not return a usable security seed; nothing was cleared.")
+            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_NO_SEED))
         }
         val keyResponse = execute(keyRequest, WriteIntent.WRITE)
         if (!keyResponse.isPositive(SECURITY_ACCESS_POSITIVE)) {
-            return DtcClearResult.Blocked("The ECU rejected security access; nothing was cleared.")
+            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED))
         }
 
         val clearResponse = awaitFinalClearResponse()
         if (!clearResponse.isPositive(CLEAR_POSITIVE)) {
-            return DtcClearResult.Blocked("The ECU rejected the clear request; no codes were cleared.")
+            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_REJECTED))
         }
 
         val verification = execute(clearProfile.verificationElmRequest, WriteIntent.READ)
         val remaining = remainingCount(verification)
-            ?: return DtcClearResult.Blocked("The clear completed but the code count could not be confirmed.")
+            ?: return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_COUNT_UNCONFIRMED))
         return DtcClearResult.Cleared(remaining)
     }
 

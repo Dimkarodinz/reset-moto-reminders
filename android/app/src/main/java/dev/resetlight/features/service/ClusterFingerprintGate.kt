@@ -1,5 +1,7 @@
 package dev.resetlight.features.service
 
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.EcuProfile
 
 /**
@@ -18,7 +20,7 @@ data class ClusterFingerprint(
 
 data class GateDecision(
     val authorized: Boolean,
-    val reason: String,
+    val reason: UiText,
 )
 
 /**
@@ -37,15 +39,18 @@ class ClusterFingerprintGate(ecu: EcuProfile) {
 
     fun evaluate(motorcycleId: String, instrumentStatusAscii: String): GateDecision {
         if (motorcycleId != fingerprint.motorcycleId) {
-            return GateDecision(false, "Connected motorcycle profile does not match the validated cluster.")
+            return GateDecision(false, UiText(UiMessage.GATE_REASON_PROFILE_MISMATCH))
         }
         if (instrumentStatusAscii != fingerprint.expectedStatusAscii) {
             return GateDecision(
                 false,
-                "Instrument status ($instrumentStatusAscii) does not match the validated cluster " +
-                    "(${fingerprint.expectedStatusAscii}).",
+                UiText(
+                    UiMessage.GATE_REASON_STATUS_MISMATCH,
+                    instrumentStatusAscii,
+                    fingerprint.expectedStatusAscii,
+                ),
             )
         }
-        return GateDecision(true, "Connected cluster matches the validated fingerprint.")
+        return GateDecision(true, UiText(UiMessage.GATE_REASON_AUTHORIZED))
     }
 }

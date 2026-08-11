@@ -36,11 +36,14 @@ import androidx.compose.ui.unit.dp
 import dev.resetlight.R
 import dev.resetlight.diagnostics.DecodedDtc
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.domain.MotorcycleDistanceUnits
 import dev.resetlight.features.dtc.DtcClearUiState
 import dev.resetlight.features.dtc.DtcReadState
 import dev.resetlight.features.research.InstrumentReadState
 import dev.resetlight.features.research.ReadOnlyCaptureState
 import dev.resetlight.features.service.ServiceResetUiState
+import dev.resetlight.ui.label
+import dev.resetlight.ui.resolved
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -53,6 +56,7 @@ fun ConnectionScreen(
     instrumentReadState: InstrumentReadState,
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
+    distanceUnits: MotorcycleDistanceUnits,
     researchCaptureEnabled: Boolean,
     writeOperationsEnabled: Boolean,
     selectedAdapterName: String?,
@@ -80,6 +84,7 @@ fun ConnectionScreen(
         instrumentReadState = instrumentReadState,
         dtcClearState = dtcClearState,
         serviceResetState = serviceResetState,
+        distanceUnits = distanceUnits,
         onPairOrSelect = onPairOrSelect,
         onConnect = onConnect,
         onDisconnect = onDisconnect,
@@ -101,6 +106,7 @@ fun ConnectionScreen(
     instrumentReadState: InstrumentReadState,
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
+    distanceUnits: MotorcycleDistanceUnits,
     onPairOrSelect: () -> Unit,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
@@ -142,7 +148,7 @@ fun ConnectionScreen(
             }
             HorizontalDivider()
             Text(
-                text = "Motorcycle diagnostics",
+                text = stringResource(R.string.diagnostics_section_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -155,6 +161,7 @@ fun ConnectionScreen(
             if (state.showServiceInfoRead) {
                 ServiceInfoReadCard(
                     instrumentReadState = instrumentReadState,
+                    distanceUnits = distanceUnits,
                     onReadInstrument = onReadInstrument,
                 )
             }
@@ -167,13 +174,14 @@ fun ConnectionScreen(
             if (state.showServiceReset) {
                 ServiceResetCard(
                     serviceResetState = serviceResetState,
+                    distanceUnits = distanceUnits,
                     onResetServiceReminder = onResetServiceReminder,
                 )
             } else {
                 UnavailableFeatureCard(state.serviceCard)
             }
             Text(
-                text = "Resetting a reminder does not perform maintenance.",
+                text = stringResource(R.string.reset_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -192,27 +200,32 @@ private fun ReadOnlyCaptureCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = when (captureState) {
-                    ReadOnlyCaptureState.Idle -> "Read-only ECU capture"
-                    ReadOnlyCaptureState.Running -> "Reading ECU data"
-                    is ReadOnlyCaptureState.Complete -> "Capture complete"
-                    is ReadOnlyCaptureState.Blocked -> "Capture stopped safely"
-                    is ReadOnlyCaptureState.Failed -> "Capture failed"
-                },
+                text = stringResource(
+                    when (captureState) {
+                        ReadOnlyCaptureState.Idle -> R.string.capture_title_idle
+                        ReadOnlyCaptureState.Running -> R.string.capture_title_running
+                        is ReadOnlyCaptureState.Complete -> R.string.capture_title_complete
+                        is ReadOnlyCaptureState.Blocked -> R.string.capture_title_blocked
+                        is ReadOnlyCaptureState.Failed -> R.string.capture_title_failed
+                    },
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = when (captureState) {
-                    ReadOnlyCaptureState.Idle ->
-                        "Reads known non-sensitive ECU identifiers and DTC information once. It never clears faults or changes the service reminder."
-                    ReadOnlyCaptureState.Running ->
-                        "Keep the ignition on and engine off. Do not leave the app until the capture finishes."
-                    is ReadOnlyCaptureState.Complete ->
-                        "Reported DTC count: ${captureState.dtcCount}. ${captureState.responseCount} responses were logged. Disconnect and return with the phone logs."
-                    is ReadOnlyCaptureState.Blocked ->
-                        "${captureState.reason} Disconnect and return with the phone logs."
-                    is ReadOnlyCaptureState.Failed -> captureState.reason
+                    ReadOnlyCaptureState.Idle -> stringResource(R.string.capture_body_idle)
+                    ReadOnlyCaptureState.Running -> stringResource(R.string.capture_body_running)
+                    is ReadOnlyCaptureState.Complete -> stringResource(
+                        R.string.capture_body_complete,
+                        captureState.dtcCount,
+                        captureState.responseCount,
+                    )
+                    is ReadOnlyCaptureState.Blocked -> stringResource(
+                        R.string.capture_body_blocked,
+                        captureState.reason.resolved(),
+                    )
+                    is ReadOnlyCaptureState.Failed -> captureState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -224,7 +237,7 @@ private fun ReadOnlyCaptureCard(
                     onClick = onCapture,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Capture read-only ECU data")
+                    Text(stringResource(R.string.capture_button))
                 }
             }
         }
@@ -242,22 +255,20 @@ private fun DtcReadCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Trouble codes",
+                text = stringResource(R.string.dtc_read_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = when (dtcReadState) {
-                    DtcReadState.Idle ->
-                        "Reads confirmed diagnostic trouble codes from the engine ECU. This does not clear or change anything."
-                    DtcReadState.Running ->
-                        "Reading confirmed trouble codes. Keep the ignition on."
+                    DtcReadState.Idle -> stringResource(R.string.dtc_read_body_idle)
+                    DtcReadState.Running -> stringResource(R.string.dtc_read_body_running)
                     is DtcReadState.Complete -> if (dtcReadState.reportedCount == 0) {
-                        "No confirmed trouble codes are stored."
+                        stringResource(R.string.dtc_read_body_none)
                     } else {
-                        "${dtcReadState.reportedCount} confirmed trouble code(s) stored."
+                        stringResource(R.string.dtc_read_body_count, dtcReadState.reportedCount)
                     }
-                    is DtcReadState.Failed -> dtcReadState.reason
+                    is DtcReadState.Failed -> dtcReadState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -273,7 +284,15 @@ private fun DtcReadCard(
                     onClick = onReadDtc,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(if (dtcReadState is DtcReadState.Idle) "Read trouble codes" else "Read again")
+                    Text(
+                        stringResource(
+                            if (dtcReadState is DtcReadState.Idle) {
+                                R.string.dtc_read_button
+                            } else {
+                                R.string.action_read_again
+                            },
+                        ),
+                    )
                 }
             }
         }
@@ -283,6 +302,7 @@ private fun DtcReadCard(
 @Composable
 private fun ServiceInfoReadCard(
     instrumentReadState: InstrumentReadState,
+    distanceUnits: MotorcycleDistanceUnits,
     onReadInstrument: () -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -291,21 +311,26 @@ private fun ServiceInfoReadCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Instrument read (research)",
+                text = stringResource(R.string.instrument_read_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = when (instrumentReadState) {
-                    InstrumentReadState.Idle ->
-                        "First contact with the instrument cluster. Sends only the two observed reads and decodes the odometer. It never changes the service reminder."
-                    InstrumentReadState.Running ->
-                        "Reading instrument data. Keep the ignition on."
-                    is InstrumentReadState.Complete ->
-                        "Odometer: ${instrumentReadState.odometerKm} km (${instrumentReadState.odometerRaw}). Status: ${instrumentReadState.statusAscii}. Return with the phone logs."
-                    is InstrumentReadState.Blocked ->
-                        "${instrumentReadState.reason} Return with the phone logs."
-                    is InstrumentReadState.Failed -> instrumentReadState.reason
+                    InstrumentReadState.Idle -> stringResource(R.string.instrument_read_body_idle)
+                    InstrumentReadState.Running -> stringResource(R.string.instrument_read_body_running)
+                    is InstrumentReadState.Complete -> stringResource(
+                        R.string.instrument_read_body_complete,
+                        distanceUnits.wireToDisplay(instrumentReadState.odometerKm),
+                        distanceUnits.display.label(),
+                        instrumentReadState.odometerRaw,
+                        instrumentReadState.statusAscii,
+                    )
+                    is InstrumentReadState.Blocked -> stringResource(
+                        R.string.instrument_read_body_blocked,
+                        instrumentReadState.reason.resolved(),
+                    )
+                    is InstrumentReadState.Failed -> instrumentReadState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -316,7 +341,15 @@ private fun ServiceInfoReadCard(
                     onClick = onReadInstrument,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(if (instrumentReadState is InstrumentReadState.Idle) "Read instrument data" else "Read again")
+                    Text(
+                        stringResource(
+                            if (instrumentReadState is InstrumentReadState.Idle) {
+                                R.string.instrument_read_button
+                            } else {
+                                R.string.action_read_again
+                            },
+                        ),
+                    )
                 }
             }
         }
@@ -335,23 +368,27 @@ private fun DtcClearCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Clear trouble codes (research)",
+                text = stringResource(R.string.dtc_clear_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = when (dtcClearState) {
-                    DtcClearUiState.Idle ->
-                        "Runs security access and clears confirmed engine codes. Only clear codes you have already read and understood."
-                    DtcClearUiState.Running ->
-                        "Clearing trouble codes. Keep the ignition on and do not leave the app."
+                    DtcClearUiState.Idle -> stringResource(R.string.dtc_clear_body_idle)
+                    DtcClearUiState.Running -> stringResource(R.string.dtc_clear_body_running)
                     is DtcClearUiState.Cleared -> if (dtcClearState.remainingCount == 0) {
-                        "Cleared. No confirmed trouble codes remain."
+                        stringResource(R.string.dtc_clear_body_cleared_none)
                     } else {
-                        "Clear completed, but ${dtcClearState.remainingCount} code(s) are still present."
+                        stringResource(
+                            R.string.dtc_clear_body_cleared_remaining,
+                            dtcClearState.remainingCount,
+                        )
                     }
-                    is DtcClearUiState.Blocked -> "${dtcClearState.reason} Nothing was cleared."
-                    is DtcClearUiState.Failed -> dtcClearState.reason
+                    is DtcClearUiState.Blocked -> stringResource(
+                        R.string.dtc_clear_body_blocked,
+                        dtcClearState.reason.resolved(),
+                    )
+                    is DtcClearUiState.Failed -> dtcClearState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -362,12 +399,20 @@ private fun DtcClearCard(
                     onClick = { confirmArmed = true },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(if (dtcClearState is DtcClearUiState.Idle) "Clear trouble codes" else "Clear again")
+                    Text(
+                        stringResource(
+                            if (dtcClearState is DtcClearUiState.Idle) {
+                                R.string.dtc_clear_button
+                            } else {
+                                R.string.dtc_clear_button_again
+                            },
+                        ),
+                    )
                 }
             } else {
                 ArmedConfirmation(
-                    warning = "This sends a write to the engine ECU. Confirm to proceed.",
-                    confirmLabel = "Confirm clear",
+                    warning = stringResource(R.string.dtc_clear_warning),
+                    confirmLabel = stringResource(R.string.dtc_clear_confirm),
                     onCancel = { confirmArmed = false },
                     onConfirm = {
                         confirmArmed = false
@@ -382,15 +427,17 @@ private fun DtcClearCard(
 @Composable
 private fun ServiceResetCard(
     serviceResetState: ServiceResetUiState,
+    distanceUnits: MotorcycleDistanceUnits,
     onResetServiceReminder: (Int, LocalDate) -> Unit,
 ) {
     var distanceText by remember { mutableStateOf("10000") }
     var dateText by remember { mutableStateOf("") }
     var confirmArmed by remember { mutableStateOf(false) }
 
-    val distanceKm = remember(distanceText) { distanceText.trim().toIntOrNull() }
+    val distanceDisplay = remember(distanceText) { distanceText.trim().toIntOrNull() }
     val parsedDate = remember(dateText) { parseServiceDate(dateText) }
-    val inputsValid = distanceKm != null && distanceKm > 0 && parsedDate != null
+    val inputsValid = distanceDisplay != null && distanceDisplay > 0 && parsedDate != null
+    val unitLabel = distanceUnits.display.label()
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -398,20 +445,27 @@ private fun ServiceResetCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Reset service reminder (research)",
+                text = stringResource(R.string.service_reset_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = when (serviceResetState) {
-                    ServiceResetUiState.Idle ->
-                        "Writes a new service interval and next-service date to the instrument cluster. Resetting a reminder does not perform maintenance."
-                    ServiceResetUiState.Running ->
-                        "Writing the service reminder. Keep the ignition on and do not leave the app."
-                    is ServiceResetUiState.Committed ->
-                        "Committed. Odometer ${serviceResetState.odometerKm} km, interval ${serviceResetState.distanceKm} km, next service ${serviceResetState.nextServiceDate}."
-                    is ServiceResetUiState.Blocked -> "${serviceResetState.reason} Nothing was written."
-                    is ServiceResetUiState.Failed -> serviceResetState.reason
+                    ServiceResetUiState.Idle -> stringResource(R.string.service_reset_body_idle)
+                    ServiceResetUiState.Running -> stringResource(R.string.service_reset_body_running)
+                    is ServiceResetUiState.Committed -> stringResource(
+                        R.string.service_reset_body_committed,
+                        distanceUnits.wireToDisplay(serviceResetState.odometerKm),
+                        unitLabel,
+                        distanceUnits.wireToDisplay(serviceResetState.distanceKm),
+                        unitLabel,
+                        serviceResetState.nextServiceDate.toString(),
+                    )
+                    is ServiceResetUiState.Blocked -> stringResource(
+                        R.string.service_reset_body_blocked,
+                        serviceResetState.reason.resolved(),
+                    )
+                    is ServiceResetUiState.Failed -> serviceResetState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -421,7 +475,7 @@ private fun ServiceResetCard(
                 OutlinedTextField(
                     value = distanceText,
                     onValueChange = { distanceText = it; confirmArmed = false },
-                    label = { Text("Service interval (km)") },
+                    label = { Text(stringResource(R.string.service_reset_interval_label, unitLabel)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
@@ -429,7 +483,7 @@ private fun ServiceResetCard(
                 OutlinedTextField(
                     value = dateText,
                     onValueChange = { dateText = it; confirmArmed = false },
-                    label = { Text("Next service date (YYYY-MM-DD)") },
+                    label = { Text(stringResource(R.string.service_reset_date_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -439,17 +493,29 @@ private fun ServiceResetCard(
                         enabled = inputsValid,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(if (serviceResetState is ServiceResetUiState.Committed) "Reset again" else "Reset reminder")
+                        Text(
+                            stringResource(
+                                if (serviceResetState is ServiceResetUiState.Committed) {
+                                    R.string.service_reset_button_again
+                                } else {
+                                    R.string.service_reset_button
+                                },
+                            ),
+                        )
                     }
-                } else if (distanceKm != null && parsedDate != null) {
+                } else if (distanceDisplay != null && parsedDate != null) {
                     ArmedConfirmation(
-                        warning = "This writes to the instrument cluster: interval $distanceKm km, " +
-                            "next service $parsedDate. Confirm to proceed.",
-                        confirmLabel = "Confirm reset",
+                        warning = stringResource(
+                            R.string.service_reset_warning,
+                            distanceDisplay,
+                            unitLabel,
+                            parsedDate.toString(),
+                        ),
+                        confirmLabel = stringResource(R.string.service_reset_confirm),
                         onCancel = { confirmArmed = false },
                         onConfirm = {
                             confirmArmed = false
-                            onResetServiceReminder(distanceKm, parsedDate)
+                            onResetServiceReminder(distanceDisplay, parsedDate)
                         },
                     )
                 }
@@ -477,7 +543,7 @@ private fun ArmedConfirmation(
     )
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-            Text("Cancel")
+            Text(stringResource(R.string.action_cancel))
         }
         Button(onClick = onConfirm, modifier = Modifier.weight(1f)) {
             Text(confirmLabel)
@@ -513,28 +579,28 @@ private fun ConnectionCard(
                 }
                 Column {
                     Text(
-                        text = state.statusTitle,
+                        text = state.statusTitle.resolved(),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = state.statusDetail,
+                        text = state.statusDetail.resolved(),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
 
-            state.selectedAdapterName?.let { LabelValue("Adapter", it) }
-            state.elmIdentity?.let { LabelValue("ELM identity", it) }
-            state.stnIdentity?.let { LabelValue("STN identity", it) }
-            state.mapId?.let { LabelValue("Adapter map", it) }
+            state.selectedAdapterName?.let { LabelValue(stringResource(R.string.label_adapter), it) }
+            state.elmIdentity?.let { LabelValue(stringResource(R.string.label_elm_identity), it) }
+            state.stnIdentity?.let { LabelValue(stringResource(R.string.label_stn_identity), it) }
+            state.mapId?.let { LabelValue(stringResource(R.string.label_adapter_map), it) }
 
             if (state.showPairOrSelect) {
                 OutlinedButton(
                     onClick = onPairOrSelect,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Pair or select adapter")
+                    Text(stringResource(R.string.button_pair_or_select))
                 }
             }
             if (state.showConnect) {
@@ -543,7 +609,7 @@ private fun ConnectionCard(
                     enabled = state.connectEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Connect")
+                    Text(stringResource(R.string.button_connect))
                 }
             }
             if (state.showDisconnect) {
@@ -551,7 +617,7 @@ private fun ConnectionCard(
                     onClick = onDisconnect,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Disconnect")
+                    Text(stringResource(R.string.button_disconnect))
                 }
             }
             val failureAction = state.failureAction
@@ -561,7 +627,7 @@ private fun ConnectionCard(
                     onClick = { onFailureAction(failureAction) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(failureActionLabel)
+                    Text(failureActionLabel.resolved())
                 }
             }
         }
@@ -616,13 +682,13 @@ private fun UnavailableFeatureCard(state: UnavailableFeatureCardState) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = state.title,
+                text = state.title.resolved(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = state.detail,
+                text = state.detail.resolved(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

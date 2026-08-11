@@ -1,5 +1,6 @@
 package dev.resetlight.features.service
 
+import dev.resetlight.domain.UiMessage
 import dev.resetlight.profiles.EcuProfileLoader
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -36,7 +37,7 @@ class ClusterFingerprintGateTest {
             instrumentStatusAscii = "999",
         )
         assertFalse(decision.authorized)
-        assertTrue(decision.reason.contains("instrument", ignoreCase = true))
+        assertEquals(UiMessage.GATE_REASON_STATUS_MISMATCH, decision.reason.key)
     }
 
     @Test

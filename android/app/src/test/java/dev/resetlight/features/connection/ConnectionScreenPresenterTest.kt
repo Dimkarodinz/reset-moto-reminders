@@ -2,6 +2,8 @@ package dev.resetlight.features.connection
 
 import dev.resetlight.domain.ConnectionFailure
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -15,7 +17,7 @@ class ConnectionScreenPresenterTest {
     fun `disconnected offers adapter selection and connection`() {
         val screen = presenter.present(ConnectionState.Disconnected, selectedAdapterName = "vLinker MC-Android")
 
-        assertEquals("Disconnected", screen.statusTitle)
+        assertEquals(UiText(UiMessage.STATUS_DISCONNECTED_TITLE), screen.statusTitle)
         assertTrue(screen.showPairOrSelect)
         assertTrue(screen.showConnect)
         assertTrue(screen.connectEnabled)
@@ -29,21 +31,21 @@ class ConnectionScreenPresenterTest {
 
         assertTrue(screen.showConnect)
         assertFalse(screen.connectEnabled)
-        assertEquals("Pair or select an adapter before connecting.", screen.statusDetail)
+        assertEquals(UiText(UiMessage.STATUS_DISCONNECTED_DETAIL_NONE), screen.statusDetail)
     }
 
     @Test
     fun `connection phases expose precise progress labels and no competing actions`() {
         val cases = listOf(
-            ConnectionState.Connecting to "Connecting",
-            ConnectionState.Identifying to "Identifying adapter",
-            ConnectionState.Initializing to "Initializing adapter",
-            ConnectionState.Disconnecting to "Disconnecting",
+            ConnectionState.Connecting to UiMessage.STATUS_CONNECTING_TITLE,
+            ConnectionState.Identifying to UiMessage.STATUS_IDENTIFYING_TITLE,
+            ConnectionState.Initializing to UiMessage.STATUS_INITIALIZING_TITLE,
+            ConnectionState.Disconnecting to UiMessage.STATUS_DISCONNECTING_TITLE,
         )
 
         cases.forEach { (state, title) ->
             val screen = presenter.present(state, selectedAdapterName = "vLinker")
-            assertEquals(title, screen.statusTitle)
+            assertEquals(UiText(title), screen.statusTitle)
             assertTrue(screen.inProgress)
             assertFalse(screen.showConnect)
             assertFalse(screen.showDisconnect)
@@ -63,7 +65,7 @@ class ConnectionScreenPresenterTest {
             researchCaptureEnabled = true,
         )
 
-        assertEquals("Adapter ready", screen.statusTitle)
+        assertEquals(UiText(UiMessage.STATUS_READY_TITLE), screen.statusTitle)
         assertEquals("ELM327 v2.2", screen.elmIdentity)
         assertEquals("STN1151 v4.3.2", screen.stnIdentity)
         assertEquals("vlinker-mc-android", screen.mapId)
@@ -105,13 +107,10 @@ class ConnectionScreenPresenterTest {
             selectedAdapterName = null,
         )
 
-        assertEquals("Pairing required", screen.statusTitle)
-        assertEquals(
-            "Pair vLinker MC-Android in Android Bluetooth settings using PIN 1234, then return and select it.",
-            screen.statusDetail,
-        )
+        assertEquals(UiText(UiMessage.FAILURE_PAIRING_TITLE), screen.statusTitle)
+        assertEquals(UiText(UiMessage.FAILURE_PAIRING_DETAIL), screen.statusDetail)
         assertEquals(FailureAction.OPEN_BLUETOOTH_SETTINGS, screen.failureAction)
-        assertEquals("Open Bluetooth settings", screen.failureActionLabel)
+        assertEquals(UiText(UiMessage.FAILURE_PAIRING_ACTION), screen.failureActionLabel)
     }
 
     @Test
@@ -121,9 +120,9 @@ class ConnectionScreenPresenterTest {
             selectedAdapterName = "vLinker",
         )
 
-        assertEquals("Bluetooth permission needed", screen.statusTitle)
+        assertEquals(UiText(UiMessage.FAILURE_PERMISSION_TITLE), screen.statusTitle)
         assertEquals(FailureAction.REQUEST_PERMISSION, screen.failureAction)
-        assertEquals("Grant permission", screen.failureActionLabel)
+        assertEquals(UiText(UiMessage.FAILURE_PERMISSION_ACTION), screen.failureActionLabel)
     }
 
     @Test
@@ -131,24 +130,24 @@ class ConnectionScreenPresenterTest {
         val cases = listOf(
             FailureExpectation(
                 ConnectionFailure.TIMEOUT,
-                "Connection timed out",
-                "The adapter did not respond in time. Check that it is powered and nearby, then try again.",
+                UiMessage.FAILURE_TIMEOUT_TITLE,
+                UiMessage.FAILURE_TIMEOUT_DETAIL,
                 FailureAction.RETRY_CONNECTION,
-                "Try again",
+                UiMessage.FAILURE_TIMEOUT_ACTION,
             ),
             FailureExpectation(
                 ConnectionFailure.IDENTITY_MISMATCH,
-                "Unsupported adapter identity",
-                "The connected device does not match the selected adapter map. Disconnect and select the correct adapter.",
+                UiMessage.FAILURE_IDENTITY_TITLE,
+                UiMessage.FAILURE_IDENTITY_DETAIL,
                 FailureAction.SELECT_ADAPTER,
-                "Select another adapter",
+                UiMessage.FAILURE_IDENTITY_ACTION,
             ),
             FailureExpectation(
                 ConnectionFailure.REMOTE_CLOSE,
-                "Adapter disconnected",
-                "The adapter closed the connection. Check power and Bluetooth range before reconnecting.",
+                UiMessage.FAILURE_REMOTE_CLOSE_TITLE,
+                UiMessage.FAILURE_REMOTE_CLOSE_DETAIL,
                 FailureAction.RETRY_CONNECTION,
-                "Reconnect",
+                UiMessage.FAILURE_REMOTE_CLOSE_ACTION,
             ),
         )
 
@@ -157,10 +156,10 @@ class ConnectionScreenPresenterTest {
                 ConnectionState.Failed(expected.failure),
                 selectedAdapterName = "vLinker",
             )
-            assertEquals(expected.title, screen.statusTitle)
-            assertEquals(expected.detail, screen.statusDetail)
+            assertEquals(UiText(expected.title), screen.statusTitle)
+            assertEquals(UiText(expected.detail), screen.statusDetail)
             assertEquals(expected.action, screen.failureAction)
-            assertEquals(expected.actionLabel, screen.failureActionLabel)
+            assertEquals(UiText(expected.actionLabel), screen.failureActionLabel)
         }
     }
 
@@ -171,7 +170,7 @@ class ConnectionScreenPresenterTest {
             selectedAdapterName = "vLinker",
         )
 
-        assertEquals("Connection failed", screen.statusTitle)
+        assertEquals(UiText(UiMessage.FAILURE_IO_TITLE), screen.statusTitle)
         assertEquals(FailureAction.RETRY_CONNECTION, screen.failureAction)
     }
 
@@ -182,16 +181,16 @@ class ConnectionScreenPresenterTest {
             selectedAdapterName = "vLinker",
         )
 
-        assertEquals("Service reminder reset", screen.serviceCard.title)
-        assertEquals("Unavailable until the motorcycle profile is validated.", screen.serviceCard.detail)
+        assertEquals(UiText(UiMessage.SERVICE_CARD_TITLE), screen.serviceCard.title)
+        assertEquals(UiText(UiMessage.SERVICE_CARD_UNAVAILABLE_DETAIL), screen.serviceCard.detail)
         assertFalse(screen.serviceCard.enabled)
     }
 
     private data class FailureExpectation(
         val failure: ConnectionFailure,
-        val title: String,
-        val detail: String,
+        val title: UiMessage,
+        val detail: UiMessage,
         val action: FailureAction,
-        val actionLabel: String,
+        val actionLabel: UiMessage,
     )
 }

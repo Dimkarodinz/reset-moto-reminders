@@ -2,10 +2,12 @@ package dev.resetlight.features.connection
 
 import dev.resetlight.domain.ConnectionFailure
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 
 data class ConnectionScreenState(
-    val statusTitle: String,
-    val statusDetail: String,
+    val statusTitle: UiText,
+    val statusDetail: UiText,
     val selectedAdapterName: String?,
     val inProgress: Boolean = false,
     val showPairOrSelect: Boolean = false,
@@ -21,13 +23,15 @@ data class ConnectionScreenState(
     val stnIdentity: String? = null,
     val mapId: String? = null,
     val failureAction: FailureAction? = null,
-    val failureActionLabel: String? = null,
-    val serviceCard: UnavailableFeatureCardState = UnavailableFeatureCardState("Service reminder reset"),
+    val failureActionLabel: UiText? = null,
+    val serviceCard: UnavailableFeatureCardState = UnavailableFeatureCardState(
+        UiText(UiMessage.SERVICE_CARD_TITLE),
+    ),
 )
 
 data class UnavailableFeatureCardState(
-    val title: String,
-    val detail: String = "Unavailable until the motorcycle profile is validated.",
+    val title: UiText,
+    val detail: UiText = UiText(UiMessage.SERVICE_CARD_UNAVAILABLE_DETAIL),
     val enabled: Boolean = false,
 )
 
@@ -47,29 +51,29 @@ class ConnectionScreenPresenter {
     ): ConnectionScreenState = when (state) {
         ConnectionState.Disconnected -> disconnected(selectedAdapterName)
         ConnectionState.SelectingOrPairing -> ConnectionScreenState(
-            statusTitle = "Select or pair adapter",
-            statusDetail = "Choose a bonded vLinker adapter, or pair it in Android Bluetooth settings.",
+            statusTitle = UiText(UiMessage.STATUS_SELECTING_TITLE),
+            statusDetail = UiText(UiMessage.STATUS_SELECTING_DETAIL),
             selectedAdapterName = selectedAdapterName,
             showPairOrSelect = true,
         )
         ConnectionState.Connecting -> progress(
-            title = "Connecting",
-            detail = "Opening the Bluetooth connection.",
+            title = UiText(UiMessage.STATUS_CONNECTING_TITLE),
+            detail = UiText(UiMessage.STATUS_CONNECTING_DETAIL),
             selectedAdapterName = selectedAdapterName,
         )
         ConnectionState.Identifying -> progress(
-            title = "Identifying adapter",
-            detail = "Checking that the adapter identity matches the selected map.",
+            title = UiText(UiMessage.STATUS_IDENTIFYING_TITLE),
+            detail = UiText(UiMessage.STATUS_IDENTIFYING_DETAIL),
             selectedAdapterName = selectedAdapterName,
         )
         ConnectionState.Initializing -> progress(
-            title = "Initializing adapter",
-            detail = "Applying the adapter initialization sequence.",
+            title = UiText(UiMessage.STATUS_INITIALIZING_TITLE),
+            detail = UiText(UiMessage.STATUS_INITIALIZING_DETAIL),
             selectedAdapterName = selectedAdapterName,
         )
         is ConnectionState.AdapterReady -> ConnectionScreenState(
-            statusTitle = "Adapter ready",
-            statusDetail = "The adapter connection is ready.",
+            statusTitle = UiText(UiMessage.STATUS_READY_TITLE),
+            statusDetail = UiText(UiMessage.STATUS_READY_DETAIL),
             selectedAdapterName = selectedAdapterName,
             showDisconnect = true,
             showReadOnlyCapture = researchCaptureEnabled,
@@ -82,17 +86,18 @@ class ConnectionScreenPresenter {
             mapId = state.mapId,
         )
         ConnectionState.Disconnecting -> progress(
-            title = "Disconnecting",
-            detail = "Closing the adapter connection.",
+            title = UiText(UiMessage.STATUS_DISCONNECTING_TITLE),
+            detail = UiText(UiMessage.STATUS_DISCONNECTING_DETAIL),
             selectedAdapterName = selectedAdapterName,
         )
         is ConnectionState.Failed -> failure(state.reason, selectedAdapterName)
     }
 
     private fun disconnected(selectedAdapterName: String?): ConnectionScreenState = ConnectionScreenState(
-        statusTitle = "Disconnected",
-        statusDetail = selectedAdapterName?.let { "Selected adapter: $it" }
-            ?: "Pair or select an adapter before connecting.",
+        statusTitle = UiText(UiMessage.STATUS_DISCONNECTED_TITLE),
+        statusDetail = selectedAdapterName?.let {
+            UiText(UiMessage.STATUS_DISCONNECTED_DETAIL_SELECTED, it)
+        } ?: UiText(UiMessage.STATUS_DISCONNECTED_DETAIL_NONE),
         selectedAdapterName = selectedAdapterName,
         showPairOrSelect = true,
         showConnect = true,
@@ -100,8 +105,8 @@ class ConnectionScreenPresenter {
     )
 
     private fun progress(
-        title: String,
-        detail: String,
+        title: UiText,
+        detail: UiText,
         selectedAdapterName: String?,
     ): ConnectionScreenState = ConnectionScreenState(
         statusTitle = title,
@@ -116,55 +121,55 @@ class ConnectionScreenPresenter {
     ): ConnectionScreenState {
         val message = when (reason) {
             ConnectionFailure.PERMISSION_DENIED -> FailureMessage(
-                title = "Bluetooth permission needed",
-                detail = "Allow the Bluetooth permission requested by Reset Moto Reminders, then try again.",
+                title = UiMessage.FAILURE_PERMISSION_TITLE,
+                detail = UiMessage.FAILURE_PERMISSION_DETAIL,
                 action = FailureAction.REQUEST_PERMISSION,
-                actionLabel = "Grant permission",
+                actionLabel = UiMessage.FAILURE_PERMISSION_ACTION,
             )
             ConnectionFailure.PAIRING_REQUIRED -> FailureMessage(
-                title = "Pairing required",
-                detail = "Pair vLinker MC-Android in Android Bluetooth settings using PIN 1234, then return and select it.",
+                title = UiMessage.FAILURE_PAIRING_TITLE,
+                detail = UiMessage.FAILURE_PAIRING_DETAIL,
                 action = FailureAction.OPEN_BLUETOOTH_SETTINGS,
-                actionLabel = "Open Bluetooth settings",
+                actionLabel = UiMessage.FAILURE_PAIRING_ACTION,
             )
             ConnectionFailure.TIMEOUT -> FailureMessage(
-                title = "Connection timed out",
-                detail = "The adapter did not respond in time. Check that it is powered and nearby, then try again.",
+                title = UiMessage.FAILURE_TIMEOUT_TITLE,
+                detail = UiMessage.FAILURE_TIMEOUT_DETAIL,
                 action = FailureAction.RETRY_CONNECTION,
-                actionLabel = "Try again",
+                actionLabel = UiMessage.FAILURE_TIMEOUT_ACTION,
             )
             ConnectionFailure.IDENTITY_MISMATCH -> FailureMessage(
-                title = "Unsupported adapter identity",
-                detail = "The connected device does not match the selected adapter map. Disconnect and select the correct adapter.",
+                title = UiMessage.FAILURE_IDENTITY_TITLE,
+                detail = UiMessage.FAILURE_IDENTITY_DETAIL,
                 action = FailureAction.SELECT_ADAPTER,
-                actionLabel = "Select another adapter",
+                actionLabel = UiMessage.FAILURE_IDENTITY_ACTION,
             )
             ConnectionFailure.REMOTE_CLOSE -> FailureMessage(
-                title = "Adapter disconnected",
-                detail = "The adapter closed the connection. Check power and Bluetooth range before reconnecting.",
+                title = UiMessage.FAILURE_REMOTE_CLOSE_TITLE,
+                detail = UiMessage.FAILURE_REMOTE_CLOSE_DETAIL,
                 action = FailureAction.RETRY_CONNECTION,
-                actionLabel = "Reconnect",
+                actionLabel = UiMessage.FAILURE_REMOTE_CLOSE_ACTION,
             )
             ConnectionFailure.IO -> FailureMessage(
-                title = "Connection failed",
-                detail = "Bluetooth communication failed. Check adapter power and range, then try again.",
+                title = UiMessage.FAILURE_IO_TITLE,
+                detail = UiMessage.FAILURE_IO_DETAIL,
                 action = FailureAction.RETRY_CONNECTION,
-                actionLabel = "Try again",
+                actionLabel = UiMessage.FAILURE_IO_ACTION,
             )
         }
         return ConnectionScreenState(
-            statusTitle = message.title,
-            statusDetail = message.detail,
+            statusTitle = UiText(message.title),
+            statusDetail = UiText(message.detail),
             selectedAdapterName = selectedAdapterName,
             failureAction = message.action,
-            failureActionLabel = message.actionLabel,
+            failureActionLabel = UiText(message.actionLabel),
         )
     }
 
     private data class FailureMessage(
-        val title: String,
-        val detail: String,
+        val title: UiMessage,
+        val detail: UiMessage,
         val action: FailureAction,
-        val actionLabel: String,
+        val actionLabel: UiMessage,
     )
 }

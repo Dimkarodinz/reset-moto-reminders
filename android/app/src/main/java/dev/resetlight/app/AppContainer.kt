@@ -64,6 +64,7 @@ class AppContainer(context: Context) {
         bluetooth = AndroidBluetoothFacade(applicationContext),
         journal = journal,
         scope = scope,
+        distanceUnits = ecuProfile.distanceUnits,
         engineReadOnlyCaptureProfile = ecuProfile.engineReadOnlyCapture,
         instrumentReadOnlyCaptureProfile = ecuProfile.instrumentReadOnlyCapture,
         dtcReadProfile = ecuProfile.diagnosticTroubleCodes.read,

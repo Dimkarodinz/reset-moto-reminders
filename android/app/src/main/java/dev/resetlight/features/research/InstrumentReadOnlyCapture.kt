@@ -3,6 +3,8 @@ package dev.resetlight.features.research
 import dev.resetlight.diagnostics.DiagnosticParseException
 import dev.resetlight.diagnostics.DiagnosticReadChannel
 import dev.resetlight.diagnostics.InstrumentResponseDecoder
+import dev.resetlight.domain.UiMessage
+import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
 import kotlinx.coroutines.CancellationException
 
@@ -14,8 +16,8 @@ sealed interface InstrumentReadState {
         val odometerKm: Int,
         val odometerRaw: String,
     ) : InstrumentReadState
-    data class Blocked(val reason: String) : InstrumentReadState
-    data class Failed(val reason: String) : InstrumentReadState
+    data class Blocked(val reason: UiText) : InstrumentReadState
+    data class Failed(val reason: UiText) : InstrumentReadState
 }
 
 sealed class InstrumentReadOnlyCaptureResult {
@@ -27,7 +29,7 @@ sealed class InstrumentReadOnlyCaptureResult {
     ) : InstrumentReadOnlyCaptureResult()
 
     data class Blocked(
-        val reason: String,
+        val reason: UiText,
         val responses: List<ResearchCaptureResponse>,
     ) : InstrumentReadOnlyCaptureResult()
 }
@@ -56,7 +58,7 @@ class InstrumentReadOnlyCapture(
             val response = execute("configure_instrument_transport", command, responses)
             if (!configurationAccepted(command, response)) {
                 return InstrumentReadOnlyCaptureResult.Blocked(
-                    reason = "Adapter rejected instrument transport command $command",
+                    reason = UiText(UiMessage.INSTRUMENT_REASON_TRANSPORT_REJECTED, command),
                     responses = responses,
                 )
             }
@@ -76,7 +78,7 @@ class InstrumentReadOnlyCapture(
             )
         } catch (parse: DiagnosticParseException) {
             InstrumentReadOnlyCaptureResult.Blocked(
-                reason = "The instrument returned an unrecognized response; nothing was written.",
+                reason = UiText(UiMessage.INSTRUMENT_REASON_UNRECOGNIZED_RESPONSE),
                 responses = responses,
             )
         }
