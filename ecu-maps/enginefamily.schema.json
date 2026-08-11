@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reset-light.invalid/schemas/enginefamily.schema.json",
+  "title": "Reset Moto Reminders engine family",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "engine_family"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "engine_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "module", "read_only_capture", "security_access", "diagnostic_trouble_codes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "module": { "type": "object" },
+        "read_only_capture": { "type": "object" },
+        "security_access": { "type": "object" },
+        "diagnostic_trouble_codes": { "type": "object" }
+      }
+    }
+  }
+}

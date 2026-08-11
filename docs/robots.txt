@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dimkarodinz.github.io/reset-moto-reminders/sitemap.xml

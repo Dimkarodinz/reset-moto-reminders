@@ -1,0 +1,64 @@
+schema_version: 1
+
+instrument_family:
+  id: triumph-original-tft
+  display_name: Triumph original TFT instrument
+  strategy: original_split
+  module:
+    role: service_reminder_storage_and_reset
+    family: Triumph original TFT instrument
+    supplier: unknown
+    hardware_family: unknown
+    part_number: unknown
+    software_version: unknown
+    transport:
+      knowledge_status: observed
+      minimal_configuration_confirmed: false
+      protocol: ISO 15765-4 CAN
+      can_id_format: 11-bit
+      bitrate_kbit_s: 500
+      request_can_id: "0x701"
+      response_can_id: "0x704"
+      elm_protocol_command: ATTP6
+      configuration_commands:
+        - ATWS
+        - ATE0
+        - ATL0
+        - ATS0
+        - ATH1
+        - ATTP6
+        - ATCAF0
+        - ATCFC0
+        - ATCRA704
+        - ATSH701
+
+  read_only_capture:
+    configuration_commands:
+      - ATWS
+      - ATE0
+      - ATL0
+      - ATS0
+      - ATH1
+      - ATTP6
+      - ATCAF0
+      - ATCFC0
+      - ATCRA704
+      - ATSH701
+    initialize_request: "5E01"
+    expected_status_ascii: "043"
+    odometer_request: "0D01"
+    odometer_semantics: unknown
+
+  service_reminder:
+    knowledge_status: captured_and_static_implementation_corroborated
+    distance:
+      request_prefix_km: "33"
+      request_prefix_miles: "34"
+      raw_unit: 100
+      minimum_raw: 1
+      maximum_raw: 255
+    date:
+      request_prefix: "5C"
+      year_base: 2000
+      fixed_suffix: "016E0000"
+      fixed_suffix_semantics: unknown

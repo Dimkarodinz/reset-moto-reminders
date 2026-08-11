@@ -1,0 +1,41 @@
+# Reset Moto Reminders
+
+Reset Moto Reminders is an unofficial, noncommercial source-available Android and iPhone app. It resets service reminders and reads or clears diagnostic trouble codes on explicitly listed Triumph motorcycle profiles.
+
+Canonical website: https://dimkarodinz.github.io/reset-moto-reminders/
+Source repository: https://github.com/Dimkarodinz/reset-moto-reminders
+Android release: https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/android-v0.12.0
+iPhone release: https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/ios-v0.4.0
+License: PolyForm Noncommercial License 1.0.0
+
+## Compatibility
+
+- Physically validated motorcycle: Triumph Tiger 900 GT Pro, model year 2021.
+- Experimental profiles: Tiger 900 gen I and gen II, Tiger 850 Sport, Tiger Sport 660, Street Triple 765, modern Bonneville/Bobber/Speed Twin/Thruxton, Scrambler 900/1200, Trident 660, Daytona 660, Tiger Sport 800, Speed Triple 1200 and Tiger 1200 GT/Rally families.
+- Physically validated adapter: vLinker MC+.
+- Experimental Android and iPhone adapter: OBDLink CX.
+- Experimental Android-only adapters: OBDLink MX, LX and MX+.
+- Android transport: Bluetooth Classic for vLinker MC-Android and OBDLink MX/LX/MX+; Bluetooth Low Energy for OBDLink CX.
+- iPhone transport: Bluetooth Low Energy for vLinker MC-IOS and OBDLink CX.
+- Dashboard read, engine DTC read and service-reminder reset are physically validated on the 2021 Tiger 900 GT Pro with vLinker MC+.
+- DTC clear is marked Beta and awaits controlled hardware validation.
+
+## Current releases
+
+- Android v0.12.0 includes the Triumph motorcycle catalogue, all listed adapter profiles and DTC-description provenance labels.
+- iPhone v0.4.0 includes the same Triumph motorcycle catalogue, provenance labels, and the vLinker MC-IOS and OBDLink CX profiles.
+- All motorcycles and adapter combinations other than the physically validated pair are visibly marked experimental.
+
+## Scope
+
+The main app reads compatible dashboard information, reads confirmed engine DTCs, clears DTCs only after confirmation, and sets the next-service distance and date. It does not flash firmware, edit ECU maps, tune the engine, change emissions settings, code an immobilizer, run actuator tests, fuzz commands or expose an arbitrary diagnostic console.
+
+## Installation
+
+- iPhone: https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html
+- Android: https://dimkarodinz.github.io/reset-moto-reminders/install-android.html
+- Privacy: https://dimkarodinz.github.io/reset-moto-reminders/privacy.html
+
+## Important qualifications
+
+This project is not affiliated with Triumph Motorcycles. Similar ECU suppliers or TFT hardware do not prove compatibility. Clearing a DTC removes diagnostic evidence but does not repair the fault. Resetting a reminder does not perform maintenance.

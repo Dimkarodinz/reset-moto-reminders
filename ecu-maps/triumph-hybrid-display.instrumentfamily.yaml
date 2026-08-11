@@ -1,0 +1,63 @@
+schema_version: 1
+
+instrument_family:
+  id: triumph-hybrid-display
+  display_name: Triumph hybrid instrument
+  strategy: hybrid_combined
+  module:
+    role: service_reminder_storage_and_reset
+    family: Triumph hybrid instrument
+    supplier: unknown
+    hardware_family: unknown
+    part_number: unknown
+    software_version: unknown
+    transport:
+      knowledge_status: independent_interoperability_evidence_not_hardware_validated
+      minimal_configuration_confirmed: false
+      protocol: ISO 15765-4 CAN
+      can_id_format: 29-bit
+      bitrate_kbit_s: 500
+      request_can_id: "0x18DAC1F1"
+      response_can_id: "0x18DAF1C1"
+      elm_protocol_command: ATTP7
+      configuration_commands:
+        - ATWS
+        - ATE0
+        - ATL0
+        - ATS0
+        - ATH1
+        - ATTP7
+        - ATV0
+        - ATCAF0
+        - ATCFC1
+        - ATCP18
+        - ATSHDAC1F1
+
+  service_reminder:
+    knowledge_status: experimental_not_hardware_validated
+    session_request: "021003"
+    session_positive_prefix: "5003"
+    seed_request: "022701"
+    seed_positive_prefix: "6701"
+    key_request_prefix: "062702"
+    key_positive_prefix: "6702"
+    security_keys:
+      - id: default
+        aes_key: "D4B15FF4C92AB7F098316E7A5B11AC39"
+      - id: timing_3201f4
+        timing_response_suffix: "3201F4"
+        aes_key: "EF704CA051B800CC9287DF6A3511A978"
+      - id: timing_3200cb
+        timing_response_suffix: "3200CB"
+        aes_key: "DC9FDBA46F2FAD18A4B8E1123C7183C2"
+    read_requests:
+      - "0322A500"
+      - "0322A000"
+      - "0322A010"
+    request_prefix: "2EA000"
+    write_positive_response: "6EA000"
+    input_step_km: 1
+    hybrid_odometer_divisor_km: 25
+    minimum_distance_km: 25
+    maximum_distance_km: 16000
+    year_base: 2000

@@ -1,0 +1,178 @@
+package dev.resetlight.profiles
+
+import java.io.InputStream
+import java.util.Locale
+
+class DtcMapLoader {
+    fun load(source: InputStream): DtcDictionary = load(source.use(InputStream::readBytes))
+
+    fun load(source: ByteArray): DtcDictionary {
+        val document = YamlProfileDocument.parse(source)
+        val root = document.root
+        val schemaVersion = root.child("schema_version").integer()
+        if (schemaVersion != SUPPORTED_SCHEMA_VERSION) {
+            throw ProfileLoadException(
+                "schema_version $schemaVersion is unsupported; expected $SUPPORTED_SCHEMA_VERSION",
+            )
+        }
+
+        val dictionary = root.child("dictionary")
+        val applicability = dictionary.child("applicability")
+        val genericCatalog = dictionary.child("generic_catalog")
+        val lookup = dictionary.child("lookup")
+        val order = lookup.child("order").requireNonEmptyList().map(YamlNode::string)
+        if (order != EXPECTED_LOOKUP_ORDER) {
+            throw ProfileLoadException("dictionary.lookup.order must be $EXPECTED_LOOKUP_ORDER")
+        }
+
+        val entries = root.child("entries").mapping().map { (rawKey, node) ->
+            val key = rawKey.uppercaseAsciiStrict()
+            if (key != rawKey) throw ProfileLoadException("DTC entry key $rawKey must be uppercase ASCII")
+            val status = node.child("message_status").string().toMessageStatus()
+            val baseCode = node.child("base_code").string()
+            val rawUdsCode = node.optionalChild("raw_uds_code")?.string()
+            validateEntry(key, baseCode, rawUdsCode)
+            val evidenceNode = node.child("evidence")
+            val evidence = DtcMessageEvidence(
+                vehicleObserved = evidenceNode.child("vehicle_observed").boolean(),
+                sourceKind = evidenceNode.child("message_source_kind").string(),
+                sourceName = evidenceNode.child("message_source_name").string(),
+                sourceVersion = evidenceNode.child("message_source_version").string(),
+                wording = evidenceNode.child("wording").string(),
+                oemConfirmed = evidenceNode.child("oem_confirmed").boolean(),
+            )
+            validateAuthority(status, evidence)
+            key to DtcMessage(
+                message = node.child("message").string(),
+                status = status,
+                baseCode = baseCode,
+                rawUdsCode = rawUdsCode,
+                evidence = evidence,
+            )
+        }.toMap()
+
+        if (entries.isEmpty()) throw ProfileLoadException("entries must not be empty")
+
+        if (genericCatalog.child("usage").string() != "generic_obd2_fallback" ||
+            genericCatalog.child("compatibility_status").string() != "generic_not_motorcycle_specific" ||
+            genericCatalog.child("source_kind").string() != "open_data" ||
+            genericCatalog.child("data_license").string() != "CC0-1.0" ||
+            genericCatalog.child("wording").string() != "upstream_cc0"
+        ) {
+            throw ProfileLoadException(
+                "Generic DTC entries must remain a generic CC0 open-data fallback",
+            )
+        }
+        val genericEntries = root.child("generic_entries").mapping().map { (key, node) ->
+            if (!DTC_BASE_CODE.matches(key)) {
+                throw ProfileLoadException("Generic DTC key $key must be an uppercase base code")
+            }
+            key to node.string()
+        }.toMap()
+        val declaredGenericCount = genericCatalog.child("declared_entry_count").integer()
+        if (declaredGenericCount != genericEntries.size) {
+            throw ProfileLoadException(
+                "declared_entry_count $declaredGenericCount does not match " +
+                    "${genericEntries.size} generic entries",
+            )
+        }
+
+        val genericFallbackMessages = lookup.child("generic_subsystem_messages").genericSubsystemMessages()
+
+        return DtcDictionary(
+            schemaVersion = schemaVersion,
+            id = dictionary.child("id").string(),
+            locale = dictionary.child("locale").string(),
+            manufacturer = applicability.child("manufacturer").string(),
+            motorcycleProfileIds = applicability.child("motorcycle_profile_ids")
+                .requireNonEmptyList().map(YamlNode::string).toSet(),
+            moduleKey = applicability.child("module").string(),
+            ecuFamily = applicability.child("ecu_family").string(),
+            genericFallbackMessages = genericFallbackMessages,
+            unknownMessage = lookup.child("unknown_message").string(),
+            entries = entries,
+            genericCatalog = DtcOpenDataMetadata(
+                sourceName = genericCatalog.child("source_name").string(),
+                sourceRevision = genericCatalog.child("source_revision").string(),
+                license = genericCatalog.child("data_license").string(),
+            ),
+            genericEntries = genericEntries,
+            sourceSha256 = document.sourceSha256,
+        )
+    }
+
+    private fun validateEntry(key: String, baseCode: String, rawUdsCode: String?) {
+        if (!DTC_BASE_CODE.matches(baseCode)) {
+            throw ProfileLoadException("DTC base code $baseCode is invalid")
+        }
+        if (key.length == 8) {
+            if (key.take(5) != baseCode) {
+                throw ProfileLoadException("DTC entry $key does not match base_code $baseCode")
+            }
+            val raw = rawUdsCode ?: throw ProfileLoadException("DTC entry $key requires raw_uds_code")
+            if (!RAW_CODE.matches(raw) || displayCode(raw) != key) {
+                throw ProfileLoadException("DTC entry $key does not match raw_uds_code $raw")
+            }
+        } else if (key != baseCode) {
+            throw ProfileLoadException("Base DTC entry $key does not match base_code $baseCode")
+        }
+    }
+
+    private fun validateAuthority(status: DtcMessageStatus, evidence: DtcMessageEvidence) {
+        if (status == DtcMessageStatus.OEM_CONFIRMED &&
+            (!evidence.oemConfirmed || evidence.sourceKind != "oem")
+        ) {
+            throw ProfileLoadException("OEM-confirmed DTC messages require OEM evidence")
+        }
+        if (status != DtcMessageStatus.OEM_CONFIRMED && evidence.oemConfirmed) {
+            throw ProfileLoadException("Non-OEM DTC messages cannot claim OEM confirmation")
+        }
+        if (status == DtcMessageStatus.VEHICLE_OBSERVED &&
+            (!evidence.vehicleObserved || evidence.sourceKind != "controlled_observation")
+        ) {
+            throw ProfileLoadException(
+                "Vehicle-observed DTC messages require controlled-observation evidence",
+            )
+        }
+    }
+
+    private fun displayCode(rawCode: String): String {
+        val value = rawCode.removePrefix("0x").toInt(16)
+        val first = value shr 16
+        val second = value shr 8 and 0xFF
+        val third = value and 0xFF
+        val family = "PCBU"[first shr 6 and 0x03]
+        return "%c%X%X%X%X-%02X".format(
+            Locale.ROOT,
+            family,
+            first shr 4 and 0x03,
+            first and 0x0F,
+            second shr 4,
+            second and 0x0F,
+            third,
+        )
+    }
+
+    private companion object {
+        const val SUPPORTED_SCHEMA_VERSION = 4
+        val EXPECTED_LOOKUP_ORDER = listOf(
+            "exact_code",
+            "validated_base_code",
+            "generic_obd2_code",
+            "generic_subsystem",
+            "invalid_fallback",
+        )
+        val RAW_CODE = Regex("^0x[0-9A-F]{6}$")
+    }
+}
+
+private fun String.toMessageStatus(): DtcMessageStatus =
+    DtcMessageStatus.entries.firstOrNull { it.serializedValue == this }
+        ?: throw ProfileLoadException("Unknown DTC message_status $this")
+
+private fun String.uppercaseAsciiStrict(): String = buildString(length) {
+    this@uppercaseAsciiStrict.forEach { character ->
+        if (character.code > 0x7F) throw ProfileLoadException("DTC codes must be ASCII")
+        append(if (character in 'a'..'z') character - 32 else character)
+    }
+}

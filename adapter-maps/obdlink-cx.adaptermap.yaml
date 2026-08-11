@@ -1,0 +1,151 @@
+schema_version: 2
+
+adapter:
+  id: obdlink-cx
+  family: obdlink
+  variant: cx
+  manufacturer_brand: OBD Solutions
+
+  identity:
+    bluetooth_name:
+      value: OBDLink CX
+      status: manufacturer_documented
+    adapter_protocol:
+      elm_compatibility_version:
+        value: OBDLink CX*
+        status: manufacturer_documented_product_identity
+      stn_chip_identity:
+        value: STN*
+        status: manufacturer_documented_family
+    device_information:
+      status: manufacturer_documented
+      values:
+        manufacturer_name: OBD Solutions, LLC
+        model_number: OBDLink CX
+        firmware_revision: device_specific
+        software_revision: device_specific
+    private_identifiers:
+      bluetooth_address: redacted
+      serial_number: not_observed
+
+  platform_support:
+    android:
+      compatible: true
+      api: bluetooth_low_energy_gatt
+      knowledge_status: manufacturer_documented_not_project_hardware_validated
+    ios:
+      compatible: true
+      api: core_bluetooth
+      knowledge_status: manufacturer_documented_not_project_hardware_validated
+
+  transport:
+    kind: bluetooth_low_energy_gatt
+    knowledge_status: manufacturer_documented
+    observed_in_multiple_sessions: false
+
+    discovery:
+      kind: ble_advertisement
+      knowledge_status: manufacturer_documented
+      advertised_name: OBDLink CX
+      primary_service_uuid: 0000FFF0-0000-1000-8000-00805F9B34FB
+      details:
+        device_information_service_uuid: 0000180A-0000-1000-8000-00805F9B34FB
+        internal_service_uuid_do_not_use: 0000FEF5-0000-1000-8000-00805F9B34FB
+
+    channel:
+      kind: gatt_characteristics
+      knowledge_status: manufacturer_documented
+      command_endpoint:
+        type: gatt_characteristic
+        service_uuid: 0000FFF0-0000-1000-8000-00805F9B34FB
+        characteristic_uuid: 0000FFF2-0000-1000-8000-00805F9B34FB
+        properties: [write, write_without_response]
+      response_endpoint:
+        type: gatt_characteristic
+        service_uuid: 0000FFF0-0000-1000-8000-00805F9B34FB
+        characteristic_uuid: 0000FFF1-0000-1000-8000-00805F9B34FB
+        properties: [notify]
+      alternate_channels: []
+      details:
+        writes_must_be_serialized: true
+        queued_writes_supported: false
+        maximum_adapter_mtu: 247
+        android_requested_mtu: 512
+
+    framing:
+      knowledge_status: manufacturer_documented_stn_serial_interface
+      command_encoding: ASCII
+      command_terminator_hex: "0D"
+      response_line_terminator_hex: "0D"
+      response_completion_prompt:
+        ascii: ">"
+        hex: "3E"
+      responses_may_fragment: true
+      reassemble_until_prompt: true
+
+    details:
+      baseband_connection:
+        pairing_or_bonding_requirement: operating_system_prompt_after_subscribe_or_write
+        pairing_pin: "123456"
+        bonding_window_after_power_on_minutes: 5
+        encrypted_communications: true
+
+  operations:
+    connect:
+      knowledge_status: manufacturer_documented_not_project_hardware_validated
+      sequence:
+        - step: scan_for_primary_service_and_exact_name
+        - step: connect_and_discover_primary_service
+        - step: enable_notifications_on_FFF1
+        - step: request_mtu_and_use_negotiated_result
+
+    identify_adapter:
+      knowledge_status: manufacturer_documented_product_identity_not_response_captured
+      channel: primary
+      prerequisites: [primary_channel_open, response_notifications_enabled]
+      command:
+        text: ATI
+        encoding: ASCII
+        terminator_hex: "0D"
+        complete_payload_hex: "4154490D"
+      response:
+        completion_prompt_hex: "3E"
+        observed_fragments: []
+        identity_value: OBDLink CX*
+      alternate_attempts: []
+
+    initialize_adapter:
+      knowledge_status: standard_stn_commands_not_project_hardware_validated
+      motorcycle_specific_configuration_excluded: true
+      wait_for_prompt_after_every_command: true
+      sequence:
+        - { name: disable_command_echo, command_text: ATE0, payload_hex: "415445300D", observed_response: expected_OK }
+        - { name: disable_linefeeds, command_text: ATL0, payload_hex: "41544C300D", observed_response: expected_OK }
+        - { name: disable_printed_spaces, command_text: ATS0, payload_hex: "415453300D", observed_response: expected_OK }
+        - { name: read_stn_identity, command_text: STI, payload_hex: "5354490D", observed_response: expected_STN_identity }
+        - { name: enable_can_headers, command_text: ATH1, payload_hex: "415448310D", observed_response: expected_OK }
+
+    disconnect:
+      knowledge_status: manufacturer_documented
+      sequence:
+        - step: cancel_pending_operations
+        - step: close_gatt_connection
+
+  integration_boundary:
+    adapter_map_responsibility:
+      - Bluetooth discovery and connection
+      - Adapter channel selection
+      - ASCII command framing and response reassembly
+      - Common adapter initialization and identity
+    ecu_map_responsibility:
+      - ELM protocol selection and CAN routing
+      - UDS and motorcycle-module requests
+
+  validation:
+    transport_profile: manufacturer_documented
+    command_channel: manufacturer_documented
+    adapter_identity: documented_device_information_plus_pending_ATI_hardware_proof
+    common_initialization: standard_commands_pending_project_hardware_proof
+    response_fragmentation: manufacturer_documented
+    independent_replay: automated_fake_transport_only
+    production_ready: false

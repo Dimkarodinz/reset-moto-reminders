@@ -1,0 +1,124 @@
+# Legal and publication restrictions
+
+Operational policy for contributors and agents; not legal advice. It assumes a maintainer in Spain and worldwide publication. Qualified Spanish/EU advice remains recommended for write-capable releases.
+
+Last reviewed: 2026-09-07.
+
+## Non-public material
+
+Never commit, release, publish or paste into a public issue:
+
+- Android bugreports, dumpstate archives, complete HCI logs or unrelated captured traffic.
+- Unreviewed research JSONL reports; minimize and manually inspect them before creating any publishable fixture.
+- Account data, device identifiers, MAC addresses or nearby-device information.
+- Third party ECU linker APKs, code, icons, screenshots, text, trace files or other assets.
+- Triumph firmware, OEM/calibration maps, dealer software or copied service-manual content.
+- Signing keys, Android keystores, Apple certificates/profiles, tokens or credentials.
+- Decompiled security code, generic security-bypass tooling or immobilizer material. A concise, independently written seed/key transform may be retained only when the maintainer explicitly authorizes interoperability research, it is validated against the maintainer's own captured input/output pairs and third-party code/artifacts are not retained. The maintainer has authorized this transform (`EngineSeedKeyDerivation`) to execute only on an explicitly confirmed engine-ECU DTC-clear path, behind the exact profile gate and explicit user confirmation. It never runs for ordinary reads, instrument operations, immobilizer work or unrelated key discovery.
+
+The archives under `logs/` are private evidence. Before the first public commit, move them outside the repository or exclude the complete directory. Publish only minimized, manually reviewed transcripts. If private material enters Git history, stop publication and purge the history; deleting the working-tree file is insufficient.
+
+## Clean-room and branding rules
+
+- Implement from independently observed inputs/outputs and public standards.
+- Do not copy or translate third-party app implementation code, UI, wording or assets. DTC descriptions must be independently written or imported from a source with an explicit compatible reuse licence. Record the source, pinned revision and licence; keep generic descriptions separate from motorcycle-specific evidence, and never present them as OEM-confirmed compatibility data.
+- Do not use OEM firmware or calibration maps as an implementation source without legal approval.
+- Stop for legal review before publishing decompiled code/assets, access-control-circumvention tooling, immobilizer material or a proprietary database. Private interoperability analysis explicitly authorized by the maintainer may retain only independently written factual results validated against first-party captures; delete temporary third-party artifacts afterward.
+- Use Triumph/model names only to identify compatibility; do not use Triumph logos or imply endorsement.
+- Display: `Unofficial project. Not affiliated with or endorsed by Triumph Motorcycles.`
+- Never describe the application as official, dealer, certified or universally compatible.
+
+Independently written source, sanitized protocol observations, documented profiles, original project assets, release-signed APKs, unsigned iOS application archives and iOS source/self-build instructions may be published subject to these rules.
+
+## Binary distribution
+
+Every Android APK must be built from a public immutable tag, signed with the protected project key, accompanied by a SHA-256 checksum and contain no capture data, credentials or test identifiers.
+
+A public GitHub release may include an unsigned IPA prepared from the same immutable source tag, accompanied by its SHA-256 checksum and source/self-build package. The archive must contain no code signature, provisioning profile, Apple certificate, account data or device registration. Describe it accurately as a prebuilt archive that is not directly installable: the user signs it locally with their own Apple Account through a sideloading tool, or builds and installs the source with Xcode. Never publish an IPA signed with the maintainer's development, Personal Team, ad-hoc or enterprise identity.
+
+## Source license
+
+Project-authored material is source-available under the PolyForm Noncommercial
+License 1.0.0 ([`LICENSE`](LICENSE)), with the required copyright notice for
+Dmytro Rodin. The public license permits use, modification, and redistribution
+only for purposes it defines as permitted; it does not grant commercial-use
+rights. It is not an OSI-approved open-source license, and the project must not
+be described as open source without the qualifier "noncommercial
+source-available."
+
+Commercial use requires a separate written agreement. Follow
+[`COMMERCIAL_LICENSING.md`](COMMERCIAL_LICENSING.md); do not promise commercial
+terms, let a separate publisher release an official build, or imply that a
+donation grants rights without a signed agreement. Preserve `LICENSE`, `NOTICE`,
+and all `Required Notice:` lines in every permitted redistribution.
+
+Do not accept or merge external copyrightable contributions until the written
+contributor agreement described in [`CONTRIBUTING.md`](CONTRIBUTING.md) exists
+and is signed. Maintain the third-party inventory in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), and do not apply the project
+license to material the maintainer does not own or have authority to relicense.
+
+The license change is prospective. Any recipient who previously received a
+copy under GPLv3 retains the rights granted for that copy; the new license cannot
+withdraw them. Before public launch, record whether any GPLv3 copy was shared,
+published, or mirrored and keep that record with the release evidence.
+
+Copyright protection in Spain does not depend on registration, but enforcement
+does depend on proving authorship, ownership, scope, and the version infringed.
+Keep dated source history, signed release tags, checksums, release archives, and
+records of commercial grants. Registration in Spain's Intellectual Property
+Registry is optional and may be considered as additional evidence before public
+or commercial release.
+
+## Safety, liability and monetization
+
+Licence disclaimers and warnings do not eliminate liability. Public/release builds may include an explicitly experimental motorcycle profile so community members can validate hardware that the maintainer cannot physically access, but only for the existing bounded DTC-clear and service-reminder operations. The selected profile and capability must be declared in the versioned maps; the adapter identity, module route and required live precursor responses must pass their exact gates; the UI must label the motorcycle as experimental both before connection and at write confirmation; and unknown response shapes must stop before the state-changing request. Send one mapped write sequence, never probe or try another format, read the result back, and report interrupted or unconfirmed outcomes as requiring inspection. State that resetting a reminder does not perform maintenance and clearing DTCs does not repair a fault.
+
+Physical validation promotes a profile from experimental to validated; it is not a prerequisite for publishing a profile that satisfies the bounded community-validation contract above. Never describe an experimental profile as tested, safe for every year/market, or confirmed compatible.
+
+Require legal review before releasing functionality outside that bounded contract, including:
+
+- Generic or user-supplied diagnostic writes, probing, fuzzing, or automatic write-format fallback.
+- Security unlocking or seed/key functionality beyond a fixed profile-scoped prerequisite for the two allowed operations; any immobilizer, emissions, calibration, coding or firmware functionality.
+- Paid features/support, commercial warranties, nonessential personal-data collection or professional-workshop positioning.
+
+EU product-liability treatment distinguishes some genuinely noncommercial
+source distributions from commercially supplied software, but the label on the
+license is not a liability shield. Keep donations voluntary and unrelated to
+access, features, updates, support, or licensing. A paid store build, commercial
+publisher, or material monetization requires a separate legal, tax, product
+liability, consumer-law, and store-policy review before launch.
+
+## Release checklist
+
+- [ ] `logs/`, bugreports, HCI/dumpstate files and their Git history are absent.
+- [ ] No third-party APK, firmware, OEM map, copied screenshot/logo/text or proprietary asset is present.
+- [ ] No secret, signing material, token, MAC address or personal identifier is present.
+- [ ] Dependency licences and attribution requirements are satisfied.
+- [ ] `LICENSE`, `NOTICE`, required notices and complete third-party notices are included in every source and binary distribution.
+- [ ] Ownership and contributor agreements cover all project-authored material offered under both public and commercial terms.
+- [ ] Employment or contractor agreements do not give an employer/client rights in the project; no employer-owned code, time, equipment, confidential information, or branding is included.
+- [ ] Any prior GPLv3 distribution or recipient is recorded; no claim is made that earlier GPL rights were revoked.
+- [ ] Compatibility claims distinguish physically validated profiles from experimental community-test profiles and do not generalize from `Keihin` alone.
+- [ ] Every experimental write is declared in a versioned profile, visibly labelled before connection and confirmation, and limited to the two bounded operations.
+- [ ] Unknown/mismatched profiles and unknown precursor response shapes cannot execute writes; no write format is probed, retried or substituted.
+- [ ] Unofficial-project and safety warnings are visible.
+- [ ] Each binary matches a public source tag and checksum.
+- [ ] Every public IPA is unsigned, contains no provisioning/signing material, matches an immutable source tag and checksum, and is accompanied by source/Xcode instructions for user-controlled local signing.
+- [ ] New security-sensitive or commercial functionality received legal review.
+- [ ] Any separate commercial publisher has a signed copyright/branding agreement with Dmytro Rodin.
+
+## References
+
+- Spanish Copyright Act, Article 100: <https://boe.es/buscar/act.php?id=BOE-A-1996-8930>
+- Directive 2009/24/EC, Articles 5 and 6: <https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32009L0024>
+- Regulation (EU) 168/2013: <https://eur-lex.europa.eu/eli/reg/2013/168/oj/eng>
+- EU Product Liability Directive 2024/2853: <https://eur-lex.europa.eu/eli/dir/2024/2853/oj/eng>
+- Android alternative distribution: <https://developer.android.com/distribute/marketing-tools/alternative-distribution>
+- Apple account limits: <https://developer.apple.com/help/account/basics/about-your-developer-account>
+- Apple registered-device distribution: <https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices>
+- Apple EU Web Distribution: <https://developer.apple.com/support/web-distribution-eu/>
+- GitHub Acceptable Use: <https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies>
+- PolyForm Noncommercial License 1.0.0: <https://polyformproject.org/licenses/noncommercial/1.0.0>
+- Spanish Intellectual Property Registry (registration is voluntary): <https://www.cultura.gob.es/cultura/areas/propiedadintelectual/mc/rpi/que-es/fines-rpi.html>
+- F-Droid Inclusion Policy: <https://f-droid.org/en/docs/Inclusion_Policy/>

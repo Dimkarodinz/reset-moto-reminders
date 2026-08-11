@@ -1,0 +1,53 @@
+# Reset Moto Reminders for Android
+
+Android app for reading motorcycle information, reading and clearing DTCs, and resetting the service reminder.
+
+Version 0.12.0 (`versionCode 16`) validates the Triumph Tiger 900 GT Pro (2021) with vLinker MC+. OBDLink CX, original MX, LX and MX+ have separate experimental profiles; the Classic products are Android-only. Riders can also choose one of the bounded experimental Triumph family profiles listed in [`../ecu-maps/README.md`](../ecu-maps/README.md).
+
+## Build from source
+
+### Android Studio
+
+1. Clone or download this repository.
+2. Open the `android` folder in Android Studio.
+3. Connect an Android phone with USB debugging enabled.
+4. Select the `app` configuration and press **Run**.
+
+Android Studio will build and install the app.
+
+### Terminal
+
+You need JDK 17 and the Android SDK.
+
+```sh
+cd android
+./gradlew :app:assembleDebug
+```
+
+The APK will be created at:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+Install it on a connected phone:
+
+```sh
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Use the app
+
+1. Pair the adapter:
+   - vLinker: pair `vLinker MC-Android` in Android settings with PIN `1234`.
+   - Original OBDLink MX: press its **Connect** button, then pair `OBDLink MX` in Android settings within two minutes. It does not use a fixed PIN.
+   - OBDLink LX or MX+: press **Connect**, then pair the exact device in Android settings.
+   - OBDLink CX: select it in the app; Android handles bonding when required.
+2. Connect the adapter to the motorcycle.
+3. Turn the ignition on and keep the engine off.
+4. Open the app, select the adapter, and tap **Connect**.
+5. Read the motorcycle before using a write action.
+
+DTC clearing is marked **Beta**. Record the codes before clearing them.
+
+For a ready-to-install signed build, use [GitHub Releases](https://github.com/Dimkarodinz/reset-moto-reminders/releases).

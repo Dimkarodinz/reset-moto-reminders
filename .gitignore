@@ -1,0 +1,33 @@
+# Private captures may include Bluetooth addresses, serials and diagnostic traffic.
+logs/
+
+# Private reverse-engineering workspaces and third-party artifacts.
+tmp/
+
+# Private research applications and their local build state.
+research-builds/
+
+# Android local/build state
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+*.p12
+*.pem
+dist/
+
+# iOS local/build state
+ios/**/.build/
+ios/**/build/
+ios/**/xcuserdata/
+ios/**/DerivedData/
+ios/**/*.xcresult
+ios/**/.swiftpm/
+
+# Local Claude Code workspaces are never shared.
+.claude/
+**/.claude/

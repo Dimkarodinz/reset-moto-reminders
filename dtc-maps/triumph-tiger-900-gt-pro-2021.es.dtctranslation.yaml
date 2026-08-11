@@ -1,0 +1,16 @@
+schema_version: 1
+
+translation:
+  locale: es
+  base_dictionary: triumph-tiger-900-gt-pro-2021-en
+  generic_subsystem_messages:
+    P: "Código de diagnóstico de averías del grupo motopropulsor {code}. No hay disponible una descripción validada del fabricante."
+    C: "Código de diagnóstico de averías del chasis {code}. No hay disponible una descripción validada del fabricante."
+    B: "Código de diagnóstico de averías de la carrocería {code}. No hay disponible una descripción validada del fabricante."
+    U: "Código de diagnóstico de averías de red {code}. No hay disponible una descripción validada del fabricante."
+  unknown_message: "Formato de código de diagnóstico de averías no reconocido."
+
+messages:
+  P1577-00: "Código específico de la motocicleta observado; no hay una descripción verificada de forma independiente."
+
+generic_messages: {}

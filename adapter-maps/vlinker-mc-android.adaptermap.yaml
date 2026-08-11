@@ -1,0 +1,196 @@
+schema_version: 2
+
+adapter:
+  id: vlinker-mc-android
+  family: vlinker-mc
+  variant: android
+  manufacturer_brand: Vgate
+
+  identity:
+    bluetooth_name:
+      value: vLinker MC-Android
+      status: observed
+    adapter_protocol:
+      elm_compatibility_version:
+        value: ELM327 v2.2
+        status: observed
+      stn_chip_identity:
+        value: STN1151 v4.3.2
+        status: observed
+    device_information:
+      status: not_observed
+      values: {}
+    private_identifiers:
+      bluetooth_address: redacted
+      serial_number: not_observed
+
+  platform_support:
+    android:
+      compatible: true
+      api: bluetooth_classic_rfcomm
+      knowledge_status: observed
+    ios:
+      compatible: false
+      api: core_bluetooth
+      knowledge_status: incompatible_transport
+      reason: CoreBluetooth does not expose Bluetooth Classic SPP/RFCOMM.
+
+  transport:
+    kind: bluetooth_classic_rfcomm
+    knowledge_status: observed
+    observed_in_multiple_sessions: true
+
+    discovery:
+      kind: sdp
+      knowledge_status: observed
+      advertised_name: vLinker MC-Android
+      primary_service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      details:
+        l2cap_psm: "0x0001"
+        observed_service_record_handle: "0x00010000"
+        service_class_uuid_short: "0x1101"
+        service_class_name: Serial Port Profile
+        service_name: vLinker MC-Android
+        protocol_descriptor_list:
+          - protocol: L2CAP
+          - protocol: RFCOMM
+            server_channel: 1
+
+    channel:
+      kind: rfcomm_serial_stream
+      knowledge_status: observed
+      command_endpoint:
+        type: rfcomm_stream
+        service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      response_endpoint:
+        type: same_rfcomm_stream
+        service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      alternate_channels: []
+      details:
+        l2cap_psm: "0x0003"
+        server_channel: 1
+        observed_data_dlci: 2
+        negotiated_max_frame_size_octets: 640
+        frame_size_status: observed_from_parameter_negotiation_response
+        credit_based_flow_control: true
+        observed_initial_credit_octets: ["0x21", "0x02", "0x01"]
+        initial_credit_octet_is_transport_metadata: true
+        packet_capture_parser_must_strip_credit_octet: true
+        serial_socket_application_receives_payload_only: true
+        application_must_not_treat_0x21_as_ascii_exclamation_prefix: true
+        dynamic_l2cap_cids_must_not_be_hardcoded: true
+
+    framing:
+      knowledge_status: observed
+      command_encoding: ASCII
+      command_terminator_hex: "0D"
+      response_line_terminator_hex: "0D"
+      response_completion_prompt:
+        ascii: ">"
+        hex: "3E"
+      responses_may_fragment: true
+      reassemble_until_prompt: true
+
+    details:
+      baseband_connection:
+        hci_link_type: ACL
+        authentication_result: success
+        encryption_enabled_after_authentication: true
+        pairing_or_bonding_requirement: pair_in_android_settings_when_no_existing_bond
+        pairing_method: legacy_pin_entered_in_android_settings
+        pairing_pin: "1234"
+        pairing_pin_status: user_confirmed_for_observed_adapter
+        same_across_other_hardware_or_firmware_revisions: unknown
+
+  operations:
+    connect:
+      knowledge_status: observed
+      sequence:
+        - step: discover_or_select_bluetooth_device
+          match:
+            primary_service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+            additional_name_check: vLinker MC-Android
+        - step: authenticate_and_enable_link_encryption
+          observed_result: success
+        - step: open_primary_channel
+          api: bluetooth_classic_rfcomm
+          service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+          observed_server_channel: 1
+        - step: wait_until_channel_is_open
+          observed_data_dlci: 2
+
+    identify_adapter:
+      knowledge_status: observed
+      channel: primary
+      prerequisites:
+        - primary_channel_open
+      command:
+        text: ATWS
+        encoding: ASCII
+        terminator_hex: "0D"
+        complete_payload_hex: "415457530D"
+      response:
+        completion_prompt_hex: "3E"
+        observed_fragments:
+          - "ATWS<0D>"
+          - "<0D><0D>ELM327 v2.2<0D><0D><3E>"
+        identity_value: ELM327 v2.2
+      alternate_attempts: []
+
+    initialize_adapter:
+      knowledge_status: observed
+      motorcycle_specific_configuration_excluded: true
+      wait_for_prompt_after_every_command: true
+      sequence:
+        - name: disable_command_echo
+          command_text: ATE0
+          payload_hex: "415445300D"
+          observed_response: "ATE0<0D>OK<0D><0D><3E>"
+          response_echo_present: true
+          postcondition: subsequent_commands_not_echoed
+        - name: disable_linefeeds
+          command_text: ATL0
+          payload_hex: "41544C300D"
+          observed_response: "OK<0D><0D><3E>"
+        - name: disable_printed_spaces
+          command_text: ATS0
+          payload_hex: "415453300D"
+          observed_response: "OK<0D><0D><3E>"
+        - name: read_stn_identity
+          command_text: STI
+          payload_hex: "5354490D"
+          observed_response: "STN1151 v4.3.2<0D><0D><3E>"
+        - name: enable_can_headers
+          command_text: ATH1
+          payload_hex: "415448310D"
+          observed_response: "OK<0D><0D><3E>"
+
+    disconnect:
+      knowledge_status: observed
+      sequence:
+        - step: close_primary_data_channel
+        - step: close_transport_multiplexer
+        - step: disconnect_bluetooth_link
+      details:
+        observed_hci_disconnect_reason: "0x13"
+        observed_hci_disconnect_meaning: remote_user_terminated_connection
+
+  integration_boundary:
+    adapter_map_responsibility:
+      - Bluetooth discovery and connection
+      - Adapter channel selection
+      - ASCII command framing and response reassembly
+      - Common adapter initialization and identity
+    ecu_map_responsibility:
+      - ELM protocol selection such as ATTP6 or ATTP7
+      - CAN receive filters and transmit headers
+      - UDS and motorcycle-module requests
+
+  validation:
+    transport_profile: captured_multiple_sessions
+    command_channel: captured_multiple_sessions
+    adapter_identity: captured_multiple_sessions
+    common_initialization: captured_multiple_sessions
+    response_fragmentation: captured
+    independent_replay: validated_by_project_app_capture_2026-08-10
+    production_ready: false

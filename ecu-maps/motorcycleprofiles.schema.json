@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reset-light.invalid/schemas/motorcycleprofiles.schema.json",
+  "title": "Reset Moto Reminders motorcycle profiles",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "default_profile", "motorcycles"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "default_profile": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "motorcycles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "display_name", "model_codes", "validation_status", "engine_family", "instrument_family", "dtc_clear_strategy", "capabilities"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "display_name": { "type": "string", "minLength": 1 },
+          "model_codes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Z0-9]+$" } },
+          "validation_status": { "enum": ["validated", "experimental"] },
+          "engine_family": { "type": "string", "minLength": 1 },
+          "instrument_family": { "type": "string", "minLength": 1 },
+          "dtc_clear_strategy": { "enum": ["security_access", "direct"] },
+          "capabilities": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["dtc_read", "dtc_clear", "dashboard_read", "service_reset"],
+            "properties": {
+              "dtc_read": { "enum": ["validated", "experimental", "unavailable"] },
+              "dtc_clear": { "enum": ["validated", "experimental", "unavailable"] },
+              "dashboard_read": { "enum": ["validated", "experimental", "unavailable"] },
+              "service_reset": { "enum": ["validated", "experimental", "unavailable"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

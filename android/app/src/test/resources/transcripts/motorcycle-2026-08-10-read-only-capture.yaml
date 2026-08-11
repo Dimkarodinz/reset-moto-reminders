@@ -1,0 +1,80 @@
+# Sanitized byte-exact transcript of the first project-app motorcycle capture.
+# Source: private journal logs/2026-08-10/session-1786391055629.jsonl
+#         (SHA-256 063eeee7..., see logs/2026-08-10/README.md).
+# Vehicle: 2021 Tiger 900 GT Pro, ignition on, engine off; adapter vLinker MC+.
+# Every response value here is already recorded in the public maps; the
+# capture read no VIN/serial identifiers and sent no write or security command.
+capture_date: 2026-08-10
+exchanges:
+  - command: ATWS
+    outbound_hex: 415457530D
+    inbound_hex: 415457530D0D0D454C4D3332372076322E320D0D3E
+  - command: ATE0
+    outbound_hex: 415445300D
+    inbound_hex: 415445300D4F4B0D0D3E
+  - command: ATL0
+    outbound_hex: 41544C300D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATS0
+    outbound_hex: 415453300D
+    inbound_hex: 4F4B0D0D3E
+  - command: STI
+    outbound_hex: 5354490D
+    inbound_hex: 53544E313135312076342E332E320D0D3E
+  - command: ATH1
+    outbound_hex: 415448310D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATWS
+    outbound_hex: 415457530D
+    inbound_hex: 0D0D454C4D3332372076322E320D0D3E
+  - command: ATE0
+    outbound_hex: 415445300D
+    inbound_hex: 415445300D4F4B0D0D3E
+  - command: ATL0
+    outbound_hex: 41544C300D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATS0
+    outbound_hex: 415453300D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATH1
+    outbound_hex: 415448310D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATTP7
+    outbound_hex: 41545450370D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATV0
+    outbound_hex: 415456300D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATCAF0
+    outbound_hex: 4154434146300D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATCFC1
+    outbound_hex: 4154434643310D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATCP18
+    outbound_hex: 4154435031380D
+    inbound_hex: 4F4B0D0D3E
+  - command: ATSHDAD5F1
+    outbound_hex: 415453484441443546310D
+    inbound_hex: 4F4B0D0D3E
+  - command: 0322F1A0
+    outbound_hex: 30333232463141300D
+    inbound_hex: 3138444146314435303636324631413030303030303041410D0D3E
+  - command: 0322F1A2
+    outbound_hex: 30333232463141320D
+    inbound_hex: 3138444146314435303636324631413230303030303641410D0D3E
+  - command: 0322F1AE
+    outbound_hex: 30333232463141450D
+    inbound_hex: 3138444146314435303536324631414530303034414141410D0D3E
+  - command: 0322F199
+    outbound_hex: 30333232463139390D
+    inbound_hex: 3138444146314435303636324631393932353035303941410D0D3E
+  - command: 0322F19B
+    outbound_hex: 30333232463139420D
+    inbound_hex: 3138444146314435303636324631394232353035303941410D0D3E
+  - command: 0322F1A7
+    outbound_hex: 30333232463141370D
+    inbound_hex: 3138444146314435303636324631413732303230303141410D0D3E
+  - command: 03190108
+    outbound_hex: 30333139303130380D
+    inbound_hex: 3138444146314435303635393031304330303030303041410D0D3E

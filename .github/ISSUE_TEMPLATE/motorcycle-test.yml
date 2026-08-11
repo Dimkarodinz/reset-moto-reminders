@@ -1,0 +1,130 @@
+name: Motorcycle test result
+description: Report what worked with your motorcycle and OBD adapter
+title: "[Motorcycle test] "
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for testing Reset Moto Reminders. Please submit one report for each motorcycle and adapter combination.
+
+  - type: dropdown
+    id: motorcycle
+    attributes:
+      label: Motorcycle family
+      options:
+        - Tiger 900 / Tiger 850 Sport (gen I)
+        - Tiger 900 (gen II)
+        - Tiger Sport 660
+        - Street Triple 765 R / RS / Moto2
+        - Bonneville / Bobber / Speed Twin / Thruxton
+        - Scrambler 900 / 1200
+        - Trident 660 / Daytona 660 / Tiger Sport 800
+        - Speed Triple 1200 RS / RR
+        - Tiger 1200 GT / Rally
+        - Other Triumph
+    validations:
+      required: true
+
+  - type: input
+    id: exact_model
+    attributes:
+      label: Exact model and year
+      placeholder: Triumph Tiger 900 GT Pro, 2021
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Phone
+      options:
+        - Android
+        - iPhone
+    validations:
+      required: true
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: OBD adapter
+      options:
+        - vLinker MC+
+        - OBDLink CX
+        - OBDLink MX
+        - OBDLink LX
+        - OBDLink MX+
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: App version
+      placeholder: Android 0.12.0 or iPhone 0.4.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - Worked
+        - Failed
+        - Not tested
+    validations:
+      required: true
+
+  - type: dropdown
+    id: service_reset
+    attributes:
+      label: Service reminder reset
+      options:
+        - Worked
+        - Failed
+        - Not tested
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dtc_read
+    attributes:
+      label: DTC read
+      options:
+        - Worked
+        - Failed
+        - Not tested
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dtc_clear
+    attributes:
+      label: DTC clear
+      options:
+        - Worked
+        - Failed
+        - No DTC to clear
+        - Not tested
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: What happened?
+      description: Add any useful details, including messages shown by the app.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Optional. Remove VINs, serial numbers, Bluetooth addresses and other personal information before attaching anything.
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I attached no logs, or I removed identifying and personal information from them.
+          required: true

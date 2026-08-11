@@ -1,0 +1,148 @@
+schema_version: 2
+
+adapter:
+  id: obdlink-mx-android
+  family: obdlink
+  variant: mx-bluetooth-original
+  manufacturer_brand: OBD Solutions
+
+  identity:
+    bluetooth_name:
+      value: OBDLink MX
+      status: manufacturer_documented
+    adapter_protocol:
+      elm_compatibility_version:
+        value: OBDLink MX*
+        status: manufacturer_documented_STDI_hardware_identity_not_project_captured
+      stn_chip_identity:
+        value: STN115*
+        status: manufacturer_documented_original_MX_STN_family_not_project_hardware_validated
+    device_information:
+      status: manufacturer_documented
+      values:
+        model_number: OBDLink MX Bluetooth
+        latest_firmware_revision: 5.6.19
+        lifecycle: discontinued_replaced_by_MX_plus
+    private_identifiers:
+      bluetooth_address: redacted
+      serial_number: not_observed
+
+  platform_support:
+    android:
+      compatible: true
+      api: bluetooth_classic_rfcomm
+      knowledge_status: manufacturer_documented_not_project_hardware_validated
+    ios:
+      compatible: false
+      api: core_bluetooth
+      knowledge_status: manufacturer_documented_incompatible_transport
+      reason: The original OBDLink MX Bluetooth product is not supported on iOS.
+
+  transport:
+    kind: bluetooth_classic_rfcomm
+    knowledge_status: manufacturer_documented_ELM327_compatible_not_project_hardware_validated
+    observed_in_multiple_sessions: false
+
+    discovery:
+      kind: sdp
+      knowledge_status: standard_bluetooth_serial_profile_assumption_pending_hardware_proof
+      advertised_name: OBDLink MX
+      primary_service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      details:
+        service_class_uuid_short: "0x1101"
+        service_class_name: Serial Port Profile
+        exact_name_required: true
+
+    channel:
+      kind: rfcomm_serial_stream
+      knowledge_status: standard_bluetooth_serial_profile_assumption_pending_hardware_proof
+      command_endpoint:
+        type: rfcomm_stream
+        service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      response_endpoint:
+        type: same_rfcomm_stream
+        service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+      alternate_channels: []
+      details:
+        server_channel: resolved_by_SDP
+        hardcoded_rfcomm_channel_forbidden: true
+
+    framing:
+      knowledge_status: manufacturer_documented_ELM327_compatible
+      command_encoding: ASCII
+      command_terminator_hex: "0D"
+      response_line_terminator_hex: "0D"
+      response_completion_prompt:
+        ascii: ">"
+        hex: "3E"
+      responses_may_fragment: true
+      reassemble_until_prompt: true
+
+    details:
+      baseband_connection:
+        pairing_or_bonding_requirement: press_physical_connect_button_then_pair_in_android_settings
+        pairing_method: time_limited_physical_presence_pairing
+        pairing_pin: not_applicable
+        pairing_window_minutes: 2
+        security_note: adapter_does_not_use_an_easy_to_guess_PIN
+
+  operations:
+    connect:
+      knowledge_status: manufacturer_documented_not_project_hardware_validated
+      sequence:
+        - step: press_physical_connect_button
+          purpose: enter_time_limited_pairing_mode
+        - step: pair_exact_device_in_android_settings
+          additional_name_check: OBDLink MX
+        - step: open_primary_channel
+          api: bluetooth_classic_rfcomm
+          service_uuid: 00001101-0000-1000-8000-00805f9b34fb
+
+    identify_adapter:
+      knowledge_status: manufacturer_documented_hardware_identity_pending_project_hardware_proof
+      channel: primary
+      prerequisites: [primary_channel_open]
+      command:
+        text: STDI
+        encoding: ASCII
+        terminator_hex: "0D"
+        complete_payload_hex: "535444490D"
+      response:
+        completion_prompt_hex: "3E"
+        observed_fragments: []
+        identity_value: OBDLink MX*
+      alternate_attempts: []
+
+    initialize_adapter:
+      knowledge_status: standard_STN_commands_pending_project_hardware_proof
+      motorcycle_specific_configuration_excluded: true
+      wait_for_prompt_after_every_command: true
+      sequence:
+        - { name: disable_command_echo, command_text: ATE0, payload_hex: "415445300D", observed_response: expected_OK }
+        - { name: disable_linefeeds, command_text: ATL0, payload_hex: "41544C300D", observed_response: expected_OK }
+        - { name: disable_printed_spaces, command_text: ATS0, payload_hex: "415453300D", observed_response: expected_OK }
+        - { name: read_stn_identity, command_text: STI, payload_hex: "5354490D", observed_response: expected_STN_identity }
+        - { name: enable_can_headers, command_text: ATH1, payload_hex: "415448310D", observed_response: expected_OK }
+
+    disconnect:
+      knowledge_status: standard_bluetooth_classic_behavior
+      sequence:
+        - step: cancel_pending_operations
+        - step: close_rfcomm_socket
+
+  integration_boundary:
+    adapter_map_responsibility:
+      - Bluetooth discovery, pairing guidance and RFCOMM connection
+      - Adapter identity, ASCII framing and common initialization
+    ecu_map_responsibility:
+      - ELM protocol selection and CAN routing
+      - UDS and motorcycle-module requests
+
+  validation:
+    transport_profile: manufacturer_documented_product_plus_standard_SPP_assumption
+    command_channel: pending_project_hardware_proof
+    adapter_identity: manufacturer_documented_STDI_and_STI_pending_project_hardware_proof
+    common_initialization: pending_project_hardware_proof
+    response_fragmentation: ELM327_compatibility_assumption
+    independent_replay: automated_fake_transport_only
+    production_ready: false

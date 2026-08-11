@@ -1,0 +1,232 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
+
+val releaseKeystoreFile = providers.environmentVariable("RESET_MOTO_KEYSTORE_FILE")
+val releaseKeystorePassword = providers.environmentVariable("RESET_MOTO_KEYSTORE_PASSWORD")
+val releaseKeyAlias = providers.environmentVariable("RESET_MOTO_KEY_ALIAS")
+val releaseKeyPassword = providers.environmentVariable("RESET_MOTO_KEY_PASSWORD")
+val releaseSigningValues = listOf(
+    releaseKeystoreFile,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+)
+val hasAnyReleaseSigningValue = releaseSigningValues.any { it.isPresent }
+val hasAllReleaseSigningValues = releaseSigningValues.all { it.isPresent }
+
+require(!hasAnyReleaseSigningValue || hasAllReleaseSigningValues) {
+    "Android release signing requires all RESET_MOTO_KEYSTORE_* and RESET_MOTO_KEY_* environment variables"
+}
+
+android {
+    namespace = "dev.resetlight"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "dev.resetlight"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 16
+        versionName = "0.12.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasAllReleaseSigningValues) {
+            create("projectRelease") {
+                storeFile = file(releaseKeystoreFile.get())
+                storePassword = releaseKeystorePassword.get()
+                keyAlias = releaseKeyAlias.get()
+                keyPassword = releaseKeyPassword.get()
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "WRITE_OPERATIONS_ENABLED", "true")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            buildConfigField("boolean", "WRITE_OPERATIONS_ENABLED", "true")
+            if (hasAllReleaseSigningValues) {
+                signingConfig = signingConfigs.getByName("projectRelease")
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
+    packaging {
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+}
+
+val generatedProfiles = layout.buildDirectory.dir("generated/profileAssets")
+val generatedLegalAssets = layout.buildDirectory.dir("generated/legalAssets")
+val adapterMapSource = rootProject.file("../adapter-maps/vlinker-mc-android.adaptermap.yaml")
+val obdlinkCxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-cx.adaptermap.yaml")
+val obdlinkMxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-mx-android.adaptermap.yaml")
+val obdlinkLxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-lx-android.adaptermap.yaml")
+val obdlinkMxPlusAdapterMapSource = rootProject.file("../adapter-maps/obdlink-mx-plus-android.adaptermap.yaml")
+val adapterSchemaSource = rootProject.file("../adapter-maps/adaptermap.schema.json")
+val ecuMapSource = rootProject.file("../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml")
+val triumphFamilyProfileSources = listOf(
+    "triumph-modern-can.enginefamily.yaml",
+    "triumph-original-tft.instrumentfamily.yaml",
+    "triumph-updated-tft.instrumentfamily.yaml",
+    "triumph-hybrid-display.instrumentfamily.yaml",
+    "triumph-adaptive-combined.instrumentfamily.yaml",
+    "triumph.motorcycleprofiles.yaml",
+).map { rootProject.file("../ecu-maps/$it") }
+val ecuSchemaSource = rootProject.file("../ecu-maps/ecumap.schema.json")
+val triumphFamilySchemaSources = listOf(
+    "enginefamily.schema.json",
+    "instrumentfamily.schema.json",
+    "motorcycleprofiles.schema.json",
+).map { rootProject.file("../ecu-maps/$it") }
+val dtcMapSource = rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
+val dtcSchemaSource = rootProject.file("../dtc-maps/dtcmap.schema.json")
+val dtcTranslationSchemaSource = rootProject.file("../dtc-maps/dtctranslation.schema.json")
+val dtcTranslationSources = listOf("es", "uk", "fr", "de").map { locale ->
+    rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.$locale.dtctranslation.yaml")
+}
+val legalSources = listOf(
+    rootProject.file("../LICENSE"),
+    rootProject.file("../NOTICE"),
+    rootProject.file("../THIRD_PARTY_NOTICES.md"),
+    rootProject.file("../third-party/obdex/LICENSE-DATA"),
+)
+
+val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
+    inputs.files(
+        adapterMapSource,
+        obdlinkCxAdapterMapSource,
+        obdlinkMxAdapterMapSource,
+        obdlinkLxAdapterMapSource,
+        obdlinkMxPlusAdapterMapSource,
+        adapterSchemaSource,
+        ecuMapSource,
+        *triumphFamilyProfileSources.toTypedArray(),
+        ecuSchemaSource,
+        *triumphFamilySchemaSources.toTypedArray(),
+        dtcMapSource,
+        dtcSchemaSource,
+        dtcTranslationSchemaSource,
+        *dtcTranslationSources.toTypedArray(),
+    )
+    from(
+        adapterMapSource,
+        obdlinkCxAdapterMapSource,
+        obdlinkMxAdapterMapSource,
+        obdlinkLxAdapterMapSource,
+        obdlinkMxPlusAdapterMapSource,
+        adapterSchemaSource,
+        ecuMapSource,
+        *triumphFamilyProfileSources.toTypedArray(),
+        ecuSchemaSource,
+        *triumphFamilySchemaSources.toTypedArray(),
+        dtcMapSource,
+        dtcSchemaSource,
+        dtcTranslationSchemaSource,
+        *dtcTranslationSources.toTypedArray(),
+    )
+    into(generatedProfiles.map { it.dir("profiles") })
+    doFirst {
+        require(Regex("(?m)^schema_version:\\s*2\\s*$").containsMatchIn(adapterMapSource.readText())) {
+            "Unsupported or missing adapter-map schema_version"
+        }
+        require(Regex("(?m)^schema_version:\\s*3\\s*$").containsMatchIn(ecuMapSource.readText())) {
+            "Unsupported or missing ECU-map schema_version"
+        }
+        triumphFamilyProfileSources.forEach { source ->
+            require(Regex("(?m)^schema_version:\\s*1\\s*$").containsMatchIn(source.readText())) {
+                "Unsupported or missing family-profile schema_version in ${source.name}"
+            }
+        }
+        require(Regex("(?m)^schema_version:\\s*4\\s*$").containsMatchIn(dtcMapSource.readText())) {
+            "Unsupported or missing DTC-map schema_version"
+        }
+        dtcTranslationSources.forEach { source ->
+            require(Regex("(?m)^schema_version:\\s*1\\s*$").containsMatchIn(source.readText())) {
+                "Unsupported or missing DTC-translation schema_version in ${source.name}"
+            }
+        }
+        require(
+            adapterSchemaSource.isFile &&
+                ecuSchemaSource.isFile &&
+                triumphFamilySchemaSources.all { it.isFile } &&
+                dtcSchemaSource.isFile &&
+                dtcTranslationSchemaSource.isFile
+        ) {
+            "All profile JSON Schemas must exist before maps are packaged"
+        }
+    }
+}
+
+val generateLegalAssets = tasks.register<Sync>("generateLegalAssets") {
+    inputs.files(legalSources)
+    from(legalSources)
+    into(generatedLegalAssets.map { it.dir("legal-notices") })
+    doFirst {
+        require(legalSources.all { it.isFile }) {
+            "Project and third-party legal notices must exist before packaging"
+        }
+    }
+}
+
+android.sourceSets["main"].assets.srcDir(generatedProfiles)
+android.sourceSets["main"].assets.srcDir(generatedLegalAssets)
+tasks.named("preBuild").configure { dependsOn(generateProfileAssets, generateLegalAssets) }
+
+dependencies {
+    implementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+    implementation("org.yaml:snakeyaml:2.3")
+
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.3.21")
+    testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.3")
+    testImplementation("com.networknt:json-schema-validator:1.5.6")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.02.00"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+}

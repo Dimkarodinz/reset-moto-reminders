@@ -1,0 +1,16 @@
+schema_version: 1
+
+translation:
+  locale: fr
+  base_dictionary: triumph-tiger-900-gt-pro-2021-en
+  generic_subsystem_messages:
+    P: "Code de diagnostic de défaut du groupe motopropulseur {code}. Aucune description validée du constructeur n'est disponible."
+    C: "Code de diagnostic de défaut du châssis {code}. Aucune description validée du constructeur n'est disponible."
+    B: "Code de diagnostic de défaut de la carrosserie {code}. Aucune description validée du constructeur n'est disponible."
+    U: "Code de diagnostic de défaut du réseau {code}. Aucune description validée du constructeur n'est disponible."
+  unknown_message: "Format de code de diagnostic de défaut non reconnu."
+
+messages:
+  P1577-00: "Code de groupe motopropulseur spécifique à la moto observé ; aucune description vérifiée indépendamment n’est disponible."
+
+generic_messages: {}
