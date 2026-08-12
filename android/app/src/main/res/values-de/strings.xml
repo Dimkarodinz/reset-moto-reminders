@@ -13,6 +13,7 @@
     <string name="diagnostics_section_title">Motorraddiagnose</string>
     <string name="reset_disclaimer">Das Zurücksetzen einer Erinnerung führt keine Wartung durch.</string>
     <string name="action_cancel">Abbrechen</string>
+    <string name="action_ok">OK</string>
     <string name="action_read_again">Erneut auslesen</string>
 
     <!-- Connection status -->
@@ -128,7 +129,9 @@
     <string name="service_reset_body_committed">Übernommen. Kilometerzähler %1$d %2$s, Intervall %3$d %4$s, nächster Service %5$s.</string>
     <string name="service_reset_body_blocked">%1$s Es wurde nichts geschrieben.</string>
     <string name="service_reset_interval_label">Serviceintervall (%1$s)</string>
-    <string name="service_reset_date_label">Nächstes Servicedatum (YYYY-MM-DD)</string>
+    <string name="service_reset_interval_error_format">Geben Sie eine positive ganze Zahl ein.</string>
+    <string name="service_reset_interval_error_range">Verwenden Sie ein Vielfaches von %1$d %2$s, zwischen %3$d und %4$d %2$s.</string>
+    <string name="service_reset_date_label">Datum des nächsten Service</string>
     <string name="service_reset_button">Erinnerung zurücksetzen</string>
     <string name="service_reset_button_again">Erneut zurücksetzen</string>
     <string name="service_reset_warning">Dies schreibt in das Kombiinstrument: Intervall %1$d %2$s, nächster Service %3$s. Bestätigen Sie, um fortzufahren.</string>

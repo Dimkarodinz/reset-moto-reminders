@@ -13,6 +13,7 @@
     <string name="diagnostics_section_title">Diagnóstico de la motocicleta</string>
     <string name="reset_disclaimer">Restablecer un aviso no realiza el mantenimiento.</string>
     <string name="action_cancel">Cancelar</string>
+    <string name="action_ok">Aceptar</string>
     <string name="action_read_again">Leer de nuevo</string>
 
     <!-- Connection status -->
@@ -128,7 +129,9 @@
     <string name="service_reset_body_committed">Confirmado. Odómetro %1$d %2$s, intervalo %3$d %4$s, próximo mantenimiento %5$s.</string>
     <string name="service_reset_body_blocked">%1$s No se escribió nada.</string>
     <string name="service_reset_interval_label">Intervalo de mantenimiento (%1$s)</string>
-    <string name="service_reset_date_label">Fecha del próximo mantenimiento (YYYY-MM-DD)</string>
+    <string name="service_reset_interval_error_format">Introduce un número entero positivo.</string>
+    <string name="service_reset_interval_error_range">Usa un múltiplo de %1$d %2$s, entre %3$d y %4$d %2$s.</string>
+    <string name="service_reset_date_label">Fecha del próximo mantenimiento</string>
     <string name="service_reset_button">Restablecer aviso</string>
     <string name="service_reset_button_again">Restablecer de nuevo</string>
     <string name="service_reset_warning">Esto escribe en el cuadro de instrumentos: intervalo %1$d %2$s, próximo mantenimiento %3$s. Confirma para continuar.</string>

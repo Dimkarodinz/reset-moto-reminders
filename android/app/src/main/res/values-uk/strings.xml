@@ -13,6 +13,7 @@
     <string name="diagnostics_section_title">Діагностика мотоцикла</string>
     <string name="reset_disclaimer">Скидання нагадування не виконує обслуговування.</string>
     <string name="action_cancel">Скасувати</string>
+    <string name="action_ok">OK</string>
     <string name="action_read_again">Прочитати знову</string>
 
     <!-- Connection status -->
@@ -128,7 +129,9 @@
     <string name="service_reset_body_committed">Записано. Одометр %1$d %2$s, інтервал %3$d %4$s, наступне обслуговування %5$s.</string>
     <string name="service_reset_body_blocked">%1$s Нічого не було записано.</string>
     <string name="service_reset_interval_label">Інтервал обслуговування (%1$s)</string>
-    <string name="service_reset_date_label">Дата наступного обслуговування (YYYY-MM-DD)</string>
+    <string name="service_reset_interval_error_format">Введіть ціле додатне число.</string>
+    <string name="service_reset_interval_error_range">Використовуйте кратне %1$d %2$s, від %3$d до %4$d %2$s.</string>
+    <string name="service_reset_date_label">Дата наступного обслуговування</string>
     <string name="service_reset_button">Скинути нагадування</string>
     <string name="service_reset_button_again">Скинути знову</string>
     <string name="service_reset_warning">Це записує на панель приладів: інтервал %1$d %2$s, наступне обслуговування %3$s. Підтвердьте, щоб продовжити.</string>
