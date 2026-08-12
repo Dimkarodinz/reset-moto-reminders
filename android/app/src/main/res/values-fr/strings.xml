@@ -13,6 +13,7 @@
     <string name="diagnostics_section_title">Diagnostic moto</string>
     <string name="reset_disclaimer">Réinitialiser un rappel n\'effectue pas l\'entretien.</string>
     <string name="action_cancel">Annuler</string>
+    <string name="action_ok">OK</string>
     <string name="action_read_again">Relire</string>
 
     <!-- Connection status -->
@@ -128,7 +129,9 @@
     <string name="service_reset_body_committed">Validé. Compteur kilométrique %1$d %2$s, intervalle %3$d %4$s, prochain entretien %5$s.</string>
     <string name="service_reset_body_blocked">%1$s Rien n\'a été écrit.</string>
     <string name="service_reset_interval_label">Intervalle d\'entretien (%1$s)</string>
-    <string name="service_reset_date_label">Date du prochain entretien (YYYY-MM-DD)</string>
+    <string name="service_reset_interval_error_format">Saisissez un nombre entier positif.</string>
+    <string name="service_reset_interval_error_range">Utilisez un multiple de %1$d %2$s, entre %3$d et %4$d %2$s.</string>
+    <string name="service_reset_date_label">Date du prochain entretien</string>
     <string name="service_reset_button">Réinitialiser le rappel</string>
     <string name="service_reset_button_again">Réinitialiser à nouveau</string>
     <string name="service_reset_warning">Cela écrit sur le tableau de bord : intervalle %1$d %2$s, prochain entretien %3$s. Confirmez pour continuer.</string>

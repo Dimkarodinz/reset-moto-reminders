@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
                     dtcClearState = dtcClearState,
                     serviceResetState = serviceResetState,
                     distanceUnits = owner.distanceUnits,
+                    intervalConstraints = owner.serviceIntervalConstraints,
                     researchCaptureEnabled = BuildConfig.RESEARCH_BUILD,
                     writeOperationsEnabled = owner.writeOperationsAvailable,
                     selectedAdapterName = selected?.displayName(devices, adapterDefaultName),

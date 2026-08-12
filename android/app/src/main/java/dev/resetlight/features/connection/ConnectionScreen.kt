@@ -11,15 +11,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +44,9 @@ import dev.resetlight.R
 import dev.resetlight.diagnostics.DecodedDtc
 import dev.resetlight.domain.ConnectionState
 import dev.resetlight.domain.MotorcycleDistanceUnits
+import dev.resetlight.domain.NextServiceDateRules
+import dev.resetlight.domain.ServiceIntervalConstraints
+import dev.resetlight.domain.ServiceIntervalError
 import dev.resetlight.features.dtc.DtcClearUiState
 import dev.resetlight.features.dtc.DtcReadState
 import dev.resetlight.features.research.InstrumentReadState
@@ -46,7 +56,7 @@ import dev.resetlight.ui.label
 import dev.resetlight.ui.resolved
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
+import java.time.format.FormatStyle
 
 @Composable
 fun ConnectionScreen(
@@ -57,6 +67,7 @@ fun ConnectionScreen(
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
     distanceUnits: MotorcycleDistanceUnits,
+    intervalConstraints: ServiceIntervalConstraints?,
     researchCaptureEnabled: Boolean,
     writeOperationsEnabled: Boolean,
     selectedAdapterName: String?,
@@ -85,6 +96,7 @@ fun ConnectionScreen(
         dtcClearState = dtcClearState,
         serviceResetState = serviceResetState,
         distanceUnits = distanceUnits,
+        intervalConstraints = intervalConstraints,
         onPairOrSelect = onPairOrSelect,
         onConnect = onConnect,
         onDisconnect = onDisconnect,
@@ -107,6 +119,7 @@ fun ConnectionScreen(
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
     distanceUnits: MotorcycleDistanceUnits,
+    intervalConstraints: ServiceIntervalConstraints?,
     onPairOrSelect: () -> Unit,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
@@ -175,6 +188,7 @@ fun ConnectionScreen(
                 ServiceResetCard(
                     serviceResetState = serviceResetState,
                     distanceUnits = distanceUnits,
+                    intervalConstraints = intervalConstraints,
                     onResetServiceReminder = onResetServiceReminder,
                 )
             } else {
@@ -424,20 +438,30 @@ private fun DtcClearCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ServiceResetCard(
     serviceResetState: ServiceResetUiState,
     distanceUnits: MotorcycleDistanceUnits,
+    intervalConstraints: ServiceIntervalConstraints?,
     onResetServiceReminder: (Int, LocalDate) -> Unit,
 ) {
+    val today = remember { LocalDate.now() }
     var distanceText by remember { mutableStateOf("10000") }
-    var dateText by remember { mutableStateOf("") }
+    var selectedDateEpochDay by rememberSaveable {
+        mutableStateOf(NextServiceDateRules.default(today).toEpochDay())
+    }
+    var showDatePicker by remember { mutableStateOf(false) }
     var confirmArmed by remember { mutableStateOf(false) }
 
-    val distanceDisplay = remember(distanceText) { distanceText.trim().toIntOrNull() }
-    val parsedDate = remember(dateText) { parseServiceDate(dateText) }
-    val inputsValid = distanceDisplay != null && distanceDisplay > 0 && parsedDate != null
+    val selectedDate = LocalDate.ofEpochDay(selectedDateEpochDay)
     val unitLabel = distanceUnits.display.label()
+    val intervalError = intervalConstraints?.validate(distanceText, distanceUnits)
+    val distanceDisplay = distanceText.trim().toIntOrNull()
+    val dateValid = NextServiceDateRules.isValid(selectedDate, today)
+    val inputsValid =
+        intervalConstraints != null && intervalError == null && distanceDisplay != null && dateValid
+    val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -459,7 +483,7 @@ private fun ServiceResetCard(
                         unitLabel,
                         distanceUnits.wireToDisplay(serviceResetState.distanceKm),
                         unitLabel,
-                        serviceResetState.nextServiceDate.toString(),
+                        dateFormatter.format(serviceResetState.nextServiceDate),
                     )
                     is ServiceResetUiState.Blocked -> stringResource(
                         R.string.service_reset_body_blocked,
@@ -477,16 +501,50 @@ private fun ServiceResetCard(
                     onValueChange = { distanceText = it; confirmArmed = false },
                     label = { Text(stringResource(R.string.service_reset_interval_label, unitLabel)) },
                     singleLine = true,
+                    isError = intervalError != null,
+                    supportingText = when {
+                        intervalError == ServiceIntervalError.FORMAT -> {
+                            { Text(stringResource(R.string.service_reset_interval_error_format)) }
+                        }
+                        intervalError == ServiceIntervalError.RANGE && intervalConstraints != null -> {
+                            {
+                                Text(
+                                    stringResource(
+                                        R.string.service_reset_interval_error_range,
+                                        intervalConstraints.stepDisplay(distanceUnits),
+                                        unitLabel,
+                                        intervalConstraints.minDisplay(distanceUnits),
+                                        intervalConstraints.maxDisplay(distanceUnits),
+                                    ),
+                                )
+                            }
+                        }
+                        else -> null
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                OutlinedTextField(
-                    value = dateText,
-                    onValueChange = { dateText = it; confirmArmed = false },
-                    label = { Text(stringResource(R.string.service_reset_date_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                // A read-only field that opens the date picker: the picker is
+                // the only way to change the date, so format errors are
+                // impossible and the selectable window enforces the date rules.
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = dateFormatter.format(selectedDate),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.service_reset_date_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clickable {
+                                confirmArmed = false
+                                showDatePicker = true
+                            },
+                    )
+                }
                 if (!confirmArmed) {
                     Button(
                         onClick = { confirmArmed = true },
@@ -503,26 +561,87 @@ private fun ServiceResetCard(
                             ),
                         )
                     }
-                } else if (distanceDisplay != null && parsedDate != null) {
+                } else if (inputsValid && distanceDisplay != null) {
                     ArmedConfirmation(
                         warning = stringResource(
                             R.string.service_reset_warning,
                             distanceDisplay,
                             unitLabel,
-                            parsedDate.toString(),
+                            dateFormatter.format(selectedDate),
                         ),
                         confirmLabel = stringResource(R.string.service_reset_confirm),
                         onCancel = { confirmArmed = false },
                         onConfirm = {
                             confirmArmed = false
-                            onResetServiceReminder(distanceDisplay, parsedDate)
+                            onResetServiceReminder(distanceDisplay, selectedDate)
                         },
                     )
                 }
             }
         }
     }
+
+    if (showDatePicker) {
+        NextServiceDatePickerDialog(
+            today = today,
+            initialDate = selectedDate,
+            onConfirm = { picked ->
+                selectedDateEpochDay = picked.toEpochDay()
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false },
+        )
+    }
 }
+
+/**
+ * Date picker for the next-service date, limited to the window
+ * [NextServiceDateRules] allows: today through two years ahead.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NextServiceDatePickerDialog(
+    today: LocalDate,
+    initialDate: LocalDate,
+    onConfirm: (LocalDate) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val selectableDates = remember(today) {
+        object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                NextServiceDateRules.isValid(LocalDate.ofEpochDay(utcTimeMillis / MILLIS_PER_DAY), today)
+
+            override fun isSelectableYear(year: Int): Boolean =
+                year >= today.year && year <= NextServiceDateRules.latest(today).year
+        }
+    }
+    val state = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate.toEpochDay() * MILLIS_PER_DAY,
+        selectableDates = selectableDates,
+    )
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    state.selectedDateMillis?.let { millis ->
+                        onConfirm(LocalDate.ofEpochDay(millis / MILLIS_PER_DAY))
+                    }
+                },
+                enabled = state.selectedDateMillis != null,
+            ) {
+                Text(stringResource(R.string.action_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        },
+    ) {
+        DatePicker(state = state)
+    }
+}
+
+private const val MILLIS_PER_DAY = 86_400_000L
 
 /**
  * The shared arm→confirm affordance for the two research write operations: a red
@@ -549,12 +668,6 @@ private fun ArmedConfirmation(
             Text(confirmLabel)
         }
     }
-}
-
-private fun parseServiceDate(text: String): LocalDate? = try {
-    if (text.isBlank()) null else LocalDate.parse(text.trim(), DateTimeFormatter.ISO_LOCAL_DATE)
-} catch (_: DateTimeParseException) {
-    null
 }
 
 @Composable

@@ -14,6 +14,7 @@
     <string name="diagnostics_section_title">Motorcycle diagnostics</string>
     <string name="reset_disclaimer">Resetting a reminder does not perform maintenance.</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
     <string name="action_read_again">Read again</string>
 
     <!-- Connection status -->
@@ -129,7 +130,9 @@
     <string name="service_reset_body_committed">Committed. Odometer %1$d %2$s, interval %3$d %4$s, next service %5$s.</string>
     <string name="service_reset_body_blocked">%1$s Nothing was written.</string>
     <string name="service_reset_interval_label">Service interval (%1$s)</string>
-    <string name="service_reset_date_label">Next service date (YYYY-MM-DD)</string>
+    <string name="service_reset_interval_error_format">Enter a whole positive number.</string>
+    <string name="service_reset_interval_error_range">Use a multiple of %1$d %2$s, between %3$d and %4$d %2$s.</string>
+    <string name="service_reset_date_label">Next service date</string>
     <string name="service_reset_button">Reset reminder</string>
     <string name="service_reset_button_again">Reset again</string>
     <string name="service_reset_warning">This writes to the instrument cluster: interval %1$d %2$s, next service %3$s. Confirm to proceed.</string>

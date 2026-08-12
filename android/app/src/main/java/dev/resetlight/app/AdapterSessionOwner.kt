@@ -10,6 +10,7 @@ import dev.resetlight.domain.ConnectionState
 import dev.resetlight.domain.ConnectionStateMachine
 import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.domain.MotorcycleDistanceUnits
+import dev.resetlight.domain.ServiceIntervalConstraints
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
 import dev.resetlight.logging.EventJournal
@@ -97,6 +98,19 @@ class AdapterSessionOwner(
             layer = "profile",
             name = "adapter_profile_loaded",
             text = "id=${profile.id} schema=${profile.schemaVersion} sha256=${profile.sourceSha256}",
+        )
+    }
+
+    /**
+     * The interval values the observed wire encoding can carry, for UI-side
+     * validation before a reset is ever armed. Null when no write profile is
+     * packaged (release builds).
+     */
+    val serviceIntervalConstraints: ServiceIntervalConstraints? = serviceReminderProfile?.let {
+        ServiceIntervalConstraints(
+            stepKm = it.distanceRawUnitKm,
+            minKm = it.distanceMinimumRaw * it.distanceRawUnitKm,
+            maxKm = it.distanceMaximumRaw * it.distanceRawUnitKm,
         )
     }
 
