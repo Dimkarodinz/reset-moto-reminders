@@ -170,7 +170,47 @@ class AdapterSessionOwnerTest {
         assertEquals("P1577-00", result.dtcs.single().displayCode)
     }
 
-    private fun TestScope.readyOwnerWithDtcRead(dtcExchanges: List<ReplayExchange>): AdapterSessionOwner {
+    @Test
+    fun `dtc read NO DATA fails the operation but keeps the adapter session alive`() = runTest {
+        // Trip 2026-08-12: NO DATA on the DTC read raised a parse exception that
+        // tore the whole vLink session down. The adapter link is healthy in that
+        // situation, so only the operation may fail.
+        val owner = readyOwnerWithDtcRead(
+            dtcExchanges = listOf(exchange("03190108", "NO DATA\r>")),
+            engineResponseCanId = "0x18DAF1D5",
+        )
+
+        owner.readDiagnosticTroubleCodes()
+        advanceUntilIdle()
+
+        val failed = owner.dtcReadState.value as DtcReadState.Failed
+        assertEquals(dev.resetlight.domain.UiMessage.ECU_NO_RESPONSE, failed.reason.key)
+        assertTrue(owner.state.value is ConnectionState.AdapterReady)
+    }
+
+    @Test
+    fun `dtc read transport failure still tears the session down`() = runTest {
+        val owner = readyOwnerWithDtcRead(
+            dtcExchanges = listOf(
+                ReplayExchange(
+                    ElmCodec.encode("03190108"),
+                    listOf(ReplayInbound.Failure(java.io.IOException("dropped"))),
+                ),
+            ),
+            engineResponseCanId = "0x18DAF1D5",
+        )
+
+        owner.readDiagnosticTroubleCodes()
+        advanceUntilIdle()
+
+        assertTrue(owner.dtcReadState.value is DtcReadState.Failed)
+        assertTrue(owner.state.value is ConnectionState.Failed)
+    }
+
+    private fun TestScope.readyOwnerWithDtcRead(
+        dtcExchanges: List<ReplayExchange>,
+        engineResponseCanId: String? = null,
+    ): AdapterSessionOwner {
         val adapterProfile = AdapterProfileLoader().load(
             File("build/generated/profileAssets/profiles/vlinker-mc-android.adaptermap.yaml").readBytes(),
         )
@@ -196,6 +236,7 @@ class AdapterSessionOwnerTest {
             this,
             dtcReadProfile = ecuProfile.diagnosticTroubleCodes.read,
             dtcDescriptions = descriptions,
+            engineResponseCanId = engineResponseCanId,
         ) { replay }
         owner.connect("synthetic-address")
         advanceUntilIdle()

@@ -75,5 +75,7 @@ class AppContainer(context: Context) {
         clusterFingerprintGate = ClusterFingerprintGate(ecuProfile),
         motorcycleId = ecuProfile.motorcycleId,
         writesEnabled = BuildConfig.RESEARCH_BUILD,
+        engineResponseCanId = ecuProfile.engineEcu.transport.responseCanId,
+        instrumentResponseCanId = ecuProfile.instrumentCluster.transport.responseCanId,
     )
 }

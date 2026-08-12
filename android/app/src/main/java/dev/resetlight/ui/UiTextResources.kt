@@ -57,6 +57,8 @@ fun UiMessage.resourceId(): Int = when (this) {
     UiMessage.DTC_READ_FAILED_ERROR -> R.string.dtc_read_failed_error
     UiMessage.DTC_READ_COUNT_MISMATCH -> R.string.dtc_read_count_mismatch
 
+    UiMessage.ECU_NO_RESPONSE -> R.string.error_ecu_no_response
+
     UiMessage.INSTRUMENT_READ_FAILED_ERROR -> R.string.instrument_read_failed_error
     UiMessage.INSTRUMENT_REASON_TRANSPORT_REJECTED -> R.string.instrument_reason_transport_rejected
     UiMessage.INSTRUMENT_REASON_UNRECOGNIZED_RESPONSE -> R.string.instrument_reason_unrecognized_response
@@ -69,6 +71,7 @@ fun UiMessage.resourceId(): Int = when (this) {
     UiMessage.DTC_CLEAR_REASON_COUNT_UNCONFIRMED -> R.string.dtc_clear_reason_count_unconfirmed
 
     UiMessage.SERVICE_RESET_FAILED_ERROR -> R.string.service_reset_failed_error
+    UiMessage.SERVICE_RESET_REASON_INVALID_INPUT -> R.string.service_reset_reason_invalid_input
     UiMessage.SERVICE_RESET_REASON_UNRECOGNIZED_STATUS -> R.string.service_reset_reason_unrecognized_status
     UiMessage.SERVICE_RESET_REASON_DISTANCE_REJECTED -> R.string.service_reset_reason_distance_rejected
     UiMessage.SERVICE_RESET_REASON_DATE_UNCONFIRMED -> R.string.service_reset_reason_date_unconfirmed

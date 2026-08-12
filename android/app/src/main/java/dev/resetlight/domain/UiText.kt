@@ -10,6 +10,10 @@ package dev.resetlight.domain
  */
 data class UiText(val key: UiMessage, val args: List<String> = emptyList()) {
     constructor(key: UiMessage, vararg args: String) : this(key, args.toList())
+
+    /** Compact form for journals: the stable key name plus any arguments. */
+    override fun toString(): String =
+        if (args.isEmpty()) key.name else "${key.name}(${args.joinToString(", ")})"
 }
 
 /**
@@ -70,6 +74,9 @@ enum class UiMessage {
     DTC_READ_FAILED_ERROR,
     DTC_READ_COUNT_MISMATCH,
 
+    // Shared: the module did not answer on the configured route
+    ECU_NO_RESPONSE,
+
     // Instrument read
     INSTRUMENT_READ_FAILED_ERROR,
     INSTRUMENT_REASON_TRANSPORT_REJECTED,
@@ -85,6 +92,7 @@ enum class UiMessage {
 
     // Service reminder reset
     SERVICE_RESET_FAILED_ERROR,
+    SERVICE_RESET_REASON_INVALID_INPUT,
     SERVICE_RESET_REASON_UNRECOGNIZED_STATUS,
     SERVICE_RESET_REASON_DISTANCE_REJECTED,
     SERVICE_RESET_REASON_DATE_UNCONFIRMED,

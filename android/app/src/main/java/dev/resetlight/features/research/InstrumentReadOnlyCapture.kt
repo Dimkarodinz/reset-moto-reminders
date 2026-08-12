@@ -1,8 +1,10 @@
 package dev.resetlight.features.research
 
+import dev.resetlight.diagnostics.CanResponseExtractor
 import dev.resetlight.diagnostics.DiagnosticParseException
 import dev.resetlight.diagnostics.DiagnosticReadChannel
 import dev.resetlight.diagnostics.InstrumentResponseDecoder
+import dev.resetlight.diagnostics.elmConfigurationAccepted
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
@@ -48,6 +50,7 @@ class InstrumentReadOnlyCaptureFailure(
 class InstrumentReadOnlyCapture(
     private val profile: InstrumentReadOnlyCaptureProfile,
     private val channel: DiagnosticReadChannel,
+    private val extractor: CanResponseExtractor? = null,
 ) {
     private val decoder = InstrumentResponseDecoder()
 
@@ -56,7 +59,7 @@ class InstrumentReadOnlyCapture(
 
         profile.configurationCommands.forEach { command ->
             val response = execute("configure_instrument_transport", command, responses)
-            if (!configurationAccepted(command, response)) {
+            if (!elmConfigurationAccepted(command, response)) {
                 return InstrumentReadOnlyCaptureResult.Blocked(
                     reason = UiText(UiMessage.INSTRUMENT_REASON_TRANSPORT_REJECTED, command),
                     responses = responses,
@@ -68,8 +71,8 @@ class InstrumentReadOnlyCapture(
         val odometerResponse = execute("read_odometer", profile.odometerElmRequest, responses)
 
         return try {
-            val status = decoder.decodeInitialize(initializeResponse)
-            val odometer = decoder.decodeOdometer(odometerResponse)
+            val status = decoder.decodeInitialize(payload(initializeResponse))
+            val odometer = decoder.decodeOdometer(payload(odometerResponse))
             InstrumentReadOnlyCaptureResult.Complete(
                 statusAscii = status.statusAscii,
                 odometerKm = odometer.odometerKm,
@@ -84,6 +87,9 @@ class InstrumentReadOnlyCapture(
         }
     }
 
+    private fun payload(response: String): String =
+        extractor?.extract(response) ?: response
+
     private suspend fun execute(
         name: String,
         request: String,
@@ -96,14 +102,5 @@ class InstrumentReadOnlyCapture(
         throw cancelled
     } catch (failure: Throwable) {
         throw InstrumentReadOnlyCaptureFailure(request, failure)
-    }
-
-    private fun configurationAccepted(command: String, response: String): Boolean {
-        val normalized = response.uppercase()
-        return if (command == "ATWS") {
-            normalized.contains("ELM327")
-        } else {
-            normalized.lines().any { it.trim() == "OK" }
-        }
     }
 }

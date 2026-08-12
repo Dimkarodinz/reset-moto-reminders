@@ -41,6 +41,33 @@ class InstrumentReadOnlyCaptureTest {
     }
 
     @Test
+    fun `decodes the live framed responses from the 2026-08-12 trip journal`() = runTest {
+        // These exact bytes blocked the read on hardware before the extractor:
+        // the adapter (ATH1) prefixes the 11-bit response CAN ID `704`, making
+        // the raw string odd-length hex.
+        val channel = RecordingChannel(
+            configResponses = profile.configurationCommands.associateWith { command ->
+                if (command == "ATWS") "ELM327 v2.2" else "OK"
+            },
+            requestResponses = mapOf(
+                profile.initializeElmRequest to "704DE303433FFFFFFFF",
+                profile.odometerElmRequest to "7048D0100AE9C000000",
+            ),
+        )
+
+        val result = InstrumentReadOnlyCapture(
+            profile,
+            channel,
+            extractor = dev.resetlight.diagnostics.CanResponseExtractor("0x704", isoTp = false),
+        ).capture()
+
+        result as InstrumentReadOnlyCaptureResult.Complete
+        assertEquals("043", result.statusAscii)
+        assertEquals(44700, result.odometerKm)
+        assertEquals("0xAE9C", result.odometerRaw)
+    }
+
+    @Test
     fun `blocks when the cluster route configuration is rejected`() = runTest {
         val channel = RecordingChannel(
             configResponses = profile.configurationCommands.associateWith { "?" },

@@ -1,6 +1,7 @@
 package dev.resetlight.features.research
 
 import dev.resetlight.diagnostics.DiagnosticReadChannel
+import dev.resetlight.diagnostics.elmConfigurationAccepted
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.EngineReadOnlyCaptureProfile
@@ -61,7 +62,7 @@ class ReadOnlyEngineCapture(
 
         profile.configurationCommands.forEach { command ->
             val response = execute("configure_engine_transport", command, responses)
-            if (!configurationAccepted(command, response)) {
+            if (!elmConfigurationAccepted(command, response)) {
                 return ReadOnlyEngineCaptureResult.Blocked(
                     reason = UiText(UiMessage.CAPTURE_REASON_ENGINE_TRANSPORT_REJECTED, command),
                     responses = responses,
@@ -140,15 +141,6 @@ class ReadOnlyEngineCapture(
         throw cancelled
     } catch (failure: Throwable) {
         throw ReadOnlyEngineCaptureFailure(request, failure)
-    }
-
-    private fun configurationAccepted(command: String, response: String): Boolean {
-        val normalized = response.uppercase()
-        return if (command == "ATWS") {
-            normalized.contains("ELM327")
-        } else {
-            normalized.lines().any { it.trim() == "OK" }
-        }
     }
 
     private fun parseDtcCount(response: String): Int? {

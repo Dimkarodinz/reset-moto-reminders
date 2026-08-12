@@ -84,6 +84,36 @@ class DtcClearServiceTest {
     }
 
     @Test
+    fun `configures the engine route then clears against live framed responses`() = runTest {
+        // The live framing the 2026-08-12 trip showed (ATH1 + ATCAF0): CAN ID
+        // 18DAF1D5, ISO-TP length byte, AA padding. The verification frame is
+        // the trip's real DTC-count response byte-for-byte.
+        val configuration = ecu.engineReadOnlyCapture.configurationCommands
+        val script = ScriptedChannel(
+            configuration.associateWith { if (it == "ATWS") "ELM327 v2.2" else "OK" } + mapOf(
+                securityProfile.extendedSessionElmRequest to "18DAF1D5065003003201F4AA",
+                securityProfile.seedRequestElmRequest to "18DAF1D5046701188BAAAAAA",
+                "042702A018" to "18DAF1D5026702AAAAAAAAAA",
+                clearProfile.elmRequest to "18DAF1D50154AAAAAAAAAAAA",
+                clearProfile.verificationElmRequest to "18DAF1D50659010C000000AA",
+            ),
+        )
+
+        val result = DtcClearService(
+            clearProfile,
+            securityProfile,
+            EngineSeedKeyDerivation(0x4B48),
+            script,
+            configurationCommands = configuration,
+            extractor = dev.resetlight.diagnostics.CanResponseExtractor("0x18DAF1D5", isoTp = true),
+        ).clear()
+
+        assertEquals(DtcClearResult.Cleared(remainingCount = 0), result)
+        // The engine route is applied before any diagnostic request.
+        assertEquals(configuration, script.sent.take(configuration.size))
+    }
+
+    @Test
     fun `surfaces a transport failure as a typed failure`() = runTest {
         val channel = DiagnosticWriteChannel { _, _ -> throw IOException("dropped") }
 

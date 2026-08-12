@@ -90,6 +90,7 @@
     <string name="dtc_read_button">Leer códigos de avería</string>
     <string name="dtc_read_failed_error">La lectura de códigos de avería se detuvo tras un error de conexión o del adaptador.</string>
     <string name="dtc_read_count_mismatch">La ECU notificó %1$s códigos pero devolvió %2$s. Intenta leer de nuevo.</string>
+    <string name="error_ecu_no_response">El módulo no respondió. Comprueba que el contacto esté puesto e inténtalo de nuevo.</string>
 
     <!-- Instrument read -->
     <string name="instrument_read_title">Lectura de instrumentos (investigación)</string>
@@ -133,6 +134,7 @@
     <string name="service_reset_warning">Esto escribe en el cuadro de instrumentos: intervalo %1$d %2$s, próximo mantenimiento %3$s. Confirma para continuar.</string>
     <string name="service_reset_confirm">Confirmar restablecimiento</string>
     <string name="service_reset_failed_error">El restablecimiento del aviso de mantenimiento se detuvo tras un error de conexión o del adaptador.</string>
+    <string name="service_reset_reason_invalid_input">El intervalo o la fecha solicitados están fuera del rango admitido; no se escribió nada.</string>
     <string name="service_reset_reason_unrecognized_status">El instrumento devolvió un estado no reconocido; no se escribió nada.</string>
     <string name="service_reset_reason_distance_rejected">El cuadro de instrumentos rechazó la escritura del intervalo de distancia; no se envió la fecha.</string>
     <string name="service_reset_reason_date_unconfirmed">El cuadro de instrumentos no confirmó la escritura de la fecha de mantenimiento.</string>

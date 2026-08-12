@@ -90,6 +90,7 @@
     <string name="dtc_read_button">Lire les codes de défaut</string>
     <string name="dtc_read_failed_error">La lecture des codes de défaut s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
     <string name="dtc_read_count_mismatch">L\'ECU a signalé %1$s codes mais en a renvoyé %2$s. Essayez de relire.</string>
+    <string name="error_ecu_no_response">Le module n\'a pas répondu. Vérifiez que le contact est mis, puis réessayez.</string>
 
     <!-- Instrument read -->
     <string name="instrument_read_title">Lecture du tableau de bord (recherche)</string>
@@ -133,6 +134,7 @@
     <string name="service_reset_warning">Cela écrit sur le tableau de bord : intervalle %1$d %2$s, prochain entretien %3$s. Confirmez pour continuer.</string>
     <string name="service_reset_confirm">Confirmer la réinitialisation</string>
     <string name="service_reset_failed_error">La réinitialisation du rappel d\'entretien s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="service_reset_reason_invalid_input">L\'intervalle ou la date demandés sont hors de la plage prise en charge ; rien n\'a été écrit.</string>
     <string name="service_reset_reason_unrecognized_status">Le tableau de bord a renvoyé un état non reconnu ; rien n\'a été écrit.</string>
     <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'écriture de l\'intervalle de distance ; la date n\'a pas été envoyée.</string>
     <string name="service_reset_reason_date_unconfirmed">Le tableau de bord n\'a pas confirmé l\'écriture de la date d\'entretien.</string>

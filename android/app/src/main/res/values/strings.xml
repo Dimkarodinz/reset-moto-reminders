@@ -91,6 +91,7 @@
     <string name="dtc_read_button">Read trouble codes</string>
     <string name="dtc_read_failed_error">Reading trouble codes stopped after a connection or adapter error.</string>
     <string name="dtc_read_count_mismatch">The ECU reported %1$s codes but returned %2$s. Try reading again.</string>
+    <string name="error_ecu_no_response">The module did not respond. Check that the ignition is on, then try again.</string>
 
     <!-- Instrument read -->
     <string name="instrument_read_title">Instrument read (research)</string>
@@ -134,6 +135,7 @@
     <string name="service_reset_warning">This writes to the instrument cluster: interval %1$d %2$s, next service %3$s. Confirm to proceed.</string>
     <string name="service_reset_confirm">Confirm reset</string>
     <string name="service_reset_failed_error">Resetting the service reminder stopped after a connection or adapter error.</string>
+    <string name="service_reset_reason_invalid_input">The requested interval or date is outside the supported range; nothing was written.</string>
     <string name="service_reset_reason_unrecognized_status">The instrument returned an unrecognized status; nothing was written.</string>
     <string name="service_reset_reason_distance_rejected">The cluster rejected the distance-interval write; the date was not sent.</string>
     <string name="service_reset_reason_date_unconfirmed">The cluster did not confirm the service-date write.</string>

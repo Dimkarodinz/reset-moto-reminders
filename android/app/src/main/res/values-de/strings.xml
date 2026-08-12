@@ -90,6 +90,7 @@
     <string name="dtc_read_button">Fehlercodes auslesen</string>
     <string name="dtc_read_failed_error">Das Auslesen der Fehlercodes wurde nach einem Verbindungs- oder Adapterfehler gestoppt.</string>
     <string name="dtc_read_count_mismatch">Das Steuergerät meldete %1$s Codes, gab aber %2$s zurück. Versuchen Sie erneut zu lesen.</string>
+    <string name="error_ecu_no_response">Das Modul hat nicht geantwortet. Prüfen Sie, ob die Zündung eingeschaltet ist, und versuchen Sie es erneut.</string>
 
     <!-- Instrument read -->
     <string name="instrument_read_title">Instrumentenauslesung (Forschung)</string>
@@ -133,6 +134,7 @@
     <string name="service_reset_warning">Dies schreibt in das Kombiinstrument: Intervall %1$d %2$s, nächster Service %3$s. Bestätigen Sie, um fortzufahren.</string>
     <string name="service_reset_confirm">Zurücksetzen bestätigen</string>
     <string name="service_reset_failed_error">Das Zurücksetzen der Serviceerinnerung wurde nach einem Verbindungs- oder Adapterfehler gestoppt.</string>
+    <string name="service_reset_reason_invalid_input">Das angeforderte Intervall oder Datum liegt außerhalb des unterstützten Bereichs; es wurde nichts geschrieben.</string>
     <string name="service_reset_reason_unrecognized_status">Das Instrument gab einen nicht erkannten Status zurück; es wurde nichts geschrieben.</string>
     <string name="service_reset_reason_distance_rejected">Das Kombiinstrument hat den Schreibvorgang des Distanzintervalls abgelehnt; das Datum wurde nicht gesendet.</string>
     <string name="service_reset_reason_date_unconfirmed">Das Kombiinstrument hat den Schreibvorgang des Servicedatums nicht bestätigt.</string>

@@ -1,5 +1,7 @@
 package dev.resetlight.features.dtc
 
+import dev.resetlight.diagnostics.CanResponseExtractor
+import dev.resetlight.diagnostics.DiagnosticNoResponseException
 import dev.resetlight.diagnostics.DiagnosticReadChannel
 import dev.resetlight.profiles.DtcMapLoader
 import dev.resetlight.profiles.EcuProfileLoader
@@ -76,6 +78,79 @@ class DtcReaderTest {
 
         assertEquals("03190108", error.request)
         assertEquals(listOf("03190108"), channel.requests)
+    }
+
+    @Test
+    fun `configures the engine route before the count request`() = runTest {
+        // Trip 2026-08-12: a DTC read after an instrument read went out on the
+        // stale 11-bit route and got NO DATA. The reader must re-apply the
+        // engine configuration before every read.
+        val configuration = ecuProfile.engineReadOnlyCapture.configurationCommands
+        val channel = ScriptedReadChannel(
+            configuration.map { if (it == "ATWS") "ELM327 v2.2" else "OK" } +
+                listOf("18DAF1D50659010C000000AA"),
+        )
+
+        val result = DtcReader(
+            ecuProfile.diagnosticTroubleCodes.read,
+            descriptions,
+            channel,
+            configurationCommands = configuration,
+            extractor = CanResponseExtractor("0x18DAF1D5", isoTp = true),
+        ).read()
+
+        assertEquals(0, result.reportedCount)
+        assertEquals(configuration + "03190108", channel.requests)
+    }
+
+    @Test
+    fun `decodes the live framed count response from the trip journal`() = runTest {
+        val channel = ScriptedReadChannel(listOf("18DAF1D50659010C000000AA"))
+
+        val result = DtcReader(
+            ecuProfile.diagnosticTroubleCodes.read,
+            descriptions,
+            channel,
+            extractor = CanResponseExtractor("0x18DAF1D5", isoTp = true),
+        ).read()
+
+        assertEquals(0, result.reportedCount)
+    }
+
+    @Test
+    fun `NO DATA surfaces as the typed no-response error`() = runTest {
+        val channel = ScriptedReadChannel(listOf("NO DATA"))
+
+        assertThrows(DiagnosticNoResponseException::class.java) {
+            kotlinx.coroutines.runBlocking {
+                DtcReader(
+                    ecuProfile.diagnosticTroubleCodes.read,
+                    descriptions,
+                    channel,
+                    extractor = CanResponseExtractor("0x18DAF1D5", isoTp = true),
+                ).read()
+            }
+        }
+    }
+
+    @Test
+    fun `a rejected configuration command is a typed failure and stops the read`() = runTest {
+        val configuration = ecuProfile.engineReadOnlyCapture.configurationCommands
+        val channel = ScriptedReadChannel(listOf("?"))
+
+        val error = assertThrows(DtcReadFailure.ConfigurationRejected::class.java) {
+            kotlinx.coroutines.runBlocking {
+                DtcReader(
+                    ecuProfile.diagnosticTroubleCodes.read,
+                    descriptions,
+                    channel,
+                    configurationCommands = configuration,
+                ).read()
+            }
+        }
+
+        assertEquals(configuration.first(), error.command)
+        assertEquals(listOf(configuration.first()), channel.requests)
     }
 
     private class ScriptedReadChannel(responses: List<Any>) : DiagnosticReadChannel {

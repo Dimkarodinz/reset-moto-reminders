@@ -13,6 +13,8 @@ import dev.resetlight.domain.MotorcycleDistanceUnits
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
 import dev.resetlight.logging.EventJournal
+import dev.resetlight.diagnostics.CanResponseExtractor
+import dev.resetlight.diagnostics.DiagnosticNoResponseException
 import dev.resetlight.diagnostics.DiagnosticReadChannel
 import dev.resetlight.diagnostics.DiagnosticWriteChannel
 import dev.resetlight.diagnostics.EngineSeedKeyDerivation
@@ -84,6 +86,8 @@ class AdapterSessionOwner(
     private val clusterFingerprintGate: ClusterFingerprintGate? = null,
     private val motorcycleId: String? = null,
     private val writesEnabled: Boolean = false,
+    engineResponseCanId: String? = null,
+    instrumentResponseCanId: String? = null,
     private val transportFactory: (String) -> ByteTransport = { address ->
         RfcommByteTransport(bluetooth, address, profile.transport.sppServiceUuid)
     },
@@ -95,6 +99,14 @@ class AdapterSessionOwner(
             text = "id=${profile.id} schema=${profile.schemaVersion} sha256=${profile.sourceSha256}",
         )
     }
+
+    /**
+     * Extract live framed responses (headers on, raw frames) into the bare
+     * payloads the decoders expect. The engine speaks ISO-TP on a 29-bit route;
+     * the instrument answers raw 8-byte frames on its 11-bit route.
+     */
+    private val engineExtractor = engineResponseCanId?.let { CanResponseExtractor(it, isoTp = true) }
+    private val instrumentExtractor = instrumentResponseCanId?.let { CanResponseExtractor(it, isoTp = false) }
 
     private val mutableState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val state: StateFlow<ConnectionState> = mutableState.asStateFlow()
@@ -226,20 +238,37 @@ class AdapterSessionOwner(
             startedEvent = "dtc_read_started",
             failedEvent = "dtc_read_failed",
             recover = { failure ->
-                // The ECU reported an inconsistent count; the connection is still
-                // usable, so surface the read failure without tearing it down.
-                if (failure is DtcReadFailure.CountMismatch) {
-                    mutableDtcReadState.value = DtcReadState.Failed(
-                        UiText(
-                            UiMessage.DTC_READ_COUNT_MISMATCH,
-                            failure.reportedCount.toString(),
-                            failure.decodedCount.toString(),
-                        ),
-                    )
-                    journal.record("operation", "dtc_read_failed", outcome = "count_mismatch")
-                    true
-                } else {
-                    false
+                when {
+                    // The ECU reported an inconsistent count; the connection is
+                    // still usable, so surface the failure without tearing it down.
+                    failure is DtcReadFailure.CountMismatch -> {
+                        mutableDtcReadState.value = DtcReadState.Failed(
+                            UiText(
+                                UiMessage.DTC_READ_COUNT_MISMATCH,
+                                failure.reportedCount.toString(),
+                                failure.decodedCount.toString(),
+                            ),
+                        )
+                        journal.record("operation", "dtc_read_failed", outcome = "count_mismatch")
+                        true
+                    }
+                    failure is DtcReadFailure.ConfigurationRejected -> {
+                        mutableDtcReadState.value = DtcReadState.Failed(
+                            UiText(UiMessage.CAPTURE_REASON_ENGINE_TRANSPORT_REJECTED, failure.command),
+                        )
+                        journal.record("operation", "dtc_read_failed", outcome = "transport_rejected")
+                        true
+                    }
+                    // NO DATA on the engine route: the module did not answer,
+                    // but the adapter link is fine — keep the session.
+                    failure is DiagnosticNoResponseException -> {
+                        mutableDtcReadState.value = DtcReadState.Failed(
+                            UiText(UiMessage.ECU_NO_RESPONSE),
+                        )
+                        journal.record("operation", "dtc_read_failed", outcome = "no_response")
+                        true
+                    }
+                    else -> false
                 }
             },
         ) {
@@ -247,6 +276,8 @@ class AdapterSessionOwner(
                 readProfile,
                 descriptions,
                 DiagnosticReadChannel { request -> session.execute(request).normalizedText },
+                configurationCommands = engineReadOnlyCaptureProfile?.configurationCommands.orEmpty(),
+                extractor = engineExtractor,
             ).read()
             mutableDtcReadState.value = DtcReadState.Complete(
                 reportedCount = result.reportedCount,
@@ -278,6 +309,7 @@ class AdapterSessionOwner(
             val result = InstrumentReadOnlyCapture(
                 captureProfile,
                 DiagnosticReadChannel { request -> session.execute(request).normalizedText },
+                extractor = instrumentExtractor,
             ).capture()
             mutableInstrumentReadState.value = when (result) {
                 is InstrumentReadOnlyCaptureResult.Complete -> InstrumentReadState.Complete(
@@ -326,6 +358,8 @@ class AdapterSessionOwner(
                 securityProfile,
                 EngineSeedKeyDerivation(securityProfile.seedKeyMultiplier),
                 writeChannel(session),
+                configurationCommands = engineReadOnlyCaptureProfile?.configurationCommands.orEmpty(),
+                extractor = engineExtractor,
             ).clear()
             mutableDtcClearState.value = when (result) {
                 is DtcClearResult.Cleared -> DtcClearUiState.Cleared(result.remainingCount)
@@ -367,6 +401,7 @@ class AdapterSessionOwner(
                 UiText(UiMessage.SERVICE_RESET_FAILED_ERROR),
             ),
             startedEvent = "service_reset_started",
+            startedText = "requested distance_display=$distanceDisplay distance_km=$distanceKm date=$nextServiceDate",
             failedEvent = "service_reset_failed",
         ) {
             val result = ServiceReminderResetService(
@@ -374,6 +409,7 @@ class AdapterSessionOwner(
                 serviceProfile,
                 gate,
                 id,
+                extractor = instrumentExtractor,
             ).reset(writeChannel(session), distanceKm, nextServiceDate)
             mutableServiceResetState.value = when (result) {
                 is ServiceReminderResetResult.Committed -> ServiceResetUiState.Committed(
@@ -414,6 +450,7 @@ class AdapterSessionOwner(
         failed: T,
         startedEvent: String,
         failedEvent: String,
+        startedText: String? = null,
         recover: (suspend (Throwable) -> Boolean)? = null,
         body: suspend () -> Unit,
     ) {
@@ -422,7 +459,7 @@ class AdapterSessionOwner(
         if (job.get()?.isActive == true) return
 
         stateFlow.value = running
-        journal.record("operation", startedEvent)
+        journal.record("operation", startedEvent, text = startedText)
         job.set(
             scope.launch {
                 try {
@@ -434,10 +471,38 @@ class AdapterSessionOwner(
                     if (recover?.invoke(failure) == true) return@launch
                     stateFlow.value = failed
                     journal.record("operation", failedEvent, outcome = failure::class.simpleName)
-                    failSession(failure)
+                    // Tear the session down only when the transport itself broke.
+                    // A parse or validation error leaves a healthy adapter link;
+                    // disconnecting on it (as the 2026-08-12 trip did, three
+                    // times) costs a full reconnect for no benefit.
+                    if (isTransportFatal(failure)) failSession(failure)
                 }
             },
         )
+    }
+
+    /**
+     * Whether [failure]'s cause chain shows the adapter link itself failed
+     * (I/O, timeout, disconnect, permissions, identity) rather than a
+     * diagnostic-level problem (unparseable payload, invalid input, refused
+     * command) that leaves the Bluetooth session perfectly usable.
+     */
+    private fun isTransportFatal(failure: Throwable): Boolean {
+        var current: Throwable? = failure
+        var depth = 0
+        while (current != null && depth < MAX_CAUSE_DEPTH) {
+            when (current) {
+                is IOException,
+                is CommandFailure,
+                is SocketTimeoutException,
+                is SecurityException,
+                is AdapterIdentityMismatch,
+                -> return true
+            }
+            current = current.cause
+            depth++
+        }
+        return false
     }
 
     /**
@@ -528,5 +593,10 @@ class AdapterSessionOwner(
         is DevicePairingRequiredException -> ConnectionFailure.PAIRING_REQUIRED
         is IOException, is CommandFailure.Io -> ConnectionFailure.IO
         else -> ConnectionFailure.IO
+    }
+
+    private companion object {
+        /** Guards [isTransportFatal] against pathological cause cycles. */
+        const val MAX_CAUSE_DEPTH = 10
     }
 }
