@@ -90,6 +90,7 @@
     <string name="dtc_read_button">Зчитати коди несправностей</string>
     <string name="dtc_read_failed_error">Зчитування кодів несправностей зупинено через помилку з\'єднання або адаптера.</string>
     <string name="dtc_read_count_mismatch">ECU повідомив %1$s кодів, але повернув %2$s. Спробуйте зчитати знову.</string>
+    <string name="error_ecu_no_response">Модуль не відповів. Перевірте, чи ввімкнене запалювання, і спробуйте знову.</string>
 
     <!-- Instrument read -->
     <string name="instrument_read_title">Зчитування панелі приладів (дослідження)</string>
@@ -133,6 +134,7 @@
     <string name="service_reset_warning">Це записує на панель приладів: інтервал %1$d %2$s, наступне обслуговування %3$s. Підтвердьте, щоб продовжити.</string>
     <string name="service_reset_confirm">Підтвердити скидання</string>
     <string name="service_reset_failed_error">Скидання нагадування про обслуговування зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="service_reset_reason_invalid_input">Запитаний інтервал або дата виходять за межі підтримуваного діапазону; нічого не було записано.</string>
     <string name="service_reset_reason_unrecognized_status">Панель приладів повернула нерозпізнаний статус; нічого не було записано.</string>
     <string name="service_reset_reason_distance_rejected">Панель приладів відхилила запис інтервалу відстані; дата не була надіслана.</string>
     <string name="service_reset_reason_date_unconfirmed">Панель приладів не підтвердила запис дати обслуговування.</string>

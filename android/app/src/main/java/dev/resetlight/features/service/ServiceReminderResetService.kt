@@ -1,10 +1,12 @@
 package dev.resetlight.features.service
 
+import dev.resetlight.diagnostics.CanResponseExtractor
 import dev.resetlight.diagnostics.DiagnosticParseException
 import dev.resetlight.diagnostics.DiagnosticWriteChannel
 import dev.resetlight.diagnostics.InstrumentResponseDecoder
 import dev.resetlight.diagnostics.ServiceReminderCommandBuilder
 import dev.resetlight.diagnostics.WriteIntent
+import dev.resetlight.diagnostics.elmConfigurationAccepted
 import dev.resetlight.diagnostics.hexOnly
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
@@ -46,6 +48,7 @@ class ServiceReminderResetService(
     private val serviceProfile: ServiceReminderOperationProfile,
     private val gate: ClusterFingerprintGate,
     private val motorcycleId: String,
+    private val extractor: CanResponseExtractor? = null,
 ) {
     private val decoder = InstrumentResponseDecoder()
     private val commandBuilder = ServiceReminderCommandBuilder(serviceProfile)
@@ -55,11 +58,21 @@ class ServiceReminderResetService(
         distanceKm: Int,
         nextServiceDate: LocalDate,
     ): ServiceReminderResetResult {
-        val commands = commandBuilder.build(distanceKm, nextServiceDate)
+        // Build (and validate) the write commands before any traffic. A value the
+        // observed one-byte encodings cannot represent blocks the reset with a
+        // clear message instead of throwing — the 2026-08-12 trip lost the whole
+        // adapter session to exactly this.
+        val commands = try {
+            commandBuilder.build(distanceKm, nextServiceDate)
+        } catch (invalid: IllegalArgumentException) {
+            return ServiceReminderResetResult.Blocked(
+                UiText(UiMessage.SERVICE_RESET_REASON_INVALID_INPUT),
+            )
+        }
 
         instrumentProfile.configurationCommands.forEach { command ->
             val response = execute(channel, command, WriteIntent.READ)
-            if (!configurationAccepted(command, response)) {
+            if (!elmConfigurationAccepted(command, response)) {
                 return ServiceReminderResetResult.Blocked(
                     UiText(UiMessage.INSTRUMENT_REASON_TRANSPORT_REJECTED, command),
                 )
@@ -69,7 +82,7 @@ class ServiceReminderResetService(
         val statusResponse = execute(channel, instrumentProfile.initializeElmRequest, WriteIntent.READ)
         val odometerResponse = execute(channel, instrumentProfile.odometerElmRequest, WriteIntent.READ)
         val (status, odometer) = try {
-            decoder.decodeInitialize(statusResponse) to decoder.decodeOdometer(odometerResponse)
+            decoder.decodeInitialize(payload(statusResponse)) to decoder.decodeOdometer(payload(odometerResponse))
         } catch (parse: DiagnosticParseException) {
             return ServiceReminderResetResult.Blocked(
                 UiText(UiMessage.SERVICE_RESET_REASON_UNRECOGNIZED_STATUS),
@@ -112,7 +125,11 @@ class ServiceReminderResetService(
      */
     private fun isEchoPositive(request: String, response: String): Boolean {
         val requestHex = request.hexOnly()
-        val responseHex = response.hexOnly()
+        val responseHex = try {
+            payload(response).hexOnly()
+        } catch (parse: DiagnosticParseException) {
+            return false
+        }
         if (requestHex.length < 2 || responseHex.length < requestHex.length) return false
         val requestService = requestHex.substring(0, 2).toInt(16)
         val responseService = responseHex.substring(0, 2).toInt(16)
@@ -120,14 +137,8 @@ class ServiceReminderResetService(
         return responseHex.substring(2).startsWith(requestHex.substring(2))
     }
 
-    private fun configurationAccepted(command: String, response: String): Boolean {
-        val normalized = response.uppercase()
-        return if (command == "ATWS") {
-            normalized.contains("ELM327")
-        } else {
-            normalized.lines().any { it.trim() == "OK" }
-        }
-    }
+    private fun payload(response: String): String =
+        extractor?.extract(response) ?: response
 
     private suspend fun execute(
         channel: DiagnosticWriteChannel,

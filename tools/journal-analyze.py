@@ -148,12 +148,18 @@ class Profile:
     dtc_entries: dict
     dtc_reference_entries: dict
     dtc_generic_messages: dict
+    # The instrument cluster's read-only path (route configuration + the two
+    # observed reads `5E01`/`0D01`), mirroring InstrumentReadOnlyCaptureProfile.
+    instrument_config_commands: list[str] = field(default_factory=list)
+    instrument_read_requests: list[str] = field(default_factory=list)
 
     @property
     def allowlist(self) -> set[str]:
         allowed = set(self.adapter_commands)
         allowed.update(self.config_commands)
         allowed.update(read["elm_request"] for read in self.identifier_reads)
+        allowed.update(self.instrument_config_commands)
+        allowed.update(self.instrument_read_requests)
         allowed.update(
             (
                 self.extended_session_request,
@@ -201,6 +207,19 @@ def build_profile(adapter_map: dict, ecu_map: dict, dtc_map: dict) -> Profile:
     count_pattern = dtc_requests[0]["observed_response_pattern"]
     count_prefix = hex_only(count_pattern.split("<")[0])
 
+    # Instrument read-only path, mirroring InstrumentReadOnlyCaptureProfile:
+    # route configuration plus the two observed reads (5E01/0D01). The 33/5C
+    # writes stay OUTSIDE the allowlist on purpose.
+    instrument = ecu_map["motorcycle"]["modules"]["instrument_cluster"]
+    instrument_config_commands = instrument["transport"][
+        "observed_elm_adapter_configuration"
+    ]
+    replay_template = instrument["commands"]["reset_service_reminder"]["replay_template"]
+    instrument_read_requests = [
+        replay_template["initialize_request"],
+        replay_template["odometer_request"],
+    ]
+
     dictionary = dtc_map["dictionary"]
     return Profile(
         elm_identity=identity["elm_compatibility_version"]["value"],
@@ -216,6 +235,8 @@ def build_profile(adapter_map: dict, ecu_map: dict, dtc_map: dict) -> Profile:
         dtc_entries=dtc_map.get("entries") or {},
         dtc_reference_entries=dtc_map.get("reference_entries") or {},
         dtc_generic_messages=dictionary["lookup"]["generic_subsystem_messages"],
+        instrument_config_commands=instrument_config_commands,
+        instrument_read_requests=instrument_read_requests,
     )
 
 

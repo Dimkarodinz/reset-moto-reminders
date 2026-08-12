@@ -1,6 +1,15 @@
 package dev.resetlight.diagnostics
 
-class DiagnosticParseException(message: String) : IllegalArgumentException(message)
+open class DiagnosticParseException(message: String) : IllegalArgumentException(message)
+
+/**
+ * The adapter answered with `NO DATA` (or an ELM error string) instead of a CAN
+ * frame — the module did not respond on the configured route. A subtype of
+ * [DiagnosticParseException] so existing blocked/failed handling applies, while
+ * callers can still surface the more precise "no response" message.
+ */
+class DiagnosticNoResponseException(raw: String) :
+    DiagnosticParseException("The module did not respond: $raw")
 
 internal fun String.diagnosticHexBytes(): ByteArray {
     if (isEmpty() || length % 2 != 0 || any { it !in "0123456789abcdefABCDEF" }) {

@@ -93,6 +93,52 @@ class ServiceReminderResetServiceTest {
     }
 
     @Test
+    fun `an unsupported interval blocks before any byte is sent`() = runTest {
+        // Trip 2026-08-12: the builder's require() threw pre-I/O and tore the
+        // whole adapter session down. Invalid input must block gracefully.
+        val channel = ScriptedChannel(emptyMap())
+
+        val notHundreds = service.reset(channel, 10_050, LocalDate.of(2027, 8, 7))
+        val tooLarge = service.reset(channel, 30_000, LocalDate.of(2027, 8, 7))
+        val yearOutOfRange = service.reset(channel, 10_000, LocalDate.of(3000, 8, 7))
+
+        for (result in listOf(notHundreds, tooLarge, yearOutOfRange)) {
+            result as ServiceReminderResetResult.Blocked
+            assertEquals(
+                dev.resetlight.domain.UiMessage.SERVICE_RESET_REASON_INVALID_INPUT,
+                result.reason.key,
+            )
+        }
+        assertEquals(emptyList<String>(), channel.sent)
+    }
+
+    @Test
+    fun `replays the reset against live framed instrument responses`() = runTest {
+        // The same handshake with the 704-prefixed framing the 2026-08-12 trip
+        // showed the adapter actually returns (ATH1 on).
+        val channel = ScriptedChannel(
+            configResponses() + mapOf(
+                "5E01" to "704DE303433FFFFFFFF",
+                "0D01" to "7048D0100AE9C000000",
+                "3364" to "704B364000000000000",
+                "5C1B0807016E0000" to "704DC1B0807016E0000",
+            ),
+        )
+
+        val result = ServiceReminderResetService(
+            ecu.instrumentReadOnlyCapture,
+            ecu.serviceReminder,
+            ClusterFingerprintGate(ecu),
+            ecu.motorcycleId,
+            extractor = dev.resetlight.diagnostics.CanResponseExtractor("0x704", isoTp = false),
+        ).reset(channel, 10_000, LocalDate.of(2027, 8, 7))
+
+        result as ServiceReminderResetResult.Committed
+        assertEquals(44700, result.odometerKm)
+        assertEquals(listOf("5E01", "0D01", "3364", "5C1B0807016E0000"), channel.dataRequests)
+    }
+
+    @Test
     fun `surfaces a transport failure as a typed failure`() = runTest {
         val channel = DiagnosticWriteChannel { _, _ -> throw IOException("dropped") }
 
