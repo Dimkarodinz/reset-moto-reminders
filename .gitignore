@@ -10,3 +10,11 @@ android/app/build/
 android/local.properties
 *.apk
 *.aab
+
+# iOS local/build state
+ios/**/.build/
+ios/**/build/
+ios/**/xcuserdata/
+ios/**/DerivedData/
+ios/**/*.xcresult
+ios/**/.swiftpm/

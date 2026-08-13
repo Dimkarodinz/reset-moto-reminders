@@ -91,6 +91,8 @@ On iOS, do not write `01 00` to the CCCD directly. Call `setNotifyValue(true, fo
 
 The safest first candidate is the split `0x18F0` channel because it is advertised and exposes a conventional response characteristic plus command characteristic. This is a hypothesis, not a captured fact.
 
+> **Tooling:** [`ResetLightProbe/`](ResetLightProbe/) implements exactly this proof (both candidate channels, one shot each, JSONL journal). Prefer it over a manual nRF Connect attempt — it performs the sequence deterministically and captures the evidence.
+
 ```text
 Status: proposed, unverified
 Enable notifications: service 0x18F0 / characteristic 0x2AF0

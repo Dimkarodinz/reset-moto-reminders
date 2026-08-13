@@ -17,6 +17,8 @@ Full iOS implementation is deferred until both conditions are met:
 
 Until then, iOS work is limited to transport characterization, map/document maintenance and platform-neutral UX review. When implementation begins, reuse behavior, wording, maps and test scenarios—not Android Bluetooth code or forced pixel-identical layouts.
 
+**Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) is the maintainer probe app that executes the pending adapter-only `ATI` proof (condition 2) — one button per candidate channel, one shot per launch, JSONL journal shared back into `logs/`. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/) (headless `swift test`). The probe is tooling, not the deferred iOS app; the deferred-phase conditions above still gate the real implementation.
+
 ## Required project sources
 
 | Source | Use |
