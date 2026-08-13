@@ -139,6 +139,49 @@ class ServiceReminderResetServiceTest {
     }
 
     @Test
+    fun `replays the 2026-08-13 km-mode reset that committed on hardware`() = runTest {
+        // Journal session-1786622057643, dashboard in km: odometer 0xAED4 (44756),
+        // interval 7800 km (334E), next service 2027-08-13. 704-framed responses.
+        val channel = ScriptedChannel(
+            configResponses() + mapOf(
+                "5E01" to "704DE303433FFFFFFFF",
+                "0D01" to "7048D0100AED4000000",
+                "334E" to "704B34E000000000000",
+                "5C1B080D016E0000" to "704DC1B080D016E0000",
+            ),
+        )
+
+        val result = framedService().reset(channel, 7_800, LocalDate.of(2027, 8, 13))
+
+        result as ServiceReminderResetResult.Committed
+        assertEquals(44756, result.odometerKm)
+        assertEquals(listOf("5E01", "0D01", "334E", "5C1B080D016E0000"), channel.dataRequests)
+    }
+
+    @Test
+    fun `blocks the 2026-08-13 miles-mode reset the cluster rejected and never sends the date`() = runTest {
+        // Same bike/odometer/interval as above, dashboard switched to miles. Reads
+        // are byte-identical to km mode, but the identical 334E write is rejected:
+        // B3 (positive service byte) followed by all-FF instead of the 4E echo.
+        val channel = ScriptedChannel(
+            configResponses() + mapOf(
+                "5E01" to "704DE303433FFFFFFFF",
+                "0D01" to "7048D0100AED4000000",
+                "334E" to "704B3FFFFFFFFFFFFFF",
+            ),
+        )
+
+        val result = framedService().reset(channel, 7_800, LocalDate.of(2027, 8, 13))
+
+        result as ServiceReminderResetResult.Blocked
+        assertEquals(
+            dev.resetlight.domain.UiMessage.SERVICE_RESET_REASON_DISTANCE_REJECTED,
+            result.reason.key,
+        )
+        assertTrue(channel.dataRequests.none { it.startsWith("5C") })
+    }
+
+    @Test
     fun `surfaces a transport failure as a typed failure`() = runTest {
         val channel = DiagnosticWriteChannel { _, _ -> throw IOException("dropped") }
 
@@ -146,6 +189,15 @@ class ServiceReminderResetServiceTest {
             kotlinx.coroutines.runBlocking { service.reset(channel, 10_000, LocalDate.of(2027, 8, 7)) }
         }
     }
+
+    private fun framedService(): ServiceReminderResetService =
+        ServiceReminderResetService(
+            ecu.instrumentReadOnlyCapture,
+            ecu.serviceReminder,
+            ClusterFingerprintGate(ecu),
+            ecu.motorcycleId,
+            extractor = dev.resetlight.diagnostics.CanResponseExtractor("0x704", isoTp = false),
+        )
 
     private fun configResponses(): Map<String, String> =
         ecu.instrumentReadOnlyCapture.configurationCommands

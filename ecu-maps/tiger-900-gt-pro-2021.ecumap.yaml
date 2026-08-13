@@ -12,6 +12,21 @@ motorcycle:
   # read directly as 44662 km in the retained capture). The captured GT Pro is a
   # km-market bike, so the dashboard displays kilometres too. A future miles bike
   # would set display_unit: miles here; the app converts only when the two differ.
+  #
+  # 2026-08-13 "flip the dash, capture twice" experiment (milestone 12): the same
+  # bike was read and reset with the dashboard in km, then physically switched to
+  # miles and read/reset again at the same odometer. Result is MIXED, not a clean
+  # Case A/B:
+  #   * READS are canonical. The odometer 0D01 raw was 0xAED4 (44756) in BOTH
+  #     km-mode and miles-mode captures, and 5E01 status stayed "043" — the dash
+  #     toggle is display-only for reads, so reads are unit-independent.
+  #   * The interval WRITE is unit-dependent. The identical 334E write (78 x 100 =
+  #     7800 km) was accepted in km mode (B34E echo) but REJECTED in miles mode
+  #     (B3 FFFFFFFFFFFFFF — positive service byte, value replaced with all-FF).
+  # No successful miles write exists, so the miles interval scaling is still
+  # unknown and MUST NOT be guessed. display_unit stays km; miles support is
+  # blocked until a successful miles write is captured. See the 2026-08-13
+  # observations in reset_service_reminder below.
   distance_units:
     wire_unit: km
     display_unit: km
@@ -318,6 +333,7 @@ motorcycle:
             initialize_expected_status_ascii_status: observed_identical_across_two_captures
             odometer_request: "0D01"
             odometer_request_semantics: unknown
+            odometer_unit_behavior: canonical_km_identical_across_dash_units_observed_2026_08_13
             distance:
               request_prefix_km: "33"
               raw_unit_km: 100
@@ -467,3 +483,83 @@ motorcycle:
                     interval_days_meaning: unknown
                     trailing_bytes: "00 00"
                     trailing_bytes_meaning: unknown
+
+            # 2026-08-13 dash-flip experiment (journal session-1786622057643).
+            # Two resets at the same odometer: one with the dashboard in km
+            # (committed), then the dashboard physically switched to miles and the
+            # identical reset re-run (distance write rejected). Live 704-framed
+            # responses; bytes below are the extracted payloads after stripping the
+            # 704 CAN id. This is the milestone-12 evidence for the mixed unit model
+            # documented under distance_units above.
+            - captured_on: "2026-08-13"
+              dashboard_display_unit: km
+              observed_input:
+                current_date: "2026-08-13"
+                current_odometer_km: 44756
+                requested_next_service_date: "2027-08-13"
+                requested_distance_interval_km: 7800
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                  decoded_response:
+                    payload_ascii: "043"
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AED4000000"
+                  decoded_response:
+                    odometer_raw: "0xAED4"
+                    odometer_km: 44756
+                - name: set_distance_interval
+                  request: "334E"
+                  observed_response: "B34E000000000000"
+                  encoding:
+                    interval_raw: "0x4E"
+                    interval_km: 7800
+                  result: committed
+                - name: set_or_commit_service_date
+                  request: "5C1B080D016E0000"
+                  observed_response: "DC1B080D016E0000"
+                  encoding:
+                    year: 2027
+                    month: 8
+                    day: 13
+                  result: committed
+
+            - captured_on: "2026-08-13"
+              dashboard_display_unit: miles
+              note: >-
+                Same bike, same odometer, same requested interval as the km-mode
+                reset above; only the dashboard display unit was changed to miles
+                between the two resets. Reads are identical to km mode (odometer
+                raw 0xAED4, status "043"), confirming reads are canonical. The
+                identical 334E interval write was rejected (B3 then all-FF instead
+                of the 4E echo), so the app blocked and never sent the date. No
+                successful miles write was captured; miles interval scaling
+                remains unknown.
+              observed_input:
+                current_date: "2026-08-13"
+                current_odometer_km: 44756
+                requested_next_service_date: "2027-08-13"
+                requested_distance_interval_km: 7800
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                  decoded_response:
+                    payload_ascii: "043"
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AED4000000"
+                  decoded_response:
+                    odometer_raw: "0xAED4"
+                    odometer_km: 44756
+                    note: identical_to_km_mode_read
+                - name: set_distance_interval
+                  request: "334E"
+                  observed_response: "B3FFFFFFFFFFFFFF"
+                  decoded_response:
+                    positive_service_byte: "0xB3"
+                    echoed_value: "FF FF FF FF FF FF FF"
+                    meaning: rejected_value_not_echoed
+                  result: rejected_reset_blocked_date_not_sent
