@@ -140,7 +140,7 @@
     <string name="service_reset_failed_error">Resetting the service reminder stopped after a connection or adapter error.</string>
     <string name="service_reset_reason_invalid_input">The requested interval or date is outside the supported range; nothing was written.</string>
     <string name="service_reset_reason_unrecognized_status">The instrument returned an unrecognized status; nothing was written.</string>
-    <string name="service_reset_reason_distance_rejected">The cluster rejected the distance-interval write; the date was not sent.</string>
+    <string name="service_reset_reason_distance_rejected">The cluster rejected the service-interval write, so nothing was changed. This can happen when the dashboard is set to miles — switch the dashboard to kilometres and try again.</string>
     <string name="service_reset_reason_date_unconfirmed">The cluster did not confirm the service-date write.</string>
 
     <!-- Cluster fingerprint gate -->

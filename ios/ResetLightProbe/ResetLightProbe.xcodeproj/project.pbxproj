@@ -186,6 +186,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 73S64Q3R8B;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connects to the vLinker MC-IOS adapter to run the one-time identification probe.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -210,6 +211,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 73S64Q3R8B;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connects to the vLinker MC-IOS adapter to run the one-time identification probe.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -232,20 +234,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA10000D20260813 /* Build configuration list for PBXProject "ResetLightProbe" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AA10000F20260813 /* Debug */,
-				AA10001020260813 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		AA10000920260813 /* Build configuration list for PBXNativeTarget "ResetLightProbe" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA10001120260813 /* Debug */,
 				AA10001220260813 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA10000D20260813 /* Build configuration list for PBXProject "ResetLightProbe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA10000F20260813 /* Debug */,
+				AA10001020260813 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

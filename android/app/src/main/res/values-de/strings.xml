@@ -139,7 +139,7 @@
     <string name="service_reset_failed_error">Das Zurücksetzen der Serviceerinnerung wurde nach einem Verbindungs- oder Adapterfehler gestoppt.</string>
     <string name="service_reset_reason_invalid_input">Das angeforderte Intervall oder Datum liegt außerhalb des unterstützten Bereichs; es wurde nichts geschrieben.</string>
     <string name="service_reset_reason_unrecognized_status">Das Instrument gab einen nicht erkannten Status zurück; es wurde nichts geschrieben.</string>
-    <string name="service_reset_reason_distance_rejected">Das Kombiinstrument hat den Schreibvorgang des Distanzintervalls abgelehnt; das Datum wurde nicht gesendet.</string>
+    <string name="service_reset_reason_distance_rejected">Das Kombiinstrument hat den Schreibvorgang des Serviceintervalls abgelehnt; es wurde nichts geändert. Das kann passieren, wenn das Display auf Meilen eingestellt ist – stellen Sie das Display auf Kilometer und versuchen Sie es erneut.</string>
     <string name="service_reset_reason_date_unconfirmed">Das Kombiinstrument hat den Schreibvorgang des Servicedatums nicht bestätigt.</string>
 
     <!-- Cluster fingerprint gate -->

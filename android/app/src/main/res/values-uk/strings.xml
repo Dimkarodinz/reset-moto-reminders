@@ -139,7 +139,7 @@
     <string name="service_reset_failed_error">Скидання нагадування про обслуговування зупинено через помилку з\'єднання або адаптера.</string>
     <string name="service_reset_reason_invalid_input">Запитаний інтервал або дата виходять за межі підтримуваного діапазону; нічого не було записано.</string>
     <string name="service_reset_reason_unrecognized_status">Панель приладів повернула нерозпізнаний статус; нічого не було записано.</string>
-    <string name="service_reset_reason_distance_rejected">Панель приладів відхилила запис інтервалу відстані; дата не була надіслана.</string>
+    <string name="service_reset_reason_distance_rejected">Панель приладів відхилила запис інтервалу обслуговування; нічого не змінено. Це може статися, коли дисплей налаштовано на милі — перемкніть дисплей на кілометри та спробуйте ще раз.</string>
     <string name="service_reset_reason_date_unconfirmed">Панель приладів не підтвердила запис дати обслуговування.</string>
 
     <!-- Cluster fingerprint gate -->

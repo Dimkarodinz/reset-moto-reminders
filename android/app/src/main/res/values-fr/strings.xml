@@ -139,7 +139,7 @@
     <string name="service_reset_failed_error">La réinitialisation du rappel d\'entretien s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
     <string name="service_reset_reason_invalid_input">L\'intervalle ou la date demandés sont hors de la plage prise en charge ; rien n\'a été écrit.</string>
     <string name="service_reset_reason_unrecognized_status">Le tableau de bord a renvoyé un état non reconnu ; rien n\'a été écrit.</string>
-    <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'écriture de l\'intervalle de distance ; la date n\'a pas été envoyée.</string>
+    <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'écriture de l\'intervalle d\'entretien ; rien n\'a été modifié. Cela peut se produire lorsque l\'affichage est réglé sur les miles — réglez l\'affichage sur les kilomètres et réessayez.</string>
     <string name="service_reset_reason_date_unconfirmed">Le tableau de bord n\'a pas confirmé l\'écriture de la date d\'entretien.</string>
 
     <!-- Cluster fingerprint gate -->
