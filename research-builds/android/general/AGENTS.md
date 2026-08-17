@@ -32,6 +32,13 @@ and compiles the shared adapter, diagnostic, domain, logging, profile and
 transport packages from the main Android app. Keep general-only orchestration,
 policy and UI under `dev.resetlight.research.general`; do not copy shared classes.
 
+The launcher reuses the main app's exact density-specific foreground PNGs and
+background color through `generateSharedLauncherResources`.
+`ic_general_research_launcher_overlay.xml` masks only the original needle/hub
+and adds the optically centered `?`. Do not redraw or independently tune the
+outer gauge, reset arrow, speed marks, scale or yellow accent; edit the main
+launcher source when the whole icon family should change.
+
 Use red-green-refactor TDD. Run this module plus the main and Triumph modules when
 shared code changes. Installing and opening the APK is a phone-level smoke test;
 never start a hardware scan automatically.

@@ -6,6 +6,8 @@ This folder owns the Android application: Android UI and lifecycle, permissions,
 
 The separate [`../research-builds/android/triumph`](../research-builds/android/triumph) and [`../research-builds/android/general`](../research-builds/android/general) applications compile the `adapter`, `diagnostics`, `domain`, `logging`, `profiles`, and `transport` source directories from this app directly. Changes in those shared directories must keep all three Gradle modules green; do not copy them into the research folders.
 
+This app also owns the Android launcher family source of truth: `app/src/main/res/mipmap-*/ic_launcher_foreground.png` and `app/src/main/res/values/colors.xml`. Both research builds copy those exact resources through `generateSharedLauncherResources` and layer only a center-symbol overlay. Keep the outer gauge, reset arrow, speed marks, scale, teal background and yellow accent shared; do not maintain research-specific approximations.
+
 Do not place motorcycle protocol bytes or adapter UUIDs directly in application features. Load them from validated maps through typed models.
 
 ## Platform decision and active phase

@@ -25,6 +25,8 @@ It is not the user-facing Reset Moto Reminders application. Use package `dev.res
 
 This is a Gradle application module stored outside the main Android directory and included by [`../../../android/settings.gradle.kts`](../../../android/settings.gradle.kts). It compiles the proven adapter, transport, diagnostic, profile, domain, and logging source directories from the main Android app directly. Do not copy those classes into this folder.
 
+The launcher also reuses the main app rather than maintaining another gauge drawing. `generateSharedLauncherResources` copies the main density-specific `ic_launcher_foreground.png` files and launcher background color into generated resources; `ic_research_launcher_overlay.xml` masks only the original needle/hub and adds the centered `T`. Preserve this layering so later main-icon changes propagate automatically. Do not redraw or locally adjust the outer ring, arrow, speed marks, scale or yellow accent.
+
 Research-only code stays under `dev.resetlight.research.triumph`:
 
 ```text

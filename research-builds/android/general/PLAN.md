@@ -99,5 +99,5 @@ Verified 2026-08-17 on Samsung SM-A202F / Android 11: 167 main Android,
 25 Triumph Research, 12 General Research and 13 iOS ProbeKit tests passed. All
 three Android modules passed lint and debug assembly. General APK v0.1.0
 (`versionCode 1`, SHA-256
-`406dc36a93ad14713434b613a2102c77b8c201d4008d48cfb8011965c18c06d2`)
+`d229aba23280b62c25a7c831fc022dde64ced0eead241b3a568999311340324c`)
 was installed, cold-launched and scrolled through without starting a scan.
