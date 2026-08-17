@@ -74,6 +74,12 @@ The separate **Triumph Research** Android app performs one bounded compatibility
 
 Build and motorcycle-test instructions are in [`research-builds/android/triumph/README.md`](research-builds/android/triumph/README.md). A successful report identifies evidence for the entered motorcycle; it does not by itself declare an entire model family supported. Optional writes can alter stored data: DTC clear erases fault evidence, and service restoration cannot be guaranteed after disconnect or an ambiguous result.
 
+The separate **Motorcycle Research** Android app is the read-only first pass for
+other motorcycle families. It records a finite set of standard OBD capabilities
+and DTC responses without requesting VIN, clearing codes, resetting service data,
+scanning addresses or guessing commands. See
+[`research-builds/android/general/README.md`](research-builds/android/general/README.md).
+
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
