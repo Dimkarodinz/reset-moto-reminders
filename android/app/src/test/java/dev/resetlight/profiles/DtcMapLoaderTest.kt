@@ -1,6 +1,7 @@
 package dev.resetlight.profiles
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -26,11 +27,25 @@ class DtcMapLoaderTest {
             dictionary.descriptionFor("P1577-00").status,
         )
         assertEquals(1, dictionary.entries.size)
-        assertEquals(415, dictionary.referenceEntries.size)
+        assertEquals(405, dictionary.referenceEntries.size)
         assertEquals(
             DtcMessageStatus.THIRD_PARTY_REFERENCE,
             dictionary.descriptionFor("P0030-00").status,
         )
+    }
+
+    @Test
+    fun `pruned low-utility codes remain safely handled by subsystem fallback`() {
+        val dictionary = loader.load(
+            generatedProfile("triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml"),
+        )
+
+        PRUNED_LOW_UTILITY_CODES.forEach { code ->
+            assertFalse(code, dictionary.referenceEntries.containsKey(code))
+            val result = dictionary.descriptionFor("$code-00")
+            assertEquals(code, DtcMessageStatus.GENERIC_CLASSIFICATION, result.status)
+            assertTrue(code, result.message.contains("$code-00"))
+        }
     }
 
     @Test
@@ -137,7 +152,7 @@ class DtcMapLoaderTest {
     fun `rejects a merged reference count that does not match its entries`() {
         val source = generatedProfile("triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
             .decodeToString()
-            .replace("declared_entry_count: 415", "declared_entry_count: 414")
+            .replace("declared_entry_count: 405", "declared_entry_count: 404")
 
         val error = assertThrows(ProfileLoadException::class.java) {
             loader.load(source.encodeToByteArray())
@@ -150,5 +165,20 @@ class DtcMapLoaderTest {
         val file = File("build/generated/profileAssets/profiles/$name")
         check(file.isFile) { "Generated profile is missing: ${file.absolutePath}" }
         return file.readBytes()
+    }
+
+    private companion object {
+        val PRUNED_LOW_UTILITY_CODES = listOf(
+            "P0059", // bank 2 oxygen-sensor heater on an inline-triple application
+            "P0165", // rear throttle self-learning from another engine configuration
+            "P0174", // bank 2 lean condition
+            "P0175", // bank 2 rich condition
+            "P0185", // front throttle self-learning from another engine configuration
+            "P0204", // cylinder/injector 4 on a three-cylinder application
+            "P0208", // secondary injector 4 on a three-cylinder application
+            "P0700", // explicitly names another manufacturer's ride-control system
+            "P1204", // injector 4 open/ground fault
+            "P1208", // injector 4 battery/temperature fault
+        )
     }
 }

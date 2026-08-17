@@ -1,0 +1,36 @@
+schema_version: 1
+
+profile:
+  id: standard-obd-read-v1
+  description: Bounded standard OBD read-only motorcycle discovery
+  phases:
+    - id: adapter_metadata
+      commands:
+        - { name: adapter_voltage, request: ATRV }
+    - id: protocol_setup
+      commands:
+        - { name: automatic_protocol, request: ATSP0 }
+        - { name: response_headers, request: ATH1 }
+    - id: supported_pids
+      commands:
+        - { name: pids_01_20, request: "0100" }
+        - { name: pids_21_40, request: "0120" }
+        - { name: pids_41_60, request: "0140" }
+        - { name: pids_61_80, request: "0160" }
+        - { name: pids_81_a0, request: "0180" }
+        - { name: pids_a1_c0, request: "01A0" }
+    - id: selected_protocol
+      commands:
+        - { name: protocol_description, request: ATDP }
+        - { name: protocol_number, request: ATDPN }
+    - id: diagnostic_trouble_codes
+      commands:
+        - { name: stored_dtcs, request: "03" }
+        - { name: pending_dtcs, request: "07" }
+        - { name: permanent_dtcs, request: "0A" }
+    - id: module_information
+      commands:
+        - { name: mode09_capabilities, request: "0900" }
+        - { name: calibration_ids, request: "0904" }
+        - { name: calibration_verification_numbers, request: "0906" }
+        - { name: ecu_names, request: "090A" }

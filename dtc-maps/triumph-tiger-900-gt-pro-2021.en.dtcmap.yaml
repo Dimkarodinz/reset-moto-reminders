@@ -16,7 +16,7 @@ dictionary:
     source_name: third-party source
     source_version: 6.5.06
     wording: project_paraphrase
-    declared_entry_count: 415
+    declared_entry_count: 405
   lookup:
     normalization: uppercase_ascii
     order:
@@ -84,7 +84,6 @@ reference_entries:
   P0051: "oxygen sensor 2 heater: shorted to ground; circuit open."
   P0052: "oxygen sensor 2 heater: shorted to battery voltage."
   P0053: "oxygen sensor heater resistance: bank 1 sensor 1."
-  P0059: "oxygen sensor heater resistance: bank 2 sensor 1."
   P0068: "Manifold absolute pressure sensor: does not agree with throttle position sensor."
   P0069: "Manifold absolute pressure sensor: does not agree with ambient pressure sensor."
   P0078: "Exhaust control valve actuator: electrical fault."
@@ -115,23 +114,17 @@ reference_entries:
   P0140: "oxygen sensor: no activity detected."
   P0141: "oxygen sensor heater front cylinder: shorted to battery voltage; circuit open; shorted to ground."
   P0150: "oxygen sensor 2: electrical fault."
-  P0165: "Rear throttle first self-learning: not performed."
   P0168: "Rear throttle mechanical (opening) springs self-learning: self-test failed."
   P0170: "Lambda feedback fuel trim: fault."
   P0171: "System too lean: bank 1."
   P0172: "System too rich: bank 1."
-  P0174: "System too lean: bank 2."
-  P0175: "System too rich: bank 2."
-  P0185: "Front throttle first self-learning: not performed."
   P0188: "Front throttle mechanical (opening) springs self-learning: self-test failed."
   P0201: "Injector 1: electrical fault."
   P0202: "Injector 2: electrical fault."
   P0203: "Injector 3: electrical fault."
-  P0204: "Injector 4: electrical fault."
   P0205: "Second Injector 1: electrical fault."
   P0206: "Second Injector 2: electrical fault."
   P0207: "Second Injector 3: electrical fault."
-  P0208: "Second Injector 4: electrical fault."
   P0217: "Engine Coolant: over Temperature Condition."
   P0220: "Throttle position sensor 2: shorted to battery voltage; circuit open."
   P0221: "Throttle position sensor 2: signal outside expected range."
@@ -248,7 +241,6 @@ reference_entries:
   P06A8: "5V Sensor circuit C: reference voltage outside expected range."
   P06A9: "5V Sensor circuit D: reference voltage outside expected range."
   P06B8: "EEPROM fault."
-  P0700: "A-PRC (Aprilia Performance Ride Control): function fault."
   P0701: "Low battery voltage fault."
   P0704: "Clutch switch 1: input electrical fault."
   P0705: "Gear position sensor: electrical fault."
@@ -290,11 +282,9 @@ reference_entries:
   P1201: "Injector 1: circuit open; shorted to ground."
   P1202: "Injector 2: circuit open; shorted to ground."
   P1203: "Injector 3: circuit open; shorted to ground."
-  P1204: "Injector 4: circuit open; shorted to ground."
   P1205: "Injector 1: shorted to battery voltage; over temperature."
   P1206: "Injector 2: shorted to battery voltage; over temperature."
   P1207: "Injector 3: shorted to battery voltage; over temperature."
-  P1208: "Injector 4: shorted to battery voltage; over temperature."
   P1227: "Throttle grip position tracks A-B (blue connector): incongruent signal."
   P1231: "Fuel pump relay: circuit open; shorted to ground."
   P1232: "Fuel pump relay: shorted to battery voltage."

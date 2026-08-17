@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Motorcycle Research</string>
+    <string name="app_intro">Collect a privacy-safe, read-only compatibility report in one bounded diagnostic session.</string>
+    <string name="manufacturer_label">Manufacturer</string>
+    <string name="model_label">Model</string>
+    <string name="model_year_label">Model year</string>
+    <string name="adapter_none">No paired vLinker selected</string>
+    <string name="adapter_fallback_name">vLinker adapter %1$d</string>
+    <string name="select_adapter">Select or pair adapter</string>
+    <string name="adapter_dialog_title">Select paired vLinker</string>
+    <string name="adapter_pair_hint">If it is not listed, power it from the motorcycle and pair it in Android Bluetooth settings.</string>
+    <string name="open_bluetooth_settings">Bluetooth settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="start_scan">Connect and run read-only scan</string>
+    <string name="cancel_scan">Cancel scan</string>
+    <string name="share_report">Share JSONL report</string>
+    <string name="share_report_chooser">Share motorcycle research report</string>
+    <string name="scan_boundary">Read-only build: no VIN request, DTC clear, service reset, security access, writes, passive monitoring, or address scanning.</string>
+    <string name="unofficial_notice">Unofficial research tool. Not affiliated with or endorsed by any motorcycle manufacturer.</string>
+</resources>

@@ -4,7 +4,7 @@
 
 This folder owns the Android application: Android UI and lifecycle, permissions, Bluetooth transports, internal profile loading, orchestration of the three allowed operations, local persistence and Android packaging. These instructions supplement [`../AGENTS.md`](../AGENTS.md); the root safety and compatibility rules remain mandatory.
 
-The separate [`../research-builds/android/triumph`](../research-builds/android/triumph) application compiles the `adapter`, `diagnostics`, `domain`, `logging`, `profiles`, and `transport` source directories from this app directly. Changes in those shared directories must keep both Gradle modules green; do not copy them into the research folder.
+The separate [`../research-builds/android/triumph`](../research-builds/android/triumph) and [`../research-builds/android/general`](../research-builds/android/general) applications compile the `adapter`, `diagnostics`, `domain`, `logging`, `profiles`, and `transport` source directories from this app directly. Changes in those shared directories must keep all three Gradle modules green; do not copy them into the research folders.
 
 Do not place motorcycle protocol bytes or adapter UUIDs directly in application features. Load them from validated maps through typed models.
 
@@ -49,6 +49,7 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | Android pairing, RFCOMM, framing, initialization and failure handling |
 | [`.claude/plans/initial-version.md`](.claude/plans/initial-version.md) | Reviewed implementation plan for the initial Android research version |
 | [`../research-builds/android/triumph/README.md`](../research-builds/android/triumph/README.md) | Separate Triumph compatibility collector, opt-in write validation, report workflow and build instructions |
+| [`../research-builds/android/general/README.md`](../research-builds/android/general/README.md) | Separate bounded, read-only standard-OBD collector for unmapped motorcycle families |
 
 The MC-Android map is the active Android transport target. Android can technically access the MC-IOS BLE profile, but the application must keep that profile disabled beyond adapter-only characterization until its command channel is observed and validated.
 
