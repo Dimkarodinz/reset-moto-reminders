@@ -41,7 +41,7 @@ Reading trouble codes is validated on a real Tiger 900. The clear and service-re
 
 | Motorcycle | Adapter | Status |
 | --- | --- | --- |
-| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations validated on hardware; clear/service-reset writes implemented and gated, hardware validation pending |
+| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset (km mode) validated on hardware; DTC clear implemented and gated, hardware validation pending. With the dashboard set to miles the cluster rejects the reset — switch the dash to km and retry |
 
 ### Potentially supported (not tested)
 
