@@ -9,11 +9,12 @@ Last reviewed: 2026-08-11.
 Never commit, release, publish or paste into a public issue:
 
 - Android bugreports, dumpstate archives, complete HCI logs or unrelated captured traffic.
+- Unreviewed Triumph Research JSONL reports; minimize and manually inspect them before creating any publishable fixture.
 - Account data, device identifiers, MAC addresses or nearby-device information.
 - Third party ECU linker APKs, code, icons, screenshots, text, trace files or other assets.
 - Triumph firmware, OEM/calibration maps, dealer software or copied service-manual content.
 - Signing keys, Android keystores, Apple certificates/profiles, tokens or credentials.
-- Decompiled security code, generic security-bypass tooling or immobilizer material. A concise, independently written seed/key transform may be retained only when the maintainer explicitly authorizes interoperability research, it is validated against the maintainer's own captured input/output pairs and third-party code/artifacts are not retained. The maintainer has authorized this transform (`EngineSeedKeyDerivation`) to execute — but only in the research build (`BuildConfig.RESEARCH_BUILD`), only on the engine-ECU DTC-clear path, and only after the exact-cluster fingerprint gate and an explicit user confirmation. It never runs in a release build or on any other path.
+- Decompiled security code, generic security-bypass tooling or immobilizer material. A concise, independently written seed/key transform may be retained only when the maintainer explicitly authorizes interoperability research, it is validated against the maintainer's own captured input/output pairs and third-party code/artifacts are not retained. The maintainer has authorized this transform (`EngineSeedKeyDerivation`) to execute only on an explicitly confirmed engine-ECU DTC-clear path. In the main app that remains behind `BuildConfig.RESEARCH_BUILD` and the exact profile gate. The separate Triumph Research collector may execute it only after the known engine route returns a decodable DTC count, the user selects and acknowledges DTC clear, and the exact write policy accepts every command. It never runs for ordinary reads, instrument operations, immobilizer work or unrelated key discovery.
 
 The archives under `logs/` are private evidence. Before the first public commit, move them outside the repository or exclude the complete directory. Publish only minimized, manually reviewed transcripts. If private material enters Git history, stop publication and purge the history; deleting the working-tree file is insufficient.
 
@@ -41,7 +42,7 @@ The project is licensed under the GNU General Public License version 3 ([`LICENS
 
 ## Safety, liability and monetization
 
-Licence disclaimers and warnings do not eliminate liability. Keep service writes disabled unless the instrument matches an explicitly validated profile and follow the safety rules in `AGENTS.md`. State that resetting a reminder does not perform maintenance.
+Licence disclaimers and warnings do not eliminate liability. Keep service writes disabled in public/release builds unless the instrument matches an explicitly validated profile and follow the safety rules in `AGENTS.md`. A separately labelled research collector may run only the bounded, explicitly acknowledged compatibility experiment documented there. State that resetting a reminder does not perform maintenance.
 
 Require legal review before releasing:
 

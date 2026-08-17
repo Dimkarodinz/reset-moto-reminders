@@ -31,9 +31,9 @@ class DtcClearFailure(
  * Clears confirmed DTCs on the engine ECU. The only observed clear ran inside
  * the extended session after SecurityAccess, so this replays exactly that
  * sequence: `1003` → `2701` seed → derived `2702` key → `14FFFFFF` → verify a
- * zero count. It is instantiated only from the research build behind the
- * exact-cluster fingerprint gate and an explicit confirmation; a refused
- * session or key returns [DtcClearResult.Blocked] without sending the clear.
+ * zero count. Callers apply their build-specific eligibility gate and explicit
+ * confirmation before instantiating this service. A refused session or key
+ * returns [DtcClearResult.Blocked] without sending the clear.
  *
  * The maximum number of `response-pending` (`0x78`) negatives tolerated while
  * awaiting the final clear response is bounded so a stuck ECU cannot spin.

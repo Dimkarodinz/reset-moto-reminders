@@ -4,6 +4,8 @@
 
 This folder owns the Android application: Android UI and lifecycle, permissions, Bluetooth transports, internal profile loading, orchestration of the three allowed operations, local persistence and Android packaging. These instructions supplement [`../AGENTS.md`](../AGENTS.md); the root safety and compatibility rules remain mandatory.
 
+The separate [`../research-builds/android/triumph`](../research-builds/android/triumph) application compiles the `adapter`, `diagnostics`, `domain`, `logging`, `profiles`, and `transport` source directories from this app directly. Changes in those shared directories must keep both Gradle modules green; do not copy them into the research folder.
+
 Do not place motorcycle protocol bytes or adapter UUIDs directly in application features. Load them from validated maps through typed models.
 
 ## Platform decision and active phase
@@ -46,6 +48,7 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Publishable user-facing DTC code-to-message lookup |
 | [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | Android pairing, RFCOMM, framing, initialization and failure handling |
 | [`.claude/plans/initial-version.md`](.claude/plans/initial-version.md) | Reviewed implementation plan for the initial Android research version |
+| [`../research-builds/android/triumph/README.md`](../research-builds/android/triumph/README.md) | Separate Triumph compatibility collector, opt-in write validation, report workflow and build instructions |
 
 The MC-Android map is the active Android transport target. Android can technically access the MC-IOS BLE profile, but the application must keep that profile disabled beyond adapter-only characterization until its command channel is observed and validated.
 

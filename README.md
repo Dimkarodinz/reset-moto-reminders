@@ -33,7 +33,7 @@ Safety is built into the design, not bolted on afterward:
 - Writes are **fail-closed and gated**: the app refuses to write unless it recognizes the exact motorcycle profile, and it asks you to confirm each write. An unknown or mismatched bike stays read-only.
 - It **never retries a write** after a disconnect or an unclear result.
 
-Reading trouble codes is validated on a real Tiger 900. The clear and service-reset writes are built and gated but still being validated on hardware — until that is done they ship only in the research build, never in a public release.
+Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. DTC clear is built and gated but still awaiting hardware validation. Write features remain research-only until their release gates are satisfied.
 
 ## Supported models
 
@@ -67,6 +67,12 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 Download the APK from the project releases and install it on your Android phone. Every release APK is built from a public source tag and published with a SHA-256 checksum so you can verify it.
 
 Build instructions and the full hardware-test procedure are in [`android/README.md`](android/README.md).
+
+## Help test another Triumph
+
+The separate **Triumph Research** Android app performs one bounded compatibility session. It asks for model/year, saves the known Triumph engine/TFT read evidence first, and can optionally test the exact kilometre service reset and DTC-clear sequences in that same connection after an explicit warning and acknowledgement. The service test uses the entered current values, temporarily writes `+100 km`/`+1 day`, then restores the entered baseline. It never requests VIN/serial data, fuzzes commands, or tries generic writes.
+
+Build and motorcycle-test instructions are in [`research-builds/android/triumph/README.md`](research-builds/android/triumph/README.md). A successful report identifies evidence for the entered motorcycle; it does not by itself declare an entire model family supported. Optional writes can alter stored data: DTC clear erases fault evidence, and service restoration cannot be guaranteed after disconnect or an ambiguous result.
 
 ## Platforms
 

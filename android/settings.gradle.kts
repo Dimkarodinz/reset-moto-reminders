@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ResetMotoReminders"
 include(":app")
+include(":triumphResearch")
+project(":triumphResearch").projectDir = file("../research-builds/android/triumph")

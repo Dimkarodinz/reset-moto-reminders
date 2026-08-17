@@ -8,6 +8,11 @@ android/.idea/
 android/build/
 android/app/build/
 android/local.properties
+research-builds/android/**/.gradle/
+research-builds/android/**/.kotlin/
+research-builds/android/**/.idea/
+research-builds/android/**/build/
+research-builds/android/**/local.properties
 *.apk
 *.aab
 

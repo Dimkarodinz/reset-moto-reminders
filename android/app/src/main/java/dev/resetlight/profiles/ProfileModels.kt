@@ -122,7 +122,7 @@ data class ReadOnlyIdentifierProfile(
  * Research-only description of the two observed instrument-cluster reads. The
  * cluster is configured on its own 11-bit route before the reads are sent.
  * `0D01` semantics are still unconfirmed in the map, so this profile is only
- * ever used behind the research build and never issues a write.
+ * used only in research-gated paths. The profile itself never authorizes a write.
  */
 data class InstrumentReadOnlyCaptureProfile(
     val configurationCommands: List<String>,
