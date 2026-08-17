@@ -2,7 +2,7 @@
 
 Operational policy for contributors and agents; not legal advice. It assumes a maintainer in Spain and worldwide publication. Obtain qualified Spanish/EU advice before the first public release capable of writing to a motorcycle.
 
-Last reviewed: 2026-08-11.
+Last reviewed: 2026-08-17.
 
 ## Non-public material
 
@@ -38,7 +38,37 @@ Do not publish an IPA signed with a development, Personal Team, ad-hoc or enterp
 
 ## Source license
 
-The project is licensed under the GNU General Public License version 3 ([`LICENSE`](LICENSE)). Rationale: GPLv3 keeps the project genuinely open source (contributor-friendly, F-Droid-eligible) while making commercial repackaging pointless, because any distributor must publish complete corresponding source under the same license. The maintainer is the sole copyright holder and may later add an App Store exception or dual-license if Apple-channel distribution is pursued; source-plus-self-build iOS distribution needs no exception. New source files should carry a short GPLv3 notice header once public release preparation begins.
+Project-authored material is source-available under the PolyForm Noncommercial
+License 1.0.0 ([`LICENSE`](LICENSE)), with the required copyright notice for
+Dmytro Rodin. The public license permits use, modification, and redistribution
+only for purposes it defines as permitted; it does not grant commercial-use
+rights. It is not an OSI-approved open-source license, and the project must not
+be described as open source without the qualifier "noncommercial
+source-available."
+
+Commercial use requires a separate written agreement. Follow
+[`COMMERCIAL_LICENSING.md`](COMMERCIAL_LICENSING.md); do not promise commercial
+terms, let a separate publisher release an official build, or imply that a
+donation grants rights without a signed agreement. Preserve `LICENSE`, `NOTICE`,
+and all `Required Notice:` lines in every permitted redistribution.
+
+Do not accept or merge external copyrightable contributions until the written
+contributor agreement described in [`CONTRIBUTING.md`](CONTRIBUTING.md) exists
+and is signed. Maintain the third-party inventory in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), and do not apply the project
+license to material the maintainer does not own or have authority to relicense.
+
+The license change is prospective. Any recipient who previously received a
+copy under GPLv3 retains the rights granted for that copy; the new license cannot
+withdraw them. Before public launch, record whether any GPLv3 copy was shared,
+published, or mirrored and keep that record with the release evidence.
+
+Copyright protection in Spain does not depend on registration, but enforcement
+does depend on proving authorship, ownership, scope, and the version infringed.
+Keep dated source history, signed release tags, checksums, release archives, and
+records of commercial grants. Registration in Spain's Intellectual Property
+Registry is optional and may be considered as additional evidence before public
+or commercial release.
 
 ## Safety, liability and monetization
 
@@ -50,7 +80,12 @@ Require legal review before releasing:
 - ECU/security unlocking, seed/key, immobilizer, emissions, calibration, coding or firmware functionality.
 - Paid features/support, commercial warranties, nonessential personal-data collection or professional-workshop positioning.
 
-EU product-liability treatment distinguishes genuinely non-commercial FOSS from commercially supplied software. Keep donations voluntary and unrelated to access, features, updates or support; obtain advice if monetization becomes material.
+EU product-liability treatment distinguishes some genuinely noncommercial
+source distributions from commercially supplied software, but the label on the
+license is not a liability shield. Keep donations voluntary and unrelated to
+access, features, updates, support, or licensing. A paid store build, commercial
+publisher, or material monetization requires a separate legal, tax, product
+liability, consumer-law, and store-policy review before launch.
 
 ## Release checklist
 
@@ -58,12 +93,17 @@ EU product-liability treatment distinguishes genuinely non-commercial FOSS from 
 - [ ] No third-party APK, firmware, OEM map, copied screenshot/logo/text or proprietary asset is present.
 - [ ] No secret, signing material, token, MAC address or personal identifier is present.
 - [ ] Dependency licences and attribution requirements are satisfied.
+- [ ] `LICENSE`, `NOTICE`, required notices and complete third-party notices are included in every source and binary distribution.
+- [ ] Ownership and contributor agreements cover all project-authored material offered under both public and commercial terms.
+- [ ] Employment or contractor agreements do not give an employer/client rights in the project; no employer-owned code, time, equipment, confidential information, or branding is included.
+- [ ] Any prior GPLv3 distribution or recipient is recorded; no claim is made that earlier GPL rights were revoked.
 - [ ] Compatibility claims match evidence and do not generalize from `Keihin` alone.
 - [ ] Unknown or mismatched profiles cannot execute writes.
 - [ ] Unofficial-project and safety warnings are visible.
 - [ ] Each binary matches a public source tag and checksum.
 - [ ] iOS distribution is authorized or source-only.
 - [ ] New security-sensitive or commercial functionality received legal review.
+- [ ] Any separate commercial publisher has a signed copyright/branding agreement with Dmytro Rodin.
 
 ## References
 
@@ -76,3 +116,6 @@ EU product-liability treatment distinguishes genuinely non-commercial FOSS from 
 - Apple registered-device distribution: <https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices>
 - Apple EU Web Distribution: <https://developer.apple.com/support/web-distribution-eu/>
 - GitHub Acceptable Use: <https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies>
+- PolyForm Noncommercial License 1.0.0: <https://polyformproject.org/licenses/noncommercial/1.0.0>
+- Spanish Intellectual Property Registry (registration is voluntary): <https://www.cultura.gob.es/cultura/areas/propiedadintelectual/mc/rpi/que-es/fines-rpi.html>
+- F-Droid Inclusion Policy: <https://f-droid.org/en/docs/Inclusion_Policy/>
