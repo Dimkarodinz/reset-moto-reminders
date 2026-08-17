@@ -9,8 +9,9 @@
     <application
         android:name=".ResearchApplication"
         android:allowBackup="false"
-        android:icon="@drawable/ic_research_launcher"
+        android:icon="@mipmap/ic_research_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_research_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TriumphResearch">
         <provider

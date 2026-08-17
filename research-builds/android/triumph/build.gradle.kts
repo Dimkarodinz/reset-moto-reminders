@@ -49,6 +49,12 @@ android.sourceSets["main"].java.srcDirs(
 )
 
 val generatedProfiles = layout.buildDirectory.dir("generated/profileAssets")
+val generatedLauncherResources = layout.buildDirectory.dir("generated/sharedLauncherResources")
+val sharedLauncherSource = rootProject.file("app/src/main/res")
+val sharedLauncherFiles = fileTree(sharedLauncherSource) {
+    include("mipmap-*/ic_launcher_foreground.png")
+    include("values/colors.xml")
+}
 val profileSources = listOf(
     rootProject.file("../adapter-maps/vlinker-mc-android.adaptermap.yaml"),
     rootProject.file("../adapter-maps/adaptermap.schema.json"),
@@ -67,9 +73,21 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     }
 }
 
+val generateSharedLauncherResources = tasks.register<Sync>("generateSharedLauncherResources") {
+    inputs.files(sharedLauncherFiles)
+    from(sharedLauncherSource) {
+        include("mipmap-*/ic_launcher_foreground.png")
+        include("values/colors.xml")
+    }
+    into(generatedLauncherResources)
+}
+
 android.sourceSets["main"].assets.srcDir(generatedProfiles)
+android.sourceSets["main"].res.srcDir(generatedLauncherResources)
 android.sourceSets["test"].resources.srcDir(generatedProfiles)
-tasks.named("preBuild").configure { dependsOn(generateProfileAssets) }
+tasks.named("preBuild").configure {
+    dependsOn(generateProfileAssets, generateSharedLauncherResources)
+}
 tasks.matching { it.name.contains("UnitTest", ignoreCase = true) }.configureEach {
     dependsOn(generateProfileAssets)
 }
