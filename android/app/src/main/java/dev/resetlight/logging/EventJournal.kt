@@ -37,7 +37,7 @@ data class JournalEvent(
     val rawHex: String? = null,
 ) {
     fun sanitized(): JournalEvent = copy(
-        text = text?.let(DiagnosticRedactor::redactText),
+        text = text?.let(DiagnosticRedactor::redactJournalText),
         rawHex = rawHex?.let(DiagnosticRedactor::redactDiagnosticHex),
     )
 

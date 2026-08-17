@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Triumph Research</string>
+    <string name="app_intro">Collect a privacy-safe compatibility report for a Triumph motorcycle in one bounded diagnostic session.</string>
+    <string name="motorcycle_title">Motorcycle</string>
+    <string name="model_label">Model</string>
+    <string name="model_year_label">Model year</string>
+    <string name="adapter_title">Diagnostic adapter</string>
+    <string name="adapter_none">No paired vLinker selected</string>
+    <string name="adapter_fallback_name">vLinker MC-Android %1$d</string>
+    <string name="select_or_pair_adapter">Select or pair adapter</string>
+    <string name="adapter_dialog_title">Select paired vLinker</string>
+    <string name="adapter_pair_hint">If it is not listed, power it from the motorcycle and pair it in Android Bluetooth settings using PIN 1234.</string>
+    <string name="write_tests_title">Optional write validation</string>
+    <string name="write_tests_intro">The app always saves all read evidence first. Select either test to continue in the same connection.</string>
+    <string name="reset_service_option">Test service reset, then restore (km mode)</string>
+    <string name="service_baseline_hint">The motorcycle does not expose these stored values to the app. Enter the exact current interval and date: the test writes +100 km and +1 day, then writes these original values back.</string>
+    <string name="service_distance_label">Current stored service interval (km)</string>
+    <string name="service_date_label">Current stored service date (YYYY-MM-DD)</string>
+    <string name="service_test_values">Temporary test: %1$d km, %2$s. Then restore the entered values.</string>
+    <string name="clear_dtcs_option">Clear diagnostic trouble codes</string>
+    <string name="write_warning">These tests change stored motorcycle data. DTC clear erases diagnostic evidence. Service restoration is attempted after success or an explicit rejection, but cannot be guaranteed after disconnect, timeout, or an ambiguous write.</string>
+    <string name="write_acknowledgement">I understand and want to run the selected writes once.</string>
+    <string name="open_bluetooth_settings">Bluetooth settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="start_scan">Connect and run scan</string>
+    <string name="cancel_scan">Cancel scan</string>
+    <string name="share_report">Share JSONL report</string>
+    <string name="share_report_chooser">Share Triumph research report</string>
+    <string name="evidence_title">Collected evidence</string>
+    <string name="dtc_read_evidence">DTC read confirmed</string>
+    <string name="dtc_count_value">Confirmed DTC count: %1$s</string>
+    <string name="dtc_clear_candidate">DTC clear candidate</string>
+    <string name="service_read_evidence">TFT service reads confirmed</string>
+    <string name="instrument_status_value">Instrument status: %1$s</string>
+    <string name="odometer_value">Raw kilometre odometer: %1$d km</string>
+    <string name="service_reset_candidate">Service-reset candidate</string>
+    <string name="service_reset_result">Service reset validation</string>
+    <string name="dtc_clear_result">DTC clear validation</string>
+    <string name="service_restore_result">Original-value restoration: %1$s</string>
+    <string name="candidate_warning">Candidate means the known Triumph read path matched. A write result is shown only when that test was explicitly selected.</string>
+    <string name="scan_boundary">The app never requests VIN or serial data. Optional writes are limited to the exact observed SecurityAccess/DTC-clear and kilometre service-reset sequences, run once after all reads and stopped on mismatch or an ambiguous response.</string>
+    <string name="unofficial_notice">Unofficial research tool. Not affiliated with or endorsed by Triumph Motorcycles.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>

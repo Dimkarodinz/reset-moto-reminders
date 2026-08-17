@@ -23,12 +23,16 @@ data class GateDecision(
     val reason: UiText,
 )
 
+fun interface ServiceWriteGate {
+    fun evaluate(motorcycleId: String, instrumentStatusAscii: String): GateDecision
+}
+
 /**
  * Fails closed: a write is authorized only when the connected motorcycle
  * profile is the exact captured one and the live instrument status matches the
  * observed constant. Any mismatch blocks every write with a specific reason.
  */
-class ClusterFingerprintGate(ecu: EcuProfile) {
+class ClusterFingerprintGate(ecu: EcuProfile) : ServiceWriteGate {
     val fingerprint: ClusterFingerprint = ClusterFingerprint(
         motorcycleId = ecu.motorcycleId,
         requestCanId = ecu.instrumentCluster.transport.requestCanId,
@@ -37,7 +41,7 @@ class ClusterFingerprintGate(ecu: EcuProfile) {
         expectedStatusAscii = ecu.instrumentReadOnlyCapture.expectedStatusAscii,
     )
 
-    fun evaluate(motorcycleId: String, instrumentStatusAscii: String): GateDecision {
+    override fun evaluate(motorcycleId: String, instrumentStatusAscii: String): GateDecision {
         if (motorcycleId != fingerprint.motorcycleId) {
             return GateDecision(false, UiText(UiMessage.GATE_REASON_PROFILE_MISMATCH))
         }

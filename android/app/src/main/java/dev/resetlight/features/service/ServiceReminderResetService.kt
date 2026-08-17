@@ -38,15 +38,14 @@ class ServiceReminderResetFailure(
  * so success is confirmed by matching that echo to the request we sent — the
  * reset's own readback.
  *
- * Instantiated only from the research build after [ClusterFingerprintGate]
- * authorizes the connected cluster and the user explicitly confirms the current
- * and requested values. A rejected or mismatched write returns
+ * Instantiated only after a [ServiceWriteGate] authorizes the connected cluster
+ * and the user explicitly confirms the current and requested values. A rejected or mismatched write returns
  * [ServiceReminderResetResult.Blocked] without proceeding.
  */
 class ServiceReminderResetService(
     private val instrumentProfile: InstrumentReadOnlyCaptureProfile,
     private val serviceProfile: ServiceReminderOperationProfile,
-    private val gate: ClusterFingerprintGate,
+    private val gate: ServiceWriteGate,
     private val motorcycleId: String,
     private val extractor: CanResponseExtractor? = null,
 ) {
