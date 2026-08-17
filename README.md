@@ -1,6 +1,6 @@
 # Reset Moto Reminders
 
-Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph Tiger 900 GT Pro (2021–2023) from your phone. Free, open source, no dealer visit.
+Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph Tiger 900 GT Pro (2021–2023) from your phone. Free community build, source available, no dealer visit.
 
 Reset Moto Reminders is an unofficial Android app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter and does three things: read trouble codes, clear trouble codes, and reset the service reminder. Nothing else.
 
@@ -91,7 +91,11 @@ Unofficial project. Not affiliated with or endorsed by Triumph Motorcycles. "Tri
 
 ## Support
 
-This app is free and always will be. Every feature is free for everyone. If it saved you a dealer visit, you can chip in — entirely optional:
+The GitHub community build is free for personal, noncommercial use, with all of
+its features available without payment. A separately licensed official paid
+store build may be offered later, after the safety and release gates are met.
+If the community build saved you a dealer visit, you can chip in — entirely
+optional and unrelated to features, support, or license rights:
 
 - Buy Me a Coffee: <https://www.buymeacoffee.com/CHANGE_ME>
 - Ko-fi: <https://ko-fi.com/CHANGE_ME>
@@ -99,4 +103,13 @@ This app is free and always will be. Every feature is free for everyone. If it s
 
 ## License
 
-GNU General Public License v3.0 ([`LICENSE`](LICENSE)). Open source and copyleft — any redistribution must publish complete corresponding source under the same license.
+The project is source-available under the
+[PolyForm Noncommercial License 1.0.0](LICENSE), Copyright 2026 Dmytro Rodin.
+You may inspect the code and use, modify, or redistribute it only for purposes
+permitted by that license. Commercial use requires a separate written license;
+see [`COMMERCIAL_LICENSING.md`](COMMERCIAL_LICENSING.md). This is a
+noncommercial source-available license, not an OSI-approved open-source license.
+
+External copyrightable contributions are temporarily closed until a contributor
+agreement is available. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

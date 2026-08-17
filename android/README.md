@@ -116,10 +116,15 @@ Log viewing, redacted export and retention controls remain work for the next imp
 
 ## Support
 
-This app is free and always will be. If it saved you a dealer visit, you can support development:
+The GitHub community build is free for personal, noncommercial use. A separately
+licensed official paid store build may be offered later after the release gates
+are met. If the community build saved you a dealer visit, you can support
+development:
 
 - Buy Me a Coffee: <https://www.buymeacoffee.com/CHANGE_ME>
 - Ko-fi: <https://ko-fi.com/CHANGE_ME>
 - GitHub Sponsors: <https://github.com/sponsors/CHANGE_ME>
 
-Support is entirely optional and buys no features, priority or warranty.
+Support is entirely optional and buys no features, priority, warranty, or
+commercial license rights. See the repository's [`LICENSE`](../LICENSE) and
+[`COMMERCIAL_LICENSING.md`](../COMMERCIAL_LICENSING.md).
