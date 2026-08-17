@@ -17,7 +17,7 @@ Full iOS implementation is deferred until both conditions are met:
 
 Until then, iOS work is limited to transport characterization, map/document maintenance and platform-neutral UX review. When implementation begins, reuse behavior, wording, maps and test scenarios—not Android Bluetooth code or forced pixel-identical layouts.
 
-**Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) is the maintainer probe app that executes the pending adapter-only `ATI` proof (condition 2) — one button per candidate channel, one shot per launch, JSONL journal shared back into `logs/`. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/) (headless `swift test`). The probe is tooling, not the deferred iOS app; the deferred-phase conditions above still gate the real implementation.
+**Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) is the maintainer probe app that executes the pending adapter-only `ATI` proof (condition 2) — one button per candidate channel, one shot per launch, JSONL journal shared back into `logs/`. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/) (headless `swift test`). The probe is tooling, not the deferred iOS app; the deferred-phase conditions above still gate the real implementation. *Status:* the app was built and free-signed onto the maintainer's iPhone on 2026-08-13 (the intentional `DEVELOPMENT_TEAM` setting in the project file); the probe run against the powered adapter has **not happened yet** — no journal exists, and the free signature expires ~7 days after install, so a redeploy from Xcode may be needed first.
 
 ## Required project sources
 
