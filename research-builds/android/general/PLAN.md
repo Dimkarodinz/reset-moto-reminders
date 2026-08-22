@@ -95,9 +95,10 @@ uses existing command timeouts/response limits, and sends each request once.
 - [x] APK is installed and its full UI is visually verified on the test phone.
 - [x] No hardware scan starts automatically.
 
-Verified 2026-08-17 on Samsung SM-A202F / Android 11: 167 main Android,
-25 Triumph Research, 12 General Research and 13 iOS ProbeKit tests passed. All
-three Android modules passed lint and debug assembly. General APK v0.1.0
-(`versionCode 1`, SHA-256
-`d229aba23280b62c25a7c831fc022dde64ced0eead241b3a568999311340324c`)
-was installed, cold-launched and scrolled through without starting a scan.
+Refreshed 2026-08-23 on Samsung SM-A202F / Android 11: all 14 General Research
+tests, lint and debug assembly pass. General APK v0.2.0 (`versionCode 2`,
+SHA-256
+`117c748cfef0384cc18bbcfe6d6d29c8738cf53e5db0c309a4d12c91bfd98172`)
+was installed and cold-launched without starting a scan. This refresh changes
+only the fixed dark presentation and action-style title; the bounded scan and
+read-only policy remain unchanged.

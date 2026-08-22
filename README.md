@@ -80,6 +80,8 @@ other motorcycle families. It records a finite set of standard OBD capabilities
 and DTC responses without requesting VIN, clearing codes, resetting service data,
 scanning addresses or guessing commands. See
 [`research-builds/android/general/README.md`](research-builds/android/general/README.md).
+Its v0.2.0 interface now matches the fixed dark presentation of the other apps;
+the scan itself remains intentionally unchanged and read-only.
 
 ## Platforms
 

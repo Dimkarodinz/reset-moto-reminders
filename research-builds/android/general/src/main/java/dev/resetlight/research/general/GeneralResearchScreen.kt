@@ -20,9 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.io.File
 
 @Composable
@@ -53,8 +57,7 @@ fun GeneralResearchScreen(
         ) {
             Text(
                 stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = ActionTitleStyle,
             )
             Text(stringResource(R.string.app_intro), style = MaterialTheme.typography.bodyMedium)
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -152,3 +155,13 @@ fun GeneralResearchScreen(
         }
     }
 }
+
+/** Bold, forward-leaning title inspired by compact 1990s action-film wordmarks. */
+private val ActionTitleStyle = TextStyle(
+    fontFamily = FontFamily.SansSerif,
+    fontWeight = FontWeight.Black,
+    fontStyle = FontStyle.Italic,
+    fontSize = 30.sp,
+    lineHeight = 32.sp,
+    letterSpacing = 1.2.sp,
+)

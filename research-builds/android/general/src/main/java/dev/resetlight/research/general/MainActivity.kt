@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,9 +35,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = true
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = false
+            isAppearanceLightStatusBars = false
+        }
         setContent {
-            MaterialTheme {
+            GeneralResearchTheme {
                 val session by container.sessions.state.collectAsState()
                 val devices by container.devices.collectAsState()
                 var manufacturer by rememberSaveable { mutableStateOf("") }

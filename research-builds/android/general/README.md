@@ -16,6 +16,10 @@ It never requests VIN, serial data, SecurityAccess, DTC clear, service reset,
 generic writes, routines, passive monitoring, address scans or guessed commands.
 The report is a discovery input, not proof that any write is compatible.
 
+Version 0.2.0 uses the same fixed dark visual language as the main and Triumph
+research apps. This is a presentation refresh only: its scan remains strictly
+read-only and does not reuse Triumph-specific commands on other brands.
+
 ## Build and install
 
 From `android/`, with JDK 17 and the Android SDK configured:
