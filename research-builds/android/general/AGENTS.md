@@ -39,6 +39,22 @@ and adds the optically centered `?`. Do not redraw or independently tune the
 outer gauge, reset arrow, speed marks, scale or yellow accent; edit the main
 launcher source when the whole icon family should change.
 
+The Compose UI and Android system bars use a fixed dark theme matching the main
+and Triumph research apps. The app name uses the same bold italic action-title
+treatment; body and form text keep standard Material typography. Do not restore
+automatic light mode or duplicate the main app's motorcycle write controls.
+
 Use red-green-refactor TDD. Run this module plus the main and Triumph modules when
 shared code changes. Installing and opening the APK is a phone-level smoke test;
 never start a hardware scan automatically.
+
+## Current checkpoint — 2026-08-23
+
+- Version `0.2.0` (`versionCode 2`) adds only the shared dark presentation and
+  action-title treatment; the finite 18-command read profile and read-only
+  policy are unchanged.
+- All 14 General Research unit tests, lint and debug APK assembly pass.
+- Debug APK SHA-256:
+  `117c748cfef0384cc18bbcfe6d6d29c8738cf53e5db0c309a4d12c91bfd98172`.
+- The APK is installed and cold-launched on the Samsung SM-A202F / Android 11.
+  No motorcycle scan was started.
