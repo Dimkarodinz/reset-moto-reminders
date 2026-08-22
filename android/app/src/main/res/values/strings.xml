@@ -95,23 +95,23 @@
     <string name="error_ecu_no_response">The module did not respond. Check that the ignition is on, then try again.</string>
 
     <!-- Instrument read -->
-    <string name="instrument_read_title">Instrument read (research)</string>
-    <string name="instrument_read_body_idle">First contact with the instrument cluster. Sends only the two observed reads and decodes the odometer. It never changes the service reminder.</string>
-    <string name="instrument_read_body_running">Reading instrument data. Keep the ignition on.</string>
-    <string name="instrument_read_body_complete">Odometer: %1$d %2$s (%3$s). Status: %4$s. Return with the phone logs.</string>
-    <string name="instrument_read_body_blocked">%1$s Return with the phone logs.</string>
-    <string name="instrument_read_button">Read instrument data</string>
-    <string name="instrument_read_failed_error">Reading instrument data stopped after a connection or adapter error.</string>
+    <string name="instrument_read_title">Dashboard information</string>
+    <string name="instrument_read_body_idle">Reads the odometer directly from the motorcycle dashboard. This is read-only and never changes the service reminder.</string>
+    <string name="instrument_read_body_running">Reading the motorcycle dashboard. Keep the ignition on.</string>
+    <string name="instrument_read_body_complete">Motorcycle responded. Odometer: %1$d %2$s. Dashboard status: %3$s.</string>
+    <string name="instrument_read_body_blocked">%1$s</string>
+    <string name="instrument_read_button">Read dashboard</string>
+    <string name="instrument_read_failed_error">Reading the dashboard stopped after a connection or adapter error.</string>
     <string name="instrument_reason_transport_rejected">Adapter rejected instrument transport command %1$s</string>
     <string name="instrument_reason_unrecognized_response">The instrument returned an unrecognized response; nothing was written.</string>
 
     <!-- Trouble-code clear -->
-    <string name="dtc_clear_title">Clear trouble codes (research)</string>
+    <string name="dtc_clear_title">Clear trouble codes (Beta)</string>
     <string name="dtc_clear_body_idle">Runs security access and clears confirmed engine codes. Only clear codes you have already read and understood.</string>
     <string name="dtc_clear_body_running">Clearing trouble codes. Keep the ignition on and do not leave the app.</string>
     <string name="dtc_clear_body_cleared_none">Cleared. No confirmed trouble codes remain.</string>
     <string name="dtc_clear_body_cleared_remaining">Clear completed, but %1$d code(s) are still present.</string>
-    <string name="dtc_clear_body_blocked">%1$s Nothing was cleared.</string>
+    <string name="dtc_clear_body_blocked">%1$s</string>
     <string name="dtc_clear_button">Clear trouble codes</string>
     <string name="dtc_clear_button_again">Clear again</string>
     <string name="dtc_clear_warning">This sends a write to the engine ECU. Confirm to proceed.</string>
@@ -122,13 +122,17 @@
     <string name="dtc_clear_reason_security_rejected">The ECU rejected security access; nothing was cleared.</string>
     <string name="dtc_clear_reason_rejected">The ECU rejected the clear request; no codes were cleared.</string>
     <string name="dtc_clear_reason_count_unconfirmed">The clear completed but the code count could not be confirmed.</string>
+    <string name="dtc_clear_reason_write_ambiguous">The clear attempt began, but no reliable result was received. Codes may already be cleared. Reconnect and read trouble codes before retrying.</string>
+    <string name="dtc_clear_reason_verification_lost">The ECU accepted the clear, but the follow-up code count was lost. Reconnect and read trouble codes.</string>
 
     <!-- Service reminder reset -->
-    <string name="service_reset_title">Reset service reminder (research)</string>
+    <string name="service_reset_title">Reset service reminder</string>
     <string name="service_reset_body_idle">Writes a new service interval and next-service date to the instrument cluster. Resetting a reminder does not perform maintenance.</string>
     <string name="service_reset_body_running">Writing the service reminder. Keep the ignition on and do not leave the app.</string>
     <string name="service_reset_body_committed">Committed. Odometer %1$d %2$s, interval %3$d %4$s, next service %5$s.</string>
-    <string name="service_reset_body_blocked">%1$s Nothing was written.</string>
+    <string name="service_reset_body_blocked">%1$s</string>
+    <string name="service_reset_date_time_reminder">Before resetting, make sure the motorcycle’s date and time are correct.</string>
+    <string name="service_reset_unit_label">Unit currently selected on the motorcycle</string>
     <string name="service_reset_interval_label">Service interval (%1$s)</string>
     <string name="service_reset_interval_error_format">Enter a whole positive number.</string>
     <string name="service_reset_interval_error_range">Use a multiple of %1$d %2$s, between %3$d and %4$d %2$s.</string>
@@ -140,8 +144,10 @@
     <string name="service_reset_failed_error">Resetting the service reminder stopped after a connection or adapter error.</string>
     <string name="service_reset_reason_invalid_input">The requested interval or date is outside the supported range; nothing was written.</string>
     <string name="service_reset_reason_unrecognized_status">The instrument returned an unrecognized status; nothing was written.</string>
-    <string name="service_reset_reason_distance_rejected">The cluster rejected the service-interval write, so nothing was changed. This can happen when the dashboard is set to miles — switch the dashboard to kilometres and try again.</string>
+    <string name="service_reset_reason_distance_rejected">The cluster rejected the service-interval write, so the reset stopped before changing the date.</string>
     <string name="service_reset_reason_date_unconfirmed">The cluster did not confirm the service-date write.</string>
+    <string name="service_reset_reason_partially_applied">The service interval was accepted, but the date was not confirmed. Check the motorcycle before retrying.</string>
+    <string name="service_reset_reason_write_ambiguous">A reminder write was attempted, but no reliable result was received. The interval or date may have changed. Check the motorcycle before retrying.</string>
 
     <!-- Cluster fingerprint gate -->
     <string name="gate_reason_profile_mismatch">Connected motorcycle profile does not match the validated cluster.</string>

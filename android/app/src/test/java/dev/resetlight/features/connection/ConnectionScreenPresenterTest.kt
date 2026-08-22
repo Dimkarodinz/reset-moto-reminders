@@ -78,7 +78,7 @@ class ConnectionScreenPresenterTest {
     }
 
     @Test
-    fun `release presentation never exposes research capture`() {
+    fun `main presentation hides research capture but exposes dashboard proof`() {
         val screen = presenter.present(
             ConnectionState.AdapterReady("ELM327", "STN1151", "vlinker-mc-android"),
             selectedAdapterName = "vLinker",
@@ -86,7 +86,7 @@ class ConnectionScreenPresenterTest {
         )
 
         assertFalse(screen.showReadOnlyCapture)
-        assertFalse(screen.showServiceInfoRead)
+        assertTrue(screen.showServiceInfoRead)
     }
 
     @Test
@@ -181,9 +181,21 @@ class ConnectionScreenPresenterTest {
             selectedAdapterName = "vLinker",
         )
 
+        assertTrue(screen.showUnavailableServiceCard)
         assertEquals(UiText(UiMessage.SERVICE_CARD_TITLE), screen.serviceCard.title)
         assertEquals(UiText(UiMessage.SERVICE_CARD_UNAVAILABLE_DETAIL), screen.serviceCard.detail)
         assertFalse(screen.serviceCard.enabled)
+    }
+
+    @Test
+    fun `disconnected screen does not show a motorcycle profile warning`() {
+        val screen = presenter.present(
+            ConnectionState.Disconnected,
+            selectedAdapterName = null,
+        )
+
+        assertFalse(screen.showUnavailableServiceCard)
+        assertFalse(screen.showServiceReset)
     }
 
     private data class FailureExpectation(

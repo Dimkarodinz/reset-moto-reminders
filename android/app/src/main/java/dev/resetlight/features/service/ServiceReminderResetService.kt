@@ -10,6 +10,7 @@ import dev.resetlight.diagnostics.elmConfigurationAccepted
 import dev.resetlight.diagnostics.hexOnly
 import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
+import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
 import dev.resetlight.profiles.ServiceReminderOperationProfile
 import java.time.LocalDate
@@ -18,7 +19,8 @@ import kotlinx.coroutines.CancellationException
 sealed interface ServiceReminderResetResult {
     data class Committed(
         val odometerKm: Int,
-        val distanceKm: Int,
+        val distance: Int,
+        val distanceUnit: DistanceUnit,
         val nextServiceDate: LocalDate,
     ) : ServiceReminderResetResult
 
@@ -33,7 +35,8 @@ class ServiceReminderResetFailure(
 /**
  * Replays the observed service-reminder reset against the instrument cluster:
  * configure the 11-bit route, read status (`5E01`) and odometer (`0D01`), then
- * send the distance (`33xx`) and date (`5Cxx…`) writes. Each write's positive
+ * send the unit-specific distance (`33xx` km or `34xx` miles) and date (`5Cxx…`)
+ * writes. Each write's positive
  * response is `request-service | 0x80`, and the date commit echoes its payload,
  * so success is confirmed by matching that echo to the request we sent — the
  * reset's own readback.
@@ -56,13 +59,25 @@ class ServiceReminderResetService(
         channel: DiagnosticWriteChannel,
         distanceKm: Int,
         nextServiceDate: LocalDate,
+    ): ServiceReminderResetResult = reset(
+        channel,
+        distanceKm,
+        DistanceUnit.KILOMETERS,
+        nextServiceDate,
+    )
+
+    suspend fun reset(
+        channel: DiagnosticWriteChannel,
+        distance: Int,
+        distanceUnit: DistanceUnit,
+        nextServiceDate: LocalDate,
     ): ServiceReminderResetResult {
         // Build (and validate) the write commands before any traffic. A value the
         // observed one-byte encodings cannot represent blocks the reset with a
         // clear message instead of throwing — the 2026-08-12 trip lost the whole
         // adapter session to exactly this.
         val commands = try {
-            commandBuilder.build(distanceKm, nextServiceDate)
+            commandBuilder.build(distance, distanceUnit, nextServiceDate)
         } catch (invalid: IllegalArgumentException) {
             return ServiceReminderResetResult.Blocked(
                 UiText(UiMessage.SERVICE_RESET_REASON_INVALID_INPUT),
@@ -111,7 +126,8 @@ class ServiceReminderResetService(
 
         return ServiceReminderResetResult.Committed(
             odometerKm = odometer.odometerKm,
-            distanceKm = distanceKm,
+            distance = distance,
+            distanceUnit = distanceUnit,
             nextServiceDate = nextServiceDate,
         )
     }

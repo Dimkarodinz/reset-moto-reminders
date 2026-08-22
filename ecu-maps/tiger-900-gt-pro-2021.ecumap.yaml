@@ -8,25 +8,11 @@ motorcycle:
   generation: first_generation
   market: unknown
 
-  # The ECU reports and accepts kilometres on the wire (odometer 0xAE76 = 44662,
-  # read directly as 44662 km in the retained capture). The captured GT Pro is a
-  # km-market bike, so the dashboard displays kilometres too. A future miles bike
-  # would set display_unit: miles here; the app converts only when the two differ.
-  #
-  # 2026-08-13 "flip the dash, capture twice" experiment (milestone 12): the same
-  # bike was read and reset with the dashboard in km, then physically switched to
-  # miles and read/reset again at the same odometer. Result is MIXED, not a clean
-  # Case A/B:
-  #   * READS are canonical. The odometer 0D01 raw was 0xAED4 (44756) in BOTH
-  #     km-mode and miles-mode captures, and 5E01 status stayed "043" — the dash
-  #     toggle is display-only for reads, so reads are unit-independent.
-  #   * The interval WRITE is unit-dependent. The identical 334E write (78 x 100 =
-  #     7800 km) was accepted in km mode (B34E echo) but REJECTED in miles mode
-  #     (B3 FFFFFFFFFFFFFF — positive service byte, value replaced with all-FF).
-  # No successful miles write exists, so the miles interval scaling is still
-  # unknown and MUST NOT be guessed. display_unit stays km; miles support is
-  # blocked until a successful miles write is captured. See the 2026-08-13
-  # observations in reset_service_reminder below.
+  # The 0D01 odometer read is canonical kilometres regardless of the dashboard
+  # setting. Service-interval writes are different: service 0x33 encodes hundreds
+  # of kilometres and service 0x34 encodes hundreds of miles. display_unit records
+  # the captured bike's default; the app asks which unit is currently shown before
+  # building a reset command.
   distance_units:
     wire_unit: km
     display_unit: km
@@ -323,9 +309,9 @@ motorcycle:
       commands:
         reset_service_reminder:
           knowledge_status: observed
-          successful_observations: 2
-          profile_validation: pending
-          executable_template: replay_only
+          successful_observations: 5
+          profile_validation: km_project_app_validated_miles_capture_validated_pending_project_app
+          executable_template: fingerprint_gated
           replay_template:
             knowledge_status: captured_and_static_implementation_corroborated
             initialize_request: "5E01"
@@ -335,8 +321,10 @@ motorcycle:
             odometer_request_semantics: unknown
             odometer_unit_behavior: canonical_km_identical_across_dash_units_observed_2026_08_13
             distance:
-              request_prefix_km: "33"
-              raw_unit_km: 100
+              request_prefix_by_unit:
+                km: "33"
+                miles: "34"
+              raw_unit: 100
               minimum_raw: 1
               maximum_raw: 255
             date:
@@ -346,14 +334,25 @@ motorcycle:
               fixed_suffix_semantics: unknown
           confirmed_field_encodings:
             distance_interval:
-              request_prefix_km: "0x33"
-              raw_unit_km: 100
-              status: confirmed_by_two_observations_and_static_implementation
+              request_prefix_by_unit:
+                km: "0x33"
+                miles: "0x34"
+              raw_unit: 100
+              raw_unit_semantics: hundreds_of_selected_dashboard_unit
+              status: confirmed_by_hardware_observations_and_static_implementation
               evidence:
                 - raw: "0x64"
+                  unit: km
                   interval_km: 10000
                 - raw: "0x50"
+                  unit: km
                   interval_km: 8000
+                - raw: "0x3C"
+                  unit: km
+                  interval_km: 6000
+                - raw: "0x3C"
+                  unit: miles
+                  interval_miles: 6000
 
             next_service_date:
               request_prefix: "0x5C"
@@ -534,9 +533,9 @@ motorcycle:
                 between the two resets. Reads are identical to km mode (odometer
                 raw 0xAED4, status "043"), confirming reads are canonical. The
                 identical 334E interval write was rejected (B3 then all-FF instead
-                of the 4E echo), so the app blocked and never sent the date. No
-                successful miles write was captured; miles interval scaling
-                remains unknown.
+                of the 4E echo), so the app blocked and never sent the date. The
+                later 2026-08-22 capture established that miles requires service
+                0x34 rather than 0x33.
               observed_input:
                 current_date: "2026-08-13"
                 current_odometer_km: 44756
@@ -563,3 +562,53 @@ motorcycle:
                     echoed_value: "FF FF FF FF FF FF FF"
                     meaning: rejected_value_not_echoed
                   result: rejected_reset_blocked_date_not_sent
+
+            - captured_on: "2026-08-22"
+              dashboard_display_unit: miles
+              observed_input:
+                current_odometer_km: 44756
+                requested_next_service_date: "2027-08-22"
+                requested_distance_interval_miles: 6000
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AED4000000"
+                - name: set_distance_interval
+                  request: "343C"
+                  observed_response: "B43C000000000000"
+                  encoding:
+                    interval_raw: "0x3C"
+                    interval_miles: 6000
+                  result: committed
+                - name: set_or_commit_service_date
+                  request: "5C1B0816016E0000"
+                  observed_response: "DC1B0816016E0000"
+                  result: committed
+
+            - captured_on: "2026-08-22"
+              dashboard_display_unit: km
+              observed_input:
+                current_odometer_km: 44756
+                requested_next_service_date: "2027-08-22"
+                requested_distance_interval_km: 6000
+              observed_sequence:
+                - name: initialize_or_read_status
+                  request: "5E01"
+                  observed_response: "DE303433FFFFFFFF"
+                - name: read_or_capture_odometer
+                  request: "0D01"
+                  observed_response: "8D0100AED4000000"
+                - name: set_distance_interval
+                  request: "333C"
+                  observed_response: "B33C000000000000"
+                  encoding:
+                    interval_raw: "0x3C"
+                    interval_km: 6000
+                  result: committed
+                - name: set_or_commit_service_date
+                  request: "5C1B0816016E0000"
+                  observed_response: "DC1B0816016E0000"
+                  result: committed

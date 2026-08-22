@@ -39,10 +39,13 @@ class ResearchWriteCommandPolicy(private val ecu: EcuProfile) {
     }
 
     private fun isDistanceWrite(command: String): Boolean {
-        val prefix = normalize(ecu.serviceReminder.distanceRequestPrefix)
+        val prefix = setOf(
+            normalize(ecu.serviceReminder.distanceRequestPrefixKm),
+            normalize(ecu.serviceReminder.distanceRequestPrefixMiles),
+        ).firstOrNull(command::startsWith) ?: return false
         val raw = command.removePrefix(prefix)
-        if (!command.startsWith(prefix) || raw.length != 2 || raw.any { it !in HEX }) return false
-        return raw.toInt(16) in ecu.serviceReminder.distanceMinimumRaw..ecu.serviceReminder.distanceMaximumRaw
+        return raw.length == 2 && raw.all { it in HEX } &&
+            raw.toInt(16) in ecu.serviceReminder.distanceMinimumRaw..ecu.serviceReminder.distanceMaximumRaw
     }
 
     private fun isDateWrite(command: String): Boolean {

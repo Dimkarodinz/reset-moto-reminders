@@ -5,8 +5,10 @@ import java.time.LocalDate
 /**
  * The service-interval values the observed one-byte wire encoding can carry:
  * a multiple of [stepKm] between [minKm] and [maxKm], all in wire kilometres.
- * Derived from the ECU profile (`raw_unit_km` 100, raw range 1..255 for the
- * captured Tiger 900), never hardcoded in the UI.
+ * Derived from the ECU profile (`raw_unit` 100, raw range 1..255 for the
+ * captured Tiger 900), never hardcoded in the UI. The same numeric range is
+ * valid in either selected dashboard unit; the command service chooses km or
+ * miles separately.
  */
 data class ServiceIntervalConstraints(
     val stepKm: Int,

@@ -13,11 +13,14 @@
     <string name="adapter_pair_hint">If it is not listed, power it from the motorcycle and pair it in Android Bluetooth settings using PIN 1234.</string>
     <string name="write_tests_title">Optional write validation</string>
     <string name="write_tests_intro">The app always saves all read evidence first. Select either test to continue in the same connection.</string>
-    <string name="reset_service_option">Test service reset, then restore (km mode)</string>
-    <string name="service_baseline_hint">The motorcycle does not expose these stored values to the app. Enter the exact current interval and date: the test writes +100 km and +1 day, then writes these original values back.</string>
-    <string name="service_distance_label">Current stored service interval (km)</string>
+    <string name="reset_service_option">Test service reset, then restore</string>
+    <string name="service_baseline_hint">The motorcycle does not expose these stored values to the app. Select the unit currently shown on the dashboard and enter the exact current interval and date. The test writes +100 in that unit and +1 day, then restores the entered values.</string>
+    <string name="service_unit_label">Unit currently selected on the motorcycle</string>
+    <string name="service_unit_km">km</string>
+    <string name="service_unit_miles">mi</string>
+    <string name="service_distance_label">Current stored service interval</string>
     <string name="service_date_label">Current stored service date (YYYY-MM-DD)</string>
-    <string name="service_test_values">Temporary test: %1$d km, %2$s. Then restore the entered values.</string>
+    <string name="service_test_values">Temporary test: %1$d %2$s, %3$s. Then restore the entered values.</string>
     <string name="clear_dtcs_option">Clear diagnostic trouble codes</string>
     <string name="write_warning">These tests change stored motorcycle data. DTC clear erases diagnostic evidence. Service restoration is attempted after success or an explicit rejection, but cannot be guaranteed after disconnect, timeout, or an ambiguous write.</string>
     <string name="write_acknowledgement">I understand and want to run the selected writes once.</string>
@@ -39,7 +42,7 @@
     <string name="dtc_clear_result">DTC clear validation</string>
     <string name="service_restore_result">Original-value restoration: %1$s</string>
     <string name="candidate_warning">Candidate means the known Triumph read path matched. A write result is shown only when that test was explicitly selected.</string>
-    <string name="scan_boundary">The app never requests VIN or serial data. Optional writes are limited to the exact observed SecurityAccess/DTC-clear and kilometre service-reset sequences, run once after all reads and stopped on mismatch or an ambiguous response.</string>
+    <string name="scan_boundary">The app never requests VIN or serial data. Optional writes are limited to the exact observed SecurityAccess/DTC-clear and selected-unit km or miles service-reset sequences, run once after all reads and stopped on mismatch or an ambiguous response.</string>
     <string name="unofficial_notice">Unofficial research tool. Not affiliated with or endorsed by Triumph Motorcycles.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

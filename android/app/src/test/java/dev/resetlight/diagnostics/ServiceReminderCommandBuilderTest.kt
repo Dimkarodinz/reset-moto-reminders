@@ -1,6 +1,7 @@
 package dev.resetlight.diagnostics
 
 import dev.resetlight.profiles.EcuProfileLoader
+import dev.resetlight.domain.DistanceUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -22,6 +23,18 @@ class ServiceReminderCommandBuilderTest {
         assertEquals(
             ServiceReminderCommands("3350", "5C1B0808016E0000"),
             builder.build(8_000, LocalDate.of(2027, 8, 8)),
+        )
+    }
+
+    @Test
+    fun `uses the captured miles service while preserving the selected-unit value`() {
+        assertEquals(
+            ServiceReminderCommands("343C", "5C1B0816016E0000"),
+            builder.build(6_000, DistanceUnit.MILES, LocalDate.of(2027, 8, 22)),
+        )
+        assertEquals(
+            ServiceReminderCommands("333C", "5C1B0816016E0000"),
+            builder.build(6_000, DistanceUnit.KILOMETERS, LocalDate.of(2027, 8, 22)),
         )
     }
 

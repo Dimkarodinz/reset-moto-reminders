@@ -107,6 +107,8 @@ If the write succeeds but produces no notification, stop and preserve the captur
 
 Until one path returns an adapter identity, the application must report `unsupported/unvalidated adapter transport` and must not send motorcycle diagnostic commands.
 
+The production preview in [`ResetMotoReminders/`](ResetMotoReminders/) now performs this primary-channel check at the start of every connection. It does not expose or auto-try the alternate channel. A recognizable `vLinker`/`ELM`/`STN` identity and complete prompt unlock the session; any failure disconnects before motorcycle traffic. The first physical iPhone run is still needed to promote the map from `proposed_unverified` to observed.
+
 ## Screenshot coverage
 
 All eight screenshots were reviewed:

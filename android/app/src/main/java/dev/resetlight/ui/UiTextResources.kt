@@ -69,12 +69,16 @@ fun UiMessage.resourceId(): Int = when (this) {
     UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED -> R.string.dtc_clear_reason_security_rejected
     UiMessage.DTC_CLEAR_REASON_REJECTED -> R.string.dtc_clear_reason_rejected
     UiMessage.DTC_CLEAR_REASON_COUNT_UNCONFIRMED -> R.string.dtc_clear_reason_count_unconfirmed
+    UiMessage.DTC_CLEAR_REASON_WRITE_AMBIGUOUS -> R.string.dtc_clear_reason_write_ambiguous
+    UiMessage.DTC_CLEAR_REASON_VERIFICATION_LOST -> R.string.dtc_clear_reason_verification_lost
 
     UiMessage.SERVICE_RESET_FAILED_ERROR -> R.string.service_reset_failed_error
     UiMessage.SERVICE_RESET_REASON_INVALID_INPUT -> R.string.service_reset_reason_invalid_input
     UiMessage.SERVICE_RESET_REASON_UNRECOGNIZED_STATUS -> R.string.service_reset_reason_unrecognized_status
     UiMessage.SERVICE_RESET_REASON_DISTANCE_REJECTED -> R.string.service_reset_reason_distance_rejected
     UiMessage.SERVICE_RESET_REASON_DATE_UNCONFIRMED -> R.string.service_reset_reason_date_unconfirmed
+    UiMessage.SERVICE_RESET_REASON_PARTIALLY_APPLIED -> R.string.service_reset_reason_partially_applied
+    UiMessage.SERVICE_RESET_REASON_WRITE_AMBIGUOUS -> R.string.service_reset_reason_write_ambiguous
 
     UiMessage.GATE_REASON_PROFILE_MISMATCH -> R.string.gate_reason_profile_mismatch
     UiMessage.GATE_REASON_STATUS_MISMATCH -> R.string.gate_reason_status_mismatch

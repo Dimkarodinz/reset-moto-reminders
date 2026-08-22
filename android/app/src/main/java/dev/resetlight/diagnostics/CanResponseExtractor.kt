@@ -34,6 +34,17 @@ class CanResponseExtractor(
     }
 
     fun extract(raw: String): String {
+        val payloads = extractAll(raw)
+        return payloads.singleOrNull()
+            ?: throw DiagnosticParseException("Expected one diagnostic response, got ${payloads.size}")
+    }
+
+    /**
+     * Extracts every complete diagnostic response returned before one ELM
+     * prompt. This matters for UDS response-pending: the adapter can return the
+     * `7F..78` frame and the final positive frame as one command response.
+     */
+    fun extractAll(raw: String): List<String> {
         val upper = raw.uppercase()
         if (NO_RESPONSE_MARKERS.any { upper.contains(it) }) {
             throw DiagnosticNoResponseException(raw.trim())
@@ -46,28 +57,36 @@ class CanResponseExtractor(
         }
         // Bare payload (map/test format or ATH0): no frame carries our CAN ID.
         if (frames.none { it.startsWith(header) && it.length > header.length }) {
-            return frames.singleOrNull()
-                ?: throw DiagnosticParseException("Multi-line response without recognizable CAN headers")
+            return frames
         }
         val dataFrames = frames
             .filter { it.startsWith(header) && it.length > header.length }
             .map { it.substring(header.length) }
-        return if (isoTp) reassembleIsoTp(dataFrames) else singleRawFrame(dataFrames)
+        return if (isoTp) {
+            if (dataFrames.all { it.diagnosticHexBytes()[0].u() shr 4 == SINGLE_FRAME }) {
+                dataFrames.map(::decodeSingleFrame)
+            } else {
+                listOf(reassembleIsoTp(dataFrames))
+            }
+        } else {
+            dataFrames.map { it }
+        }
     }
 
-    private fun singleRawFrame(dataFrames: List<String>): String =
-        dataFrames.singleOrNull()
-            ?: throw DiagnosticParseException("Expected a single raw CAN frame, got ${dataFrames.size}")
+    private fun decodeSingleFrame(frameHex: String): String {
+        val frame = frameHex.diagnosticHexBytes()
+        val length = frame[0].u() and 0x0F
+        if (length == 0 || frame.size < 1 + length) {
+            throw DiagnosticParseException("ISO-TP single frame shorter than its declared length")
+        }
+        return frame.toHex(from = 1, count = length)
+    }
 
     private fun reassembleIsoTp(dataFrames: List<String>): String {
         val first = dataFrames.first().diagnosticHexBytes()
         return when (first[0].u() shr 4) {
             SINGLE_FRAME -> {
-                val length = first[0].u() and 0x0F
-                if (length == 0 || first.size < 1 + length) {
-                    throw DiagnosticParseException("ISO-TP single frame shorter than its declared length")
-                }
-                first.toHex(from = 1, count = length)
+                decodeSingleFrame(dataFrames.first())
             }
             FIRST_FRAME -> {
                 val total = ((first[0].u() and 0x0F) shl 8) or first[1].u()

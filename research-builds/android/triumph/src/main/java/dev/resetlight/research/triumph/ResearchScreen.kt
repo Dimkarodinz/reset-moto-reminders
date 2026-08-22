@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,9 +23,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dev.resetlight.domain.DistanceUnit
 import java.io.File
 
 @Composable
@@ -36,7 +42,8 @@ fun ResearchScreen(
     session: ResearchSessionState,
     clearDtcs: Boolean,
     resetService: Boolean,
-    distanceKm: String,
+    distanceUnit: DistanceUnit,
+    distance: String,
     nextServiceDate: String,
     writesAcknowledged: Boolean,
     writeValidation: ResearchWriteInputValidation,
@@ -44,6 +51,7 @@ fun ResearchScreen(
     onYearChanged: (String) -> Unit,
     onClearDtcsChanged: (Boolean) -> Unit,
     onResetServiceChanged: (Boolean) -> Unit,
+    onDistanceUnitChanged: (DistanceUnit) -> Unit,
     onDistanceChanged: (String) -> Unit,
     onDateChanged: (String) -> Unit,
     onWritesAcknowledgedChanged: (Boolean) -> Unit,
@@ -67,8 +75,7 @@ fun ResearchScreen(
         ) {
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = ActionTitleStyle,
             )
             Text(
                 text = stringResource(R.string.app_intro),
@@ -90,13 +97,15 @@ fun ResearchScreen(
             WriteOptionsCard(
                 clearDtcs = clearDtcs,
                 resetService = resetService,
-                distanceKm = distanceKm,
+                distanceUnit = distanceUnit,
+                distance = distance,
                 nextServiceDate = nextServiceDate,
                 acknowledged = writesAcknowledged,
                 validation = writeValidation,
                 enabled = !presentation.running,
                 onClearDtcsChanged = onClearDtcsChanged,
                 onResetServiceChanged = onResetServiceChanged,
+                onDistanceUnitChanged = onDistanceUnitChanged,
                 onDistanceChanged = onDistanceChanged,
                 onDateChanged = onDateChanged,
                 onAcknowledgedChanged = onWritesAcknowledgedChanged,
@@ -123,17 +132,29 @@ fun ResearchScreen(
     }
 }
 
+/** Bold, forward-leaning title inspired by compact 1990s action-film wordmarks. */
+private val ActionTitleStyle = TextStyle(
+    fontFamily = FontFamily.SansSerif,
+    fontWeight = FontWeight.Black,
+    fontStyle = FontStyle.Italic,
+    fontSize = 30.sp,
+    lineHeight = 32.sp,
+    letterSpacing = 1.2.sp,
+)
+
 @Composable
 private fun WriteOptionsCard(
     clearDtcs: Boolean,
     resetService: Boolean,
-    distanceKm: String,
+    distanceUnit: DistanceUnit,
+    distance: String,
     nextServiceDate: String,
     acknowledged: Boolean,
     validation: ResearchWriteInputValidation,
     enabled: Boolean,
     onClearDtcsChanged: (Boolean) -> Unit,
     onResetServiceChanged: (Boolean) -> Unit,
+    onDistanceUnitChanged: (DistanceUnit) -> Unit,
     onDistanceChanged: (String) -> Unit,
     onDateChanged: (String) -> Unit,
     onAcknowledgedChanged: (Boolean) -> Unit,
@@ -161,8 +182,26 @@ private fun WriteOptionsCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    stringResource(R.string.service_unit_label),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = distanceUnit == DistanceUnit.KILOMETERS,
+                        onClick = { onDistanceUnitChanged(DistanceUnit.KILOMETERS) },
+                        enabled = enabled,
+                        label = { Text(stringResource(R.string.service_unit_km)) },
+                    )
+                    FilterChip(
+                        selected = distanceUnit == DistanceUnit.MILES,
+                        onClick = { onDistanceUnitChanged(DistanceUnit.MILES) },
+                        enabled = enabled,
+                        label = { Text(stringResource(R.string.service_unit_miles)) },
+                    )
+                }
                 OutlinedTextField(
-                    value = distanceKm,
+                    value = distance,
                     onValueChange = onDistanceChanged,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = enabled,
@@ -205,7 +244,8 @@ private fun WriteOptionsCard(
                     Text(
                         stringResource(
                             R.string.service_test_values,
-                            request.testDistanceKm,
+                            request.testDistance,
+                            request.distanceUnit.shortLabel(),
                             request.testNextServiceDate.toString(),
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -214,6 +254,11 @@ private fun WriteOptionsCard(
             }
         }
     }
+}
+
+private fun DistanceUnit.shortLabel(): String = when (this) {
+    DistanceUnit.KILOMETERS -> "km"
+    DistanceUnit.MILES -> "mi"
 }
 
 @Composable

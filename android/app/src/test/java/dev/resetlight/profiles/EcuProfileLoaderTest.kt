@@ -46,8 +46,9 @@ class EcuProfileLoaderTest {
 
         assertEquals("5E01", profile.serviceReminder.initializeRequest)
         assertEquals("0D01", profile.serviceReminder.odometerRequest)
-        assertEquals("33", profile.serviceReminder.distanceRequestPrefix)
-        assertEquals(100, profile.serviceReminder.distanceRawUnitKm)
+        assertEquals("33", profile.serviceReminder.distanceRequestPrefixKm)
+        assertEquals("34", profile.serviceReminder.distanceRequestPrefixMiles)
+        assertEquals(100, profile.serviceReminder.distanceRawUnit)
         assertEquals("5C", profile.serviceReminder.dateRequestPrefix)
         assertEquals(2000, profile.serviceReminder.yearBase)
         assertEquals("016E0000", profile.serviceReminder.dateFixedSuffix)

@@ -10,7 +10,7 @@ class ResearchWriteCommandPolicyTest {
     private val policy = ResearchWriteCommandPolicy(ecu)
 
     @Test
-    fun `allows only the exact observed clear and kilometre reset families`() {
+    fun `allows only the exact observed clear and selected-unit reset families`() {
         ecu.engineReadOnlyCapture.configurationCommands.forEach {
             assertTrue(policy.allows(it, WriteIntent.READ), it)
         }
@@ -23,6 +23,7 @@ class ResearchWriteCommandPolicyTest {
         assertTrue(policy.allows(ecu.diagnosticTroubleCodes.clear.elmRequest, WriteIntent.WRITE))
         assertTrue(policy.allows(ecu.diagnosticTroubleCodes.clear.verificationElmRequest, WriteIntent.READ))
         assertTrue(policy.allows("334E", WriteIntent.WRITE))
+        assertTrue(policy.allows("343C", WriteIntent.WRITE))
         assertTrue(policy.allows("5C1B0811016E0000", WriteIntent.WRITE))
     }
 
@@ -37,6 +38,7 @@ class ResearchWriteCommandPolicyTest {
             "042E123400" to WriteIntent.WRITE,
             "0431011234" to WriteIntent.WRITE,
             "3201" to WriteIntent.WRITE,
+            "353C" to WriteIntent.WRITE,
             "5D1B0811016E0000" to WriteIntent.WRITE,
             "5C1B0231016E0000" to WriteIntent.WRITE,
             "ATMA" to WriteIntent.READ,

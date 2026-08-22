@@ -1,0 +1,93 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BB10000120260823 /* ResetMotoCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB10000220260823 /* ResetMotoCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BB10000720260823 /* ResetMotoReminders.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ResetMotoReminders.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BB10000320260823 /* ResetMotoReminders */ = {isa = PBXFileSystemSynchronizedRootGroup; path = ResetMotoReminders; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BB10000420260823 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (BB10000120260823 /* ResetMotoCore in Frameworks */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BB10000520260823 = {isa = PBXGroup; children = (BB10000320260823 /* ResetMotoReminders */, BB10000620260823 /* Products */,); sourceTree = "<group>"; };
+		BB10000620260823 /* Products */ = {isa = PBXGroup; children = (BB10000720260823 /* ResetMotoReminders.app */,); name = Products; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BB10000820260823 /* ResetMotoReminders */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB10000920260823 /* Build configuration list for PBXNativeTarget "ResetMotoReminders" */;
+			buildPhases = (BB10000A20260823 /* Sources */, BB10000420260823 /* Frameworks */, BB10000B20260823 /* Resources */,);
+			buildRules = ();
+			dependencies = ();
+			fileSystemSynchronizedGroups = (BB10000320260823 /* ResetMotoReminders */,);
+			name = ResetMotoReminders;
+			packageProductDependencies = (BB10000220260823 /* ResetMotoCore */,);
+			productName = ResetMotoReminders;
+			productReference = BB10000720260823 /* ResetMotoReminders.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BB10000C20260823 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 2600; LastUpgradeCheck = 2600; TargetAttributes = {BB10000820260823 = {CreatedOnToolsVersion = 26.0;};};};
+			buildConfigurationList = BB10000D20260823 /* Build configuration list for PBXProject "ResetMotoReminders" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = BB10000520260823;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (BB10000E20260823 /* XCLocalSwiftPackageReference "../ResetMotoCore" */,);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = BB10000620260823 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (BB10000820260823 /* ResetMotoReminders */,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BB10000B20260823 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BB10000A20260823 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BB10000F20260823 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)",); IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; MTL_FAST_MATH = YES; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		BB10001020260823 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; GCC_C_LANGUAGE_STANDARD = gnu17; IPHONEOS_DEPLOYMENT_TARGET = 16.0; MTL_ENABLE_DEBUG_INFO = NO; MTL_FAST_MATH = YES; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
+		BB10001120260823 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = 73S64Q3R8B; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Reset Moto Reminders"; INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connects to a vLinker MC-IOS adapter to read motorcycle diagnostics and reset the service reminder."; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = dev.resetlight.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		BB10001220260823 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = 73S64Q3R8B; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Reset Moto Reminders"; INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Connects to a vLinker MC-IOS adapter to read motorcycle diagnostics and reset the service reminder."; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = dev.resetlight.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BB10000920260823 /* Build configuration list for PBXNativeTarget "ResetMotoReminders" */ = {isa = XCConfigurationList; buildConfigurations = (BB10001120260823 /* Debug */, BB10001220260823 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		BB10000D20260823 /* Build configuration list for PBXProject "ResetMotoReminders" */ = {isa = XCConfigurationList; buildConfigurations = (BB10000F20260823 /* Debug */, BB10001020260823 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		BB10000E20260823 /* XCLocalSwiftPackageReference "../ResetMotoCore" */ = {isa = XCLocalSwiftPackageReference; relativePath = ../ResetMotoCore; };
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BB10000220260823 /* ResetMotoCore */ = {isa = XCSwiftPackageProductDependency; productName = ResetMotoCore; };
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = BB10000C20260823 /* Project object */;
+}

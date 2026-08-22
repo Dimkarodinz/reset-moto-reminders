@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
@@ -28,6 +27,7 @@ import dev.resetlight.features.connection.AdapterSelectionPolicy
 import dev.resetlight.features.connection.ConnectionScreen
 import dev.resetlight.features.connection.FailureAction
 import dev.resetlight.transport.bluetooth.BondedDevice
+import dev.resetlight.ui.ResetMotoTheme
 
 class MainActivity : ComponentActivity() {
     private val owner by lazy { (application as ResetLightApplication).container.adapterSession }
@@ -38,15 +38,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = true
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = false
+            isAppearanceLightStatusBars = false
+        }
         setContent {
-            MaterialTheme {
+            ResetMotoTheme {
                 val connectionState by owner.state.collectAsState()
                 val readOnlyCaptureState by owner.readOnlyCaptureState.collectAsState()
                 val dtcReadState by owner.dtcReadState.collectAsState()
                 val instrumentReadState by owner.instrumentReadState.collectAsState()
                 val dtcClearState by owner.dtcClearState.collectAsState()
                 val serviceResetState by owner.serviceResetState.collectAsState()
+                val operationInProgress by owner.operationInProgress.collectAsState()
                 val devices by owner.devices.collectAsState()
                 var selectedAddress by rememberSaveable { mutableStateOf<String?>(null) }
                 var showDevicePicker by remember { mutableStateOf(false) }
@@ -60,9 +64,12 @@ class MainActivity : ComponentActivity() {
                     instrumentReadState = instrumentReadState,
                     dtcClearState = dtcClearState,
                     serviceResetState = serviceResetState,
+                    operationInProgress = operationInProgress,
                     distanceUnits = owner.distanceUnits,
                     intervalConstraints = owner.serviceIntervalConstraints,
-                    researchCaptureEnabled = BuildConfig.RESEARCH_BUILD,
+                    // Data-collection helpers live in the separate research apps.
+                    // The main app exposes only bounded rider-facing features.
+                    researchCaptureEnabled = false,
                     writeOperationsEnabled = owner.writeOperationsAvailable,
                     selectedAdapterName = selected?.displayName(devices, adapterDefaultName),
                     onPairOrSelect = {

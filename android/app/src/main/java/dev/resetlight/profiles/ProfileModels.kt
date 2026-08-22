@@ -155,15 +155,21 @@ data class ServiceReminderOperationProfile(
     val initializeRequest: String,
     val odometerRequest: String,
     val odometerRequestSemantics: String,
-    val distanceRequestPrefix: String,
-    val distanceRawUnitKm: Int,
+    val distanceRequestPrefixKm: String,
+    val distanceRequestPrefixMiles: String,
+    val distanceRawUnit: Int,
     val distanceMinimumRaw: Int,
     val distanceMaximumRaw: Int,
     val dateRequestPrefix: String,
     val yearBase: Int,
     val dateFixedSuffix: String,
     val dateFixedSuffixSemantics: String,
-)
+) {
+    // Compatibility accessors for the Triumph research build, whose write
+    // experiment intentionally remains kilometre-only.
+    val distanceRequestPrefix: String get() = distanceRequestPrefixKm
+    val distanceRawUnitKm: Int get() = distanceRawUnit
+}
 
 data class MotorcycleModuleProfile(
     val key: String,

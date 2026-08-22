@@ -94,23 +94,23 @@
     <string name="error_ecu_no_response">Le module n\'a pas répondu. Vérifiez que le contact est mis, puis réessayez.</string>
 
     <!-- Instrument read -->
-    <string name="instrument_read_title">Lecture du tableau de bord (recherche)</string>
-    <string name="instrument_read_body_idle">Premier contact avec le tableau de bord. N\'envoie que les deux lectures observées et décode le compteur kilométrique. Cela ne modifie jamais le rappel d\'entretien.</string>
-    <string name="instrument_read_body_running">Lecture des données du tableau de bord. Laissez le contact mis.</string>
-    <string name="instrument_read_body_complete">Compteur kilométrique : %1$d %2$s (%3$s). État : %4$s. Revenez avec les journaux du téléphone.</string>
-    <string name="instrument_read_body_blocked">%1$s Revenez avec les journaux du téléphone.</string>
-    <string name="instrument_read_button">Lire les données du tableau de bord</string>
-    <string name="instrument_read_failed_error">La lecture des données du tableau de bord s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
+    <string name="instrument_read_title">Informations du tableau de bord</string>
+    <string name="instrument_read_body_idle">Lit le compteur kilométrique directement depuis le tableau de bord de la moto. Cette lecture seule ne modifie jamais le rappel d\'entretien.</string>
+    <string name="instrument_read_body_running">Lecture du tableau de bord de la moto. Laissez le contact mis.</string>
+    <string name="instrument_read_body_complete">La moto a répondu. Compteur kilométrique : %1$d %2$s. État du tableau de bord : %3$s.</string>
+    <string name="instrument_read_body_blocked">%1$s</string>
+    <string name="instrument_read_button">Lire le tableau de bord</string>
+    <string name="instrument_read_failed_error">La lecture du tableau de bord s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
     <string name="instrument_reason_transport_rejected">L\'adaptateur a rejeté la commande de transport du tableau de bord %1$s</string>
     <string name="instrument_reason_unrecognized_response">Le tableau de bord a renvoyé une réponse non reconnue ; rien n\'a été écrit.</string>
 
     <!-- Trouble-code clear -->
-    <string name="dtc_clear_title">Effacer les codes de défaut (recherche)</string>
+    <string name="dtc_clear_title">Effacer les codes de défaut (Bêta)</string>
     <string name="dtc_clear_body_idle">Exécute l\'accès de sécurité et efface les codes moteur confirmés. N\'effacez que les codes que vous avez déjà lus et compris.</string>
     <string name="dtc_clear_body_running">Effacement des codes de défaut. Laissez le contact mis et ne quittez pas l\'application.</string>
     <string name="dtc_clear_body_cleared_none">Effacé. Aucun code de défaut confirmé ne subsiste.</string>
     <string name="dtc_clear_body_cleared_remaining">Effacement terminé, mais %1$d code(s) sont toujours présents.</string>
-    <string name="dtc_clear_body_blocked">%1$s Rien n\'a été effacé.</string>
+    <string name="dtc_clear_body_blocked">%1$s</string>
     <string name="dtc_clear_button">Effacer les codes de défaut</string>
     <string name="dtc_clear_button_again">Effacer à nouveau</string>
     <string name="dtc_clear_warning">Cela envoie une écriture au calculateur moteur (ECU). Confirmez pour continuer.</string>
@@ -121,13 +121,17 @@
     <string name="dtc_clear_reason_security_rejected">L\'ECU a rejeté l\'accès de sécurité ; rien n\'a été effacé.</string>
     <string name="dtc_clear_reason_rejected">L\'ECU a rejeté la demande d\'effacement ; aucun code n\'a été effacé.</string>
     <string name="dtc_clear_reason_count_unconfirmed">L\'effacement s\'est terminé mais le nombre de codes n\'a pas pu être confirmé.</string>
+    <string name="dtc_clear_reason_write_ambiguous">La tentative d\'effacement a commencé, mais aucun résultat fiable n\'a été reçu. Les codes sont peut-être déjà effacés. Reconnectez-vous et relisez-les avant de réessayer.</string>
+    <string name="dtc_clear_reason_verification_lost">L\'ECU a accepté l\'effacement, mais le décompte de contrôle a été perdu. Reconnectez-vous et relisez les codes.</string>
 
     <!-- Service reminder reset -->
-    <string name="service_reset_title">Réinitialiser le rappel d\'entretien (recherche)</string>
+    <string name="service_reset_title">Réinitialiser le rappel d\'entretien</string>
     <string name="service_reset_body_idle">Écrit un nouvel intervalle d\'entretien et une nouvelle date de prochain entretien sur le tableau de bord. Réinitialiser un rappel n\'effectue pas l\'entretien.</string>
     <string name="service_reset_body_running">Écriture du rappel d\'entretien. Laissez le contact mis et ne quittez pas l\'application.</string>
     <string name="service_reset_body_committed">Validé. Compteur kilométrique %1$d %2$s, intervalle %3$d %4$s, prochain entretien %5$s.</string>
-    <string name="service_reset_body_blocked">%1$s Rien n\'a été écrit.</string>
+    <string name="service_reset_body_blocked">%1$s</string>
+    <string name="service_reset_date_time_reminder">Avant la réinitialisation, vérifiez que la date et l\'heure de la moto sont correctes.</string>
+    <string name="service_reset_unit_label">Unité actuellement sélectionnée sur la moto</string>
     <string name="service_reset_interval_label">Intervalle d\'entretien (%1$s)</string>
     <string name="service_reset_interval_error_format">Saisissez un nombre entier positif.</string>
     <string name="service_reset_interval_error_range">Utilisez un multiple de %1$d %2$s, entre %3$d et %4$d %2$s.</string>
@@ -139,8 +143,10 @@
     <string name="service_reset_failed_error">La réinitialisation du rappel d\'entretien s\'est arrêtée après une erreur de connexion ou d\'adaptateur.</string>
     <string name="service_reset_reason_invalid_input">L\'intervalle ou la date demandés sont hors de la plage prise en charge ; rien n\'a été écrit.</string>
     <string name="service_reset_reason_unrecognized_status">Le tableau de bord a renvoyé un état non reconnu ; rien n\'a été écrit.</string>
-    <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'écriture de l\'intervalle d\'entretien ; rien n\'a été modifié. Cela peut se produire lorsque l\'affichage est réglé sur les miles — réglez l\'affichage sur les kilomètres et réessayez.</string>
+    <string name="service_reset_reason_distance_rejected">Le tableau de bord a rejeté l\'intervalle d\'entretien. La réinitialisation s\'est arrêtée avant de modifier la date.</string>
     <string name="service_reset_reason_date_unconfirmed">Le tableau de bord n\'a pas confirmé l\'écriture de la date d\'entretien.</string>
+    <string name="service_reset_reason_partially_applied">L\'intervalle d\'entretien a été accepté, mais la date n\'a pas été confirmée. Vérifiez la moto avant de réessayer.</string>
+    <string name="service_reset_reason_write_ambiguous">Une écriture du rappel a été tentée, mais aucun résultat fiable n\'a été reçu. L\'intervalle ou la date a peut-être changé. Vérifiez la moto avant de réessayer.</string>
 
     <!-- Cluster fingerprint gate -->
     <string name="gate_reason_profile_mismatch">Le profil de la moto connectée ne correspond pas au tableau de bord validé.</string>

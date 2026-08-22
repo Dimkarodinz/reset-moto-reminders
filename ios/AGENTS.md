@@ -6,18 +6,15 @@ This folder owns the iOS application: iOS UI and lifecycle, CoreBluetooth transp
 
 Do not place motorcycle protocol bytes or adapter UUIDs directly in application features. Load them from validated maps through typed models.
 
-## Platform decision and deferred phase
+## Platform decision and current phase
 
 Build the iOS app natively with Swift, SwiftUI and CoreBluetooth. Do not introduce Flutter/Dart merely to share the Android UI.
 
-Full iOS implementation is deferred until both conditions are met:
+The native iOS preview is implemented in [`ResetMotoReminders/`](ResetMotoReminders/), with the tested platform-neutral protocol/use-case layer in [`ResetMotoCore/`](ResetMotoCore/). Reuse Android behavior, wording, maps and test scenarios—not Android Bluetooth code or forced pixel-identical layouts.
 
-1. The Android adapter-only vertical slice establishes the shared conceptual interfaces and state vocabulary.
-2. The MC-IOS adapter-only `ATI` proof identifies a working GATT command/response channel and observed framing.
+The remaining boundary is physical validation of the MC-IOS primary GATT command channel. The production app handles that conservatively in every connection: it discovers only the primary `18F0` split channel, enables `2AF0` notifications, sends one adapter-only `ATI` through `2AF1`, and requires a recognizable adapter identity plus ELM prompt before enabling motorcycle features. Failure disconnects without sending a motorcycle command. Never add automatic fallback-channel probing.
 
-Until then, iOS work is limited to transport characterization, map/document maintenance and platform-neutral UX review. When implementation begins, reuse behavior, wording, maps and test scenarios—not Android Bluetooth code or forced pixel-identical layouts.
-
-**Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) is the maintainer probe app that executes the pending adapter-only `ATI` proof (condition 2) — one button per candidate channel, one shot per launch, JSONL journal shared back into `logs/`. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/) (headless `swift test`). The probe is tooling, not the deferred iOS app; the deferred-phase conditions above still gate the real implementation. *Status:* the app was built and free-signed onto the maintainer's iPhone on 2026-08-13 (the intentional `DEVELOPMENT_TEAM` setting in the project file); the probe run against the powered adapter has **not happened yet** — no journal exists, and the free signature expires ~7 days after install, so a redeploy from Xcode may be needed first.
+**Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) remains the maintainer-only tool for testing the alternate channel or collecting a focused JSONL journal. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/). The probe run against the powered adapter has not happened yet, and its earlier free signature may have expired.
 
 ## Required project sources
 
@@ -30,6 +27,10 @@ Until then, iOS work is limited to transport characterization, map/document main
 | [`../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml`](../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml) | Current motorcycle/module protocol evidence |
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Shared user-facing DTC dictionary with observed and reference-only entries kept distinct |
 | [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | CoreBluetooth discovery, GATT details and pending adapter-only proof |
+| [`PLAN.md`](PLAN.md) | Reviewed production implementation plan and safety checklist |
+| [`ResetMotoCore/`](ResetMotoCore/) | Typed generated profile, ELM/CAN/UDS logic, use cases and deterministic tests |
+| [`ResetMotoReminders/`](ResetMotoReminders/) | SwiftUI application, CoreBluetooth session and Xcode project |
+| [`tools/sync_profiles.rb`](tools/sync_profiles.rb) | Regenerates the bundled iOS JSON profile from shared YAML maps |
 
 Do not load [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) as an iOS transport profile. It uses Bluetooth Classic SPP/RFCOMM, which CoreBluetooth does not expose.
 
@@ -55,12 +56,11 @@ iOS UI and lifecycle
 
 ## Current feature gates
 
-- BLE discovery, connection, GATT discovery and notification evidence is available for the later native implementation; current iOS work remains transport characterization until the deferred-phase conditions are met.
-- The MC-IOS command channel is not proven. No captured `ATI` write or adapter response exists.
-- Until the adapter-only proof succeeds, the app must stop at `unsupported/unvalidated adapter transport` and send no motorcycle diagnostic command.
-- DTC read remains experimental until the transport proof and minimum ECU session/security prerequisites are established.
-- DTC clear and service reset remain disabled until exact module identity and software compatibility checks exist.
-- Unknown maps, schema versions, characteristic layouts, adapter identities or module identities fail closed.
+- The SwiftUI app and all four feature flows are implemented and compile for simulator and physical iOS targets. The core has deterministic transcript tests; none of these results substitutes for a physical iPhone/motorcycle test.
+- The MC-IOS primary command channel is still capture-unproven. A session-local successful `ATI` gate is mandatory before any motorcycle command; unexpected layout, missing prompt, timeout or unknown identity disconnects.
+- Dashboard and DTC reads, DTC clear (Beta), and service reset use the same captured Tiger 900 commands and response rules as Android. No other motorcycle profile is selectable.
+- Service writes require the exact bundled motorcycle profile and live `043` instrument fingerprint. DTC clear retains the Beta label and explicit destructive confirmation.
+- Unknown map schemas, characteristic layouts, adapter identities, instrument fingerprints or response shapes fail closed. Writes are never automatically retried after an ambiguous result.
 
 ## iOS implementation rules
 
@@ -71,7 +71,7 @@ iOS UI and lifecycle
 - Preserve notification fragments in arrival order and declare an ELM response complete only after the prompt is observed and validated.
 - Do not automatically probe both candidate GATT channels. Test the primary path once, preserve the capture, and test the fallback only in a separate adapter-only attempt.
 - Cancel the connection on unexpected layout, response, timeout or application shutdown. Never silently replay an interrupted write.
-- Redact peripheral identifiers, serial numbers and VINs from exported logs.
+- The production app does not export logs. The maintainer probe must redact peripheral identifiers, serial numbers and VINs from any shared journal.
 
 ## UI safety behavior
 
@@ -90,6 +90,7 @@ iOS UI and lifecycle
 - Never make an automated test clear DTCs or reset service state on a motorcycle.
 - Keep captures and real identifiers outside test fixtures and release artifacts.
 - Follow the iOS source/self-build and authorized-distribution limits in [`../LEGAL_RESTRICTIONS.md`](../LEGAL_RESTRICTIONS.md); do not publish a development-signed IPA.
+- Run `swift test --package-path ios/ResetMotoCore` plus unsigned simulator and generic-device Xcode builds before handoff. Run `ruby ios/tools/sync_profiles.rb` after relevant YAML-map changes, review the generated diff, then rerun tests.
 
 ### Planned no-fee distribution channels
 
