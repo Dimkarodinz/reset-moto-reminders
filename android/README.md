@@ -2,20 +2,22 @@
 
 Reset the service light, read trouble codes, and clear DTCs on a **Triumph Tiger 900** from an Android phone, using a Bluetooth OBD adapter. This is the Android app; see the [root README](../README.md) for the user-facing overview and supported models.
 
-Current build: **v0.6.3** (`versionCode 10`). Reset Moto Reminders connects to a bonded `vLinker MC-Android` (tested with the **vLinker MC+** OBD adapter / ECU linker on Android and iPhone), verifies the captured ELM/STN identity, applies the common adapter initialization sequence and disconnects cleanly.
+Current build: **v0.7.0** (`versionCode 11`). Reset Moto Reminders connects to a bonded `vLinker MC-Android` (tested with the **vLinker MC+** OBD adapter / ECU linker on Android and iPhone), verifies the captured ELM/STN identity, applies the common adapter initialization sequence and disconnects cleanly.
+
+The rider-facing app uses a fixed, high-contrast dark theme with dark system bars; it does not follow the phone into a light presentation.
 
 **Trouble-code reading** is a mainline feature. Once the adapter is ready, **Read trouble codes** performs the observed engine-ECU confirmed-DTC read in the default session and decodes each code against the packaged DTC dictionary. It is strictly a read: it never requests SecurityAccess, clears DTCs or sends any write. If the ECU returns a code count that does not match the decoded codes, the read reports a recoverable failure without dropping the connection.
 
-Four research-only (debug build) paths sit behind `RESEARCH_BUILD` and are absent from release builds:
+Once the adapter is ready, the main screen exposes four focused motorcycle operations:
 
-- **Read-only ECU capture** — single-attempt, non-sensitive identifiers plus DTC count/details, with one conditional extended-session retry. No write.
-- **Instrument read** — first contact with the cluster, sends only the two observed reads (`5E01`, `0D01`) and decodes the odometer. No write.
-- **Clear trouble codes (v0.6.0, write)** — runs the observed extended-session → security-access → clear → count-verify sequence. The engine seed/key derivation executes only on this engine-ECU path. Requires an explicit arm→confirm.
-- **Reset service reminder (v0.6.0, write)** — writes a new interval and next-service date to the instrument, replaying only observed bytes. Gated by a fingerprint check (exact motorcycle profile + observed transport route + live `5E01` `043` status) that fails closed before any write byte. Requires an explicit arm→confirm.
+- **Dashboard information** — reads the odometer and instrument status as read-only proof that the motorcycle responded.
+- **Read trouble codes** — reads and decodes confirmed engine DTCs.
+- **Clear trouble codes (Beta)** — runs the observed extended-session and SecurityAccess sequence, sends the all-groups clear exactly once, consumes response-pending plus the final response, then verifies the remaining count. Requires explicit arm→confirm.
+- **Reset service reminder** — asks for the unit currently selected on the motorcycle, interval and date, then writes either the observed km (`33xx`) or miles (`34xx`) interval followed by the date. A cluster fingerprint check fails closed before any write, and the UI reminds the rider to set motorcycle date/time correctly.
 
-The **service reset is hardware-validated for the km path** (full commit on the motorcycle on 2026-08-13); **DTC clear is still hardware-unvalidated** and waits for the fault-provocation trip below. Neither write can appear in a release build.
+The **service reset is project-app hardware-validated for the km path** (full commit on 2026-08-13). The miles path is supported by a successful 2026-08-22 HCI capture and deterministic replay tests, but still needs its first project-app motorcycle run. **DTC clear is still hardware-unvalidated** and waits for the fault-provocation trip below. Neither write appears in the release build yet.
 
-Checkpoint: v0.4.0 (`versionCode 5`) completed the consolidated motorcycle research test on 2026-08-10 — adapter initialization, identity match, all identifier reads and a default-session zero-DTC count read, with every command inside the read-only allowlist (journal and analysis in `logs/2026-08-10/`, root `AGENTS.md` checkpoint updated). v0.5.0 (`versionCode 6`) added the mainline DTC read and the research instrument read on top of that validated path. v0.6.0 (`versionCode 7`) added the two gated writes. v0.6.1 (`versionCode 8`) fixed the four bugs the 2026-08-12 trip exposed (live CAN framing, stale route, session teardown, pre-I/O validation). v0.6.2 (`versionCode 9`) added service-reset input validation and a next-service date picker, plus full five-language UI localization. v0.6.3 (`versionCode 10`) recorded the 2026-08-13 dash-flip evidence — the km-mode service reset **committed on hardware** (first project-app write validated end-to-end), while the identical write with the dashboard in miles was rejected by the cluster and correctly blocked, now with an actionable message. All paths are covered by transcript/scripted unit tests (165 tests), including replays of the real km commit and miles rejection. Still unexercised against a motorcycle: the DTC detail read with a nonzero count, the extended-session branch, DTC clear, and any miles-mode write.
+Checkpoint: v0.4.0 completed the first consolidated motorcycle read; v0.5.0 added the main DTC read; v0.6.0 added the gated writes; v0.6.1 fixed live CAN framing, stale routing, failure handling and pre-I/O validation; v0.6.2 added reset input/date validation and localization; v0.6.3 recorded the first project-app km reset. **v0.7.0** adds the captured miles command, a km/mi selector, the motorcycle date/time reminder, a user-facing read-only dashboard proof, and a no-resend fix for DTC response-pending. Still unexercised through this app: nonzero DTC detail decoding, DTC clear and the miles reset.
 
 ## Build
 
@@ -35,11 +37,13 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 
 The installable debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. The release task also verifies that the optimized release variant can be assembled; it is not a distributable signed release.
 
-## Harvest-sweep motorcycle trip (v0.6.0)
+## Remaining motorcycle validation (v0.7.0)
 
-> **Status (2026-08-13):** Run 1 (harvest + service reset) is **done** — the km-mode reset committed on hardware. The Run 3 units experiment is **done** in a stronger form: the rider reset in km, flipped the dash to miles and reset again, proving reads are canonical while the interval write is unit-dependent (the km-scaled write was rejected in miles mode). **Still pending: Run 2** — the DTC fault-provocation read + clear (steps 11–14). The instructions below remain the plan for that remaining run.
+> **Status (2026-08-22):** km reset is validated through this app. Miles reset is capture-validated and implemented. The remaining physical checks are one miles reset through v0.7.0 and one nonzero DTC read/clear.
 
-This build is designed so one trip gathers everything and validates both writes. Keep ignition on and engine off throughout each connection. Setup:
+The 2026-08-23 safety pass keeps the same rider flow but prevents operations from interleaving: while one dashboard/DTC/service action is running, the other action buttons and Disconnect are temporarily disabled. If the adapter loses a response after a write, the app does not retry or claim failure; it asks you to inspect the motorcycle or reconnect and read again. If the service interval was accepted but its date was not confirmed, the app reports the partial update explicitly.
+
+Keep ignition on and engine off throughout each connection. Setup:
 
 1. Connect the vLinker to the motorcycle diagnostic port so the adapter is powered.
 2. In Android Bluetooth settings, pair `vLinker MC-Android`; use PIN `1234` when requested.
@@ -47,33 +51,25 @@ This build is designed so one trip gathers everything and validates both writes.
 4. Open Reset Moto Reminders, grant Bluetooth access if Android asks, and choose **Pair or select adapter**, then the bonded adapter, then **Connect**.
 5. Confirm the screen reaches **Adapter ready** and shows `ELM327 v2.2`, `STN1151 v4.3.2` and map `vlinker-mc-android`.
 
-**Run 1 — healthy state (harvest + service reset):**
+**Run 1 — service reset:**
 
-6. Choose **Capture read-only ECU data** once; wait for its terminal state. Do not repeat it in the same connection.
-7. Choose **Read instrument data** and note the odometer/status.
-8. Choose **Read trouble codes** (expect zero on a healthy bike).
-9. **Reset service reminder:** enter the interval (km) and next-service date, choose **Reset reminder**, then **Confirm reset**. Confirm the card shows **Committed**.
-10. Choose **Disconnect**, and copy the newest private journal (commands below).
+6. Choose **Read trouble codes** (expect zero on a healthy bike).
+7. Make sure the motorcycle date/time is correct. Under **Reset service reminder**, select the unit currently shown on the motorcycle, enter the interval and next-service date, then choose **Reset reminder** and **Confirm reset**.
+8. Confirm the card shows **Committed**, then choose **Disconnect**.
 
 **Trigger a test fault (no riding):**
 
-11. Turn the ignition **off**. Unplug the **front ABS / wheel-speed sensor** connector (accessible at the fork), then turn ignition **on** and wait ~1 minute for the fault to register.
+9. Turn the ignition **off**. Unplug the **front ABS / wheel-speed sensor** connector (accessible at the fork), then turn ignition **on** and wait ~1 minute for the fault to register.
 
 **Run 2 — with fault (read + clear):**
 
-12. Reconnect the app (steps 4–5), choose **Read trouble codes**, and confirm a nonzero, decoded code appears.
-13. **Clear trouble codes:** choose **Clear trouble codes**, then **Confirm clear**. Confirm the card reports the remaining count (expect the fault to persist until the sensor is restored — that is fine; it proves the clear/verify path).
-14. Choose **Disconnect** and copy that journal too.
+10. Reconnect the app (steps 4–5), choose **Read trouble codes**, and confirm a nonzero, decoded code appears.
+11. **Clear trouble codes (Beta):** choose **Clear trouble codes**, then **Confirm clear**. Confirm the card reports the remaining count (expect the fault to persist until the sensor is restored — that is fine; it proves the clear/verify path).
+12. Choose **Disconnect**.
 
-**Run 3 — units experiment (healthy, dash in miles):**
+**Restore before leaving:** turn ignition off, reconnect the ABS sensor, then turn ignition on and confirm no warning lights remain. A miles-mode reset may be tested as Run 1 by selecting **mi**; do not select a unit different from the motorcycle display.
 
-15. Turn ignition **off**, **replug the ABS sensor**, then in the bike's dashboard menu **switch the display units to miles**. Ignition **on** and reconnect.
-16. Choose **Capture read-only ECU data** and **Read instrument data**. This second read of the same odometer, with only the dash unit changed, is the km-vs-miles comparison against Run 1 — read-only, no write is needed.
-17. Choose **Read trouble codes**, then **Clear trouble codes** / **Confirm clear** once more to leave a clean fault memory. Disconnect and copy the final journal.
-
-**Restore before leaving:** switch the dashboard back to **km**, and confirm the ABS sensor is reconnected with no warning lights remaining.
-
-Stop at any point if the identity differs, the adapter disconnects repeatedly, the fingerprint gate blocks a write, or an unexpected error appears. Writes only ever send observed bytes and never auto-retry after a disconnect or ambiguous result. This trip should validate: the DTC detail read + nonzero count/format, whether DTC clear needs SecurityAccess (and the seed/key derivation on hardware), the instrument path, the gated service reset, and — by diffing the Run 1 (km) and Run 3 (miles) instrument bytes — whether the cluster stores a canonical unit or the rider's chosen unit.
+Stop at any point if the identity differs, the adapter disconnects repeatedly, the fingerprint gate blocks a write, or an unexpected error appears. Writes only ever send observed bytes and never auto-retry after a disconnect or ambiguous result. If the app says the result needs inspection, check the motorcycle and reconnect/read before considering another write. This trip should validate the nonzero DTC detail format, DTC clear, and optionally the captured miles service-reset path.
 
 The phone is not required for the local unit, lint and APK build. Use ADB only when the phone is connected again and you intentionally start this trip.
 
@@ -103,14 +99,14 @@ It reports adapter identity, the outbound-command audit against the read-only al
 
 Ordered JSONL diagnostic journals are stored in the app-private `diagnostic-logs/` directory. Bluetooth addresses are not written to them. VIN, serial-number-like fields and UDS SecurityAccess payloads are redacted before persistence. The directory is excluded from Android backup and device transfer.
 
-Log viewing, redacted export and retention controls remain work for the next implementation checkpoint. Do not publish app data or full system/HCI captures.
+These journals are developer diagnostics only. The main app does not expose report/log sharing, and app data or full system/HCI captures must not be published.
 
 ## Planned work
 
 - ~~**Localization.**~~ **Done.** The UI is localized into English, Spanish, Ukrainian, French and German, chosen automatically from the phone's language setting with English as the default and fallback (`values-es`/`-uk`/`-fr`/`-de` overlays). DTC messages use language-tagged maps with per-locale translation overlays falling back to the authoritative English. Only UI text is translated — protocol bytes, ECU/DTC map data and journal contents stay untouched. Adding a locale is one strings overlay plus one DTC translation overlay.
 - **Support footer.** Show a small, always-visible "Buy Me a Coffee" / Ko-fi footer at the bottom of the screen (visible without scrolling) that opens the support links below in a browser. Deliberately **not** tied to a successful write: coupling a donation to the single riskiest operation reads as pressure at an emotional peak and sits closest to any liability claim. Keep it a passive footer on general app use — never a modal, never triggered by an operation outcome. No tracking, no in-app purchase.
 - **Discoverability.** Optimize the project so it surfaces in both classic search engines and LLM answers. Keyword-rich README (motorcycle/model, "reset service reminder", "clear DTC", adapter/protocol terms) with clear headings and a plain "what it does / what it does not" summary; a description on every GitHub release (changes, supported motorcycle/adapter, APK asset); a GitHub project page with topics, About and all relevant attributes; and factual, quotable phrasing an LLM can cite accurately. Never publish captures, VINs or protocol dumps for reach — the private-logs boundary and safety accuracy come first.
-- **Miles support.** Make the app represent the bike's own unit: it shows and accepts whatever unit the dashboard uses and never displays or writes a value that disagrees with it. There is deliberately no phone-locale conversion — the bike is the only source of truth. The 2026-08-13 dash-flip experiment answered the unit model and it is **mixed**: reads are canonical (odometer/status bytes identical in km and miles), but the interval **write is unit-dependent** — the km-scaled write accepted in km mode was rejected with the dash in miles, and no field reporting the current dash unit has been found. The app therefore keeps the km path, and on a miles-mode rejection tells the user to switch the dash to km and retry. Unblocking real miles writes requires one capture of a **successful** miles-mode interval write (via the third-party source with the dash in miles, harvested over HCI snoop like the original observations) to derive the miles scaling — it must not be guessed. Then fold the unit into the fingerprint gate and refuse the write whenever the unit cannot be established.
+- ~~**Miles command discovery.**~~ **Done 2026-08-22.** Reads remain canonical kilometres, while interval writes use service `0x33` for hundreds of kilometres and `0x34` for hundreds of miles. Because no reliable read identifies the dashboard setting, v0.7.0 asks the rider to select the unit currently shown on the motorcycle and echoes it in the confirmation. The remaining step is one project-app miles reset on the motorcycle.
 - **Consent / right-to-repair gate.** Before the first write-capable release, add a one-time in-app consent screen (unofficial project, no warranty, a reminder reset is not maintenance, a cleared code is not a repair, use is at the owner's own risk) plus the right-to-repair posture from the root README. This is a real acknowledgement, not a buried EULA, and requires the Spanish/EU legal review noted in `../LEGAL_RESTRICTIONS.md`.
 - **Distribution.** Publish signed GitHub release APKs with a SHA-256 checksum, built from a public source tag (the flow in `../LEGAL_RESTRICTIONS.md`). No CI — this is a single-developer project with no remote, so a tagged local build is the release mechanism.
 

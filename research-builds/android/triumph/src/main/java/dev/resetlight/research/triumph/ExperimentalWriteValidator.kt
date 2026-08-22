@@ -63,9 +63,10 @@ class ExperimentalWriteValidator(
         events.record(
             ResearchEvent(
                 name = "service_reset_validation_started",
-                text = "previous_distance_km=${request.previousDistanceKm} " +
+                text = "distance_unit=${request.distanceUnit.name.lowercase()} " +
+                    "previous_distance=${request.previousDistance} " +
                     "previous_next_service_date=${request.previousNextServiceDate} " +
-                    "test_distance_km=${request.testDistanceKm} " +
+                    "test_distance=${request.testDistance} " +
                     "test_next_service_date=${request.testNextServiceDate}",
             ),
         )
@@ -80,7 +81,8 @@ class ExperimentalWriteValidator(
         val testResult = try {
             serviceResetService(gate).reset(
                 guardedChannel("service_reset_test"),
-                request.testDistanceKm,
+                request.testDistance,
+                request.distanceUnit,
                 request.testNextServiceDate,
             )
         } catch (failure: ServiceReminderResetFailure) {
@@ -96,7 +98,7 @@ class ExperimentalWriteValidator(
         val testValidation = when (testResult) {
             is ServiceReminderResetResult.Committed -> ResearchOperationValidation(
                 ResearchWriteOutcome.VALIDATED,
-                "Temporary +100 km/+1 day values were accepted",
+                "Temporary +100 ${request.distanceUnit.name.lowercase()}/+1 day values were accepted",
             )
             is ServiceReminderResetResult.Blocked -> ResearchOperationValidation(
                 ResearchWriteOutcome.REJECTED,
@@ -114,14 +116,16 @@ class ExperimentalWriteValidator(
         events.record(
             ResearchEvent(
                 name = "service_reset_restore_started",
-                text = "distance_km=${request.previousDistanceKm} " +
+                text = "distance_unit=${request.distanceUnit.name.lowercase()} " +
+                    "distance=${request.previousDistance} " +
                     "next_service_date=${request.previousNextServiceDate}",
             ),
         )
         val restoreResult = try {
             serviceResetService(gate).reset(
                 guardedChannel("service_reset_restore"),
-                request.previousDistanceKm,
+                request.previousDistance,
+                request.distanceUnit,
                 request.previousNextServiceDate,
             )
         } catch (failure: ServiceReminderResetFailure) {

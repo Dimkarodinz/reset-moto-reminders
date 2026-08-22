@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TriumphResearch" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.TriumphResearch" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#315D66</item>
-        <item name="android:navigationBarColor">#F7FAFA</item>
-        <item name="android:statusBarColor">#F7FAFA</item>
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorAccent">#8DB9B4</item>
+        <item name="android:navigationBarColor">#0B0F14</item>
+        <item name="android:statusBarColor">#0B0F14</item>
+        <item name="android:windowBackground">#0B0F14</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

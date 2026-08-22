@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import dev.resetlight.transport.bluetooth.BondedDevice
+import dev.resetlight.domain.DistanceUnit
 import java.io.File
 import java.time.Year
 import java.time.LocalDate
@@ -36,9 +36,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = true
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = false
+            isAppearanceLightStatusBars = false
+        }
         setContent {
-            MaterialTheme {
+            TriumphResearchTheme {
                 val session by container.sessions.state.collectAsState()
                 val devices by container.devices.collectAsState()
                 var model by rememberSaveable { mutableStateOf("") }
@@ -47,17 +50,19 @@ class MainActivity : ComponentActivity() {
                 var showDevicePicker by remember { mutableStateOf(false) }
                 var clearDtcs by rememberSaveable { mutableStateOf(false) }
                 var resetService by rememberSaveable { mutableStateOf(false) }
-                var distanceKm by rememberSaveable { mutableStateOf("") }
+                var serviceDistanceUnit by rememberSaveable { mutableStateOf(DistanceUnit.KILOMETERS) }
+                var serviceDistance by rememberSaveable { mutableStateOf("") }
                 var nextServiceDate by rememberSaveable { mutableStateOf("") }
                 var writesAcknowledged by rememberSaveable { mutableStateOf(false) }
                 val validation = ResearchVehicleInput.validate(model, modelYear, Year.now().value)
                 val writeValidation = ResearchWriteInput.validate(
                     clearDtcs = clearDtcs,
                     resetService = resetService,
-                    distanceKm = distanceKm,
+                    distanceUnit = serviceDistanceUnit,
+                    distance = serviceDistance,
                     nextServiceDate = nextServiceDate,
                     today = LocalDate.now(),
-                    constraints = container.serviceIntervalConstraints,
+                    constraints = container.serviceDistanceConstraints,
                 )
                 val selected = devices.firstOrNull { it.address == selectedAddress }
 
@@ -69,7 +74,8 @@ class MainActivity : ComponentActivity() {
                     session = session,
                     clearDtcs = clearDtcs,
                     resetService = resetService,
-                    distanceKm = distanceKm,
+                    distanceUnit = serviceDistanceUnit,
+                    distance = serviceDistance,
                     nextServiceDate = nextServiceDate,
                     writesAcknowledged = writesAcknowledged,
                     writeValidation = writeValidation,
@@ -83,8 +89,12 @@ class MainActivity : ComponentActivity() {
                         resetService = it
                         writesAcknowledged = false
                     },
+                    onDistanceUnitChanged = {
+                        serviceDistanceUnit = it
+                        writesAcknowledged = false
+                    },
                     onDistanceChanged = {
-                        distanceKm = it.filter(Char::isDigit).take(5)
+                        serviceDistance = it.filter(Char::isDigit).take(5)
                         writesAcknowledged = false
                     },
                     onDateChanged = {

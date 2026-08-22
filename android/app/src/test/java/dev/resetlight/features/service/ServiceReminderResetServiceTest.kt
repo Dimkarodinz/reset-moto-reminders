@@ -2,6 +2,7 @@ package dev.resetlight.features.service
 
 import dev.resetlight.diagnostics.DiagnosticWriteChannel
 import dev.resetlight.diagnostics.WriteIntent
+import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.profiles.EcuProfileLoader
 import java.io.File
 import java.io.IOException
@@ -156,6 +157,30 @@ class ServiceReminderResetServiceTest {
         result as ServiceReminderResetResult.Committed
         assertEquals(44756, result.odometerKm)
         assertEquals(listOf("5E01", "0D01", "334E", "5C1B080D016E0000"), channel.dataRequests)
+    }
+
+    @Test
+    fun `replays the captured 2026-08-22 miles reset`() = runTest {
+        val channel = ScriptedChannel(
+            configResponses() + mapOf(
+                "5E01" to "704DE303433FFFFFFFF",
+                "0D01" to "7048D0100AED4000000",
+                "343C" to "704B43C000000000000",
+                "5C1B0816016E0000" to "704DC1B0816016E0000",
+            ),
+        )
+
+        val result = framedService().reset(
+            channel,
+            6_000,
+            DistanceUnit.MILES,
+            LocalDate.of(2027, 8, 22),
+        )
+
+        result as ServiceReminderResetResult.Committed
+        assertEquals(DistanceUnit.MILES, result.distanceUnit)
+        assertEquals(6_000, result.distance)
+        assertEquals(listOf("5E01", "0D01", "343C", "5C1B0816016E0000"), channel.dataRequests)
     }
 
     @Test

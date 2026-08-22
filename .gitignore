@@ -1,6 +1,9 @@
 # Private captures may include Bluetooth addresses, serials and diagnostic traffic.
 logs/
 
+# Private reverse-engineering workspaces and third-party artifacts.
+tmp/
+
 # Android local/build state
 android/.gradle/
 android/.kotlin/

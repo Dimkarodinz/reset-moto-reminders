@@ -8,15 +8,18 @@ The application gathers bounded compatibility evidence from Triumph motorcycles 
 
 It is not the user-facing Reset Moto Reminders application. Use package `dev.resetlight.research.triumph` and the visible name `Triumph Research` so both APKs can coexist.
 
+The app uses a fixed high-contrast dark theme matching the main app's near-black, graphite, muted-teal and restrained-warning palette. Keep status and navigation bars dark with light icons; do not follow the phone's light theme automatically.
+
 ## Hard boundaries
 
 - Complete and journal the automatic read phase before any selected write validation. The read policy permits only the single observed, non-persistent `1003` DTC-read fallback.
 - Never send VIN (`F190`), ECU serial (`F18C`), generic write (`2E`), routine control (`31`), OBD mode `04`, or any unlisted write. Enforce separate read and write policies with negative tests even if a packaged map changes.
-- Optional write validation is limited to the exact mapped SecurityAccess/DTC-clear/count-verify sequence and exact kilometre `33xx`/`5Cxx` service-reset templates. Service validation is a round trip based on user-entered current values: write one profile step (`+100 km`) and `+1 day`, classify the echoes, then restore the entered values and classify restoration separately. It requires a matching precursor read, explicit selection/acknowledgement, and one session attempt.
+- Optional write validation is limited to the exact mapped SecurityAccess/DTC-clear/count-verify sequence and the observed selected-unit service templates: `33xx` for kilometres, `34xx` for miles, followed by `5Cxx` for the date. Service validation is a round trip based on user-entered current values: write one profile step (`+100` in the selected dashboard unit) and `+1 day`, classify the echoes, then restore the entered values in the same unit and classify restoration separately. It requires a matching precursor read, explicit selection/acknowledgement, and one session attempt.
 - Attempt service restoration after either a confirmed temporary commit or an explicit ECU rejection while the connection remains healthy. On disconnect, timeout or ambiguous write, mark restoration unknown and stop; never send a speculative follow-up write or auto-retry the session. The protocol cannot read the current stored interval/date, so the UI must require accurate baseline entry and must never prefill assumed values.
 - Never add arbitrary CAN-address, DID, routine, or key scanning.
 - Treat every result as evidence for that motorcycle only, never automatic support for a model family. A rejection is useful evidence and not a prompt to probe alternative bytes.
-- Keep kilometre values raw; do not add miles conversion or localization to this research app.
+- Keep the tester-entered distance raw in the selected dashboard unit. Never convert between km and miles, infer the unit from phone locale, or switch service prefixes during a round trip.
+- Send DTC clear exactly once. If the response contains `7F1478`, consume the final response returned for that same request; never interpret response-pending as permission to resend the clear.
 - Do not log Bluetooth MAC addresses. Never request VIN or serial values. Redact sensitive material in both text and ASCII-encoded raw-hex journal fields.
 - Keep reports private until the user explicitly shares them. Never commit collected reports.
 - Do not turn one successful motorcycle into a family-wide compatibility claim.

@@ -36,13 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.resetlight.R
 import dev.resetlight.diagnostics.DecodedDtc
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.domain.MotorcycleDistanceUnits
 import dev.resetlight.domain.NextServiceDateRules
 import dev.resetlight.domain.ServiceIntervalConstraints
@@ -66,6 +71,7 @@ fun ConnectionScreen(
     instrumentReadState: InstrumentReadState,
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
+    operationInProgress: Boolean,
     distanceUnits: MotorcycleDistanceUnits,
     intervalConstraints: ServiceIntervalConstraints?,
     researchCaptureEnabled: Boolean,
@@ -78,7 +84,7 @@ fun ConnectionScreen(
     onReadDtc: () -> Unit,
     onReadInstrument: () -> Unit,
     onClearDtc: () -> Unit,
-    onResetServiceReminder: (Int, LocalDate) -> Unit,
+    onResetServiceReminder: (Int, DistanceUnit, LocalDate) -> Unit,
     onFailureAction: (FailureAction) -> Unit,
     modifier: Modifier = Modifier,
     presenter: ConnectionScreenPresenter = ConnectionScreenPresenter(),
@@ -95,6 +101,7 @@ fun ConnectionScreen(
         instrumentReadState = instrumentReadState,
         dtcClearState = dtcClearState,
         serviceResetState = serviceResetState,
+        operationInProgress = operationInProgress,
         distanceUnits = distanceUnits,
         intervalConstraints = intervalConstraints,
         onPairOrSelect = onPairOrSelect,
@@ -118,6 +125,7 @@ fun ConnectionScreen(
     instrumentReadState: InstrumentReadState,
     dtcClearState: DtcClearUiState,
     serviceResetState: ServiceResetUiState,
+    operationInProgress: Boolean,
     distanceUnits: MotorcycleDistanceUnits,
     intervalConstraints: ServiceIntervalConstraints?,
     onPairOrSelect: () -> Unit,
@@ -127,10 +135,11 @@ fun ConnectionScreen(
     onReadDtc: () -> Unit,
     onReadInstrument: () -> Unit,
     onClearDtc: () -> Unit,
-    onResetServiceReminder: (Int, LocalDate) -> Unit,
+    onResetServiceReminder: (Int, DistanceUnit, LocalDate) -> Unit,
     onFailureAction: (FailureAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val actionsEnabled = !operationInProgress
     Scaffold(
         modifier = modifier.fillMaxSize(),
     ) { contentPadding ->
@@ -143,20 +152,21 @@ fun ConnectionScreen(
         ) {
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = ActionTitleStyle,
             )
             ConnectionCard(
                 state = state,
                 onPairOrSelect = onPairOrSelect,
                 onConnect = onConnect,
                 onDisconnect = onDisconnect,
+                disconnectEnabled = !operationInProgress,
                 onFailureAction = onFailureAction,
             )
             if (state.showReadOnlyCapture) {
                 ReadOnlyCaptureCard(
                     captureState = readOnlyCaptureState,
                     onCapture = onReadOnlyCapture,
+                    actionsEnabled = actionsEnabled,
                 )
             }
             HorizontalDivider()
@@ -169,6 +179,7 @@ fun ConnectionScreen(
                 DtcReadCard(
                     dtcReadState = dtcReadState,
                     onReadDtc = onReadDtc,
+                    actionsEnabled = actionsEnabled,
                 )
             }
             if (state.showServiceInfoRead) {
@@ -176,12 +187,14 @@ fun ConnectionScreen(
                     instrumentReadState = instrumentReadState,
                     distanceUnits = distanceUnits,
                     onReadInstrument = onReadInstrument,
+                    actionsEnabled = actionsEnabled,
                 )
             }
             if (state.showDtcClear) {
                 DtcClearCard(
                     dtcClearState = dtcClearState,
                     onClearDtc = onClearDtc,
+                    actionsEnabled = actionsEnabled,
                 )
             }
             if (state.showServiceReset) {
@@ -190,8 +203,9 @@ fun ConnectionScreen(
                     distanceUnits = distanceUnits,
                     intervalConstraints = intervalConstraints,
                     onResetServiceReminder = onResetServiceReminder,
+                    actionsEnabled = actionsEnabled,
                 )
-            } else {
+            } else if (state.showUnavailableServiceCard) {
                 UnavailableFeatureCard(state.serviceCard)
             }
             Text(
@@ -203,10 +217,20 @@ fun ConnectionScreen(
     }
 }
 
+private val ActionTitleStyle = TextStyle(
+    fontFamily = FontFamily.SansSerif,
+    fontWeight = FontWeight.Black,
+    fontStyle = FontStyle.Italic,
+    fontSize = 30.sp,
+    lineHeight = 32.sp,
+    letterSpacing = 1.2.sp,
+)
+
 @Composable
 private fun ReadOnlyCaptureCard(
     captureState: ReadOnlyCaptureState,
     onCapture: () -> Unit,
+    actionsEnabled: Boolean,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -249,6 +273,7 @@ private fun ReadOnlyCaptureCard(
             if (captureState is ReadOnlyCaptureState.Idle) {
                 Button(
                     onClick = onCapture,
+                    enabled = actionsEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(stringResource(R.string.capture_button))
@@ -262,6 +287,7 @@ private fun ReadOnlyCaptureCard(
 private fun DtcReadCard(
     dtcReadState: DtcReadState,
     onReadDtc: () -> Unit,
+    actionsEnabled: Boolean,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -296,6 +322,7 @@ private fun DtcReadCard(
             } else {
                 Button(
                     onClick = onReadDtc,
+                    enabled = actionsEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
@@ -318,6 +345,7 @@ private fun ServiceInfoReadCard(
     instrumentReadState: InstrumentReadState,
     distanceUnits: MotorcycleDistanceUnits,
     onReadInstrument: () -> Unit,
+    actionsEnabled: Boolean,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -337,7 +365,6 @@ private fun ServiceInfoReadCard(
                         R.string.instrument_read_body_complete,
                         distanceUnits.wireToDisplay(instrumentReadState.odometerKm),
                         distanceUnits.display.label(),
-                        instrumentReadState.odometerRaw,
                         instrumentReadState.statusAscii,
                     )
                     is InstrumentReadState.Blocked -> stringResource(
@@ -353,6 +380,7 @@ private fun ServiceInfoReadCard(
             } else {
                 Button(
                     onClick = onReadInstrument,
+                    enabled = actionsEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
@@ -374,6 +402,7 @@ private fun ServiceInfoReadCard(
 private fun DtcClearCard(
     dtcClearState: DtcClearUiState,
     onClearDtc: () -> Unit,
+    actionsEnabled: Boolean,
 ) {
     var confirmArmed by remember { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -402,6 +431,7 @@ private fun DtcClearCard(
                         R.string.dtc_clear_body_blocked,
                         dtcClearState.reason.resolved(),
                     )
+                    is DtcClearUiState.NeedsVerification -> dtcClearState.reason.resolved()
                     is DtcClearUiState.Failed -> dtcClearState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -411,6 +441,7 @@ private fun DtcClearCard(
             } else if (!confirmArmed) {
                 OutlinedButton(
                     onClick = { confirmArmed = true },
+                    enabled = actionsEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
@@ -432,6 +463,7 @@ private fun DtcClearCard(
                         confirmArmed = false
                         onClearDtc()
                     },
+                    enabled = actionsEnabled,
                 )
             }
         }
@@ -444,10 +476,12 @@ private fun ServiceResetCard(
     serviceResetState: ServiceResetUiState,
     distanceUnits: MotorcycleDistanceUnits,
     intervalConstraints: ServiceIntervalConstraints?,
-    onResetServiceReminder: (Int, LocalDate) -> Unit,
+    onResetServiceReminder: (Int, DistanceUnit, LocalDate) -> Unit,
+    actionsEnabled: Boolean,
 ) {
     val today = remember { LocalDate.now() }
     var distanceText by remember { mutableStateOf("10000") }
+    var selectedUnit by rememberSaveable { mutableStateOf(distanceUnits.display) }
     var selectedDateEpochDay by rememberSaveable {
         mutableStateOf(NextServiceDateRules.default(today).toEpochDay())
     }
@@ -455,8 +489,10 @@ private fun ServiceResetCard(
     var confirmArmed by remember { mutableStateOf(false) }
 
     val selectedDate = LocalDate.ofEpochDay(selectedDateEpochDay)
-    val unitLabel = distanceUnits.display.label()
-    val intervalError = intervalConstraints?.validate(distanceText, distanceUnits)
+    val unitLabel = selectedUnit.label()
+    val intervalUnits = MotorcycleDistanceUnits(selectedUnit, selectedUnit)
+    val odometerDisplayUnits = MotorcycleDistanceUnits(distanceUnits.wire, selectedUnit)
+    val intervalError = intervalConstraints?.validate(distanceText, intervalUnits)
     val distanceDisplay = distanceText.trim().toIntOrNull()
     val dateValid = NextServiceDateRules.isValid(selectedDate, today)
     val inputsValid =
@@ -479,23 +515,51 @@ private fun ServiceResetCard(
                     ServiceResetUiState.Running -> stringResource(R.string.service_reset_body_running)
                     is ServiceResetUiState.Committed -> stringResource(
                         R.string.service_reset_body_committed,
-                        distanceUnits.wireToDisplay(serviceResetState.odometerKm),
-                        unitLabel,
-                        distanceUnits.wireToDisplay(serviceResetState.distanceKm),
-                        unitLabel,
+                        odometerDisplayUnits.wireToDisplay(serviceResetState.odometerKm),
+                        selectedUnit.label(),
+                        serviceResetState.distance,
+                        serviceResetState.distanceUnit.label(),
                         dateFormatter.format(serviceResetState.nextServiceDate),
                     )
                     is ServiceResetUiState.Blocked -> stringResource(
                         R.string.service_reset_body_blocked,
                         serviceResetState.reason.resolved(),
                     )
+                    is ServiceResetUiState.NeedsInspection -> serviceResetState.reason.resolved()
                     is ServiceResetUiState.Failed -> serviceResetState.reason.resolved()
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
+            Text(
+                text = stringResource(R.string.service_reset_date_time_reminder),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (serviceResetState is ServiceResetUiState.Running) {
                 CircularProgressIndicator()
             } else {
+                Text(
+                    text = stringResource(R.string.service_reset_unit_label),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (selectedUnit == DistanceUnit.KILOMETERS) {
+                        Button(onClick = {}) { Text(stringResource(R.string.distance_unit_km)) }
+                    } else {
+                        OutlinedButton(onClick = {
+                            selectedUnit = DistanceUnit.KILOMETERS
+                            confirmArmed = false
+                        }) { Text(stringResource(R.string.distance_unit_km)) }
+                    }
+                    if (selectedUnit == DistanceUnit.MILES) {
+                        Button(onClick = {}) { Text(stringResource(R.string.distance_unit_miles)) }
+                    } else {
+                        OutlinedButton(onClick = {
+                            selectedUnit = DistanceUnit.MILES
+                            confirmArmed = false
+                        }) { Text(stringResource(R.string.distance_unit_miles)) }
+                    }
+                }
                 OutlinedTextField(
                     value = distanceText,
                     onValueChange = { distanceText = it; confirmArmed = false },
@@ -506,17 +570,19 @@ private fun ServiceResetCard(
                         intervalError == ServiceIntervalError.FORMAT -> {
                             { Text(stringResource(R.string.service_reset_interval_error_format)) }
                         }
-                        intervalError == ServiceIntervalError.RANGE && intervalConstraints != null -> {
-                            {
+                        intervalError == ServiceIntervalError.RANGE -> {
+                            intervalConstraints.let { constraints ->
+                                {
                                 Text(
                                     stringResource(
                                         R.string.service_reset_interval_error_range,
-                                        intervalConstraints.stepDisplay(distanceUnits),
+                                        constraints.stepDisplay(intervalUnits),
                                         unitLabel,
-                                        intervalConstraints.minDisplay(distanceUnits),
-                                        intervalConstraints.maxDisplay(distanceUnits),
+                                        constraints.minDisplay(intervalUnits),
+                                        constraints.maxDisplay(intervalUnits),
                                     ),
                                 )
+                                }
                             }
                         }
                         else -> null
@@ -548,7 +614,7 @@ private fun ServiceResetCard(
                 if (!confirmArmed) {
                     Button(
                         onClick = { confirmArmed = true },
-                        enabled = inputsValid,
+                        enabled = inputsValid && actionsEnabled,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
@@ -561,11 +627,12 @@ private fun ServiceResetCard(
                             ),
                         )
                     }
-                } else if (inputsValid && distanceDisplay != null) {
+                } else if (inputsValid) {
+                    val confirmedDistance = requireNotNull(distanceDisplay)
                     ArmedConfirmation(
                         warning = stringResource(
                             R.string.service_reset_warning,
-                            distanceDisplay,
+                            confirmedDistance,
                             unitLabel,
                             dateFormatter.format(selectedDate),
                         ),
@@ -573,8 +640,9 @@ private fun ServiceResetCard(
                         onCancel = { confirmArmed = false },
                         onConfirm = {
                             confirmArmed = false
-                            onResetServiceReminder(distanceDisplay, selectedDate)
+                            onResetServiceReminder(confirmedDistance, selectedUnit, selectedDate)
                         },
+                        enabled = actionsEnabled,
                     )
                 }
             }
@@ -654,6 +722,7 @@ private fun ArmedConfirmation(
     confirmLabel: String,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
+    enabled: Boolean = true,
 ) {
     Text(
         text = warning,
@@ -664,7 +733,7 @@ private fun ArmedConfirmation(
         OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.action_cancel))
         }
-        Button(onClick = onConfirm, modifier = Modifier.weight(1f)) {
+        Button(onClick = onConfirm, enabled = enabled, modifier = Modifier.weight(1f)) {
             Text(confirmLabel)
         }
     }
@@ -676,6 +745,7 @@ private fun ConnectionCard(
     onPairOrSelect: () -> Unit,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
+    disconnectEnabled: Boolean,
     onFailureAction: (FailureAction) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -728,6 +798,7 @@ private fun ConnectionCard(
             if (state.showDisconnect) {
                 OutlinedButton(
                     onClick = onDisconnect,
+                    enabled = disconnectEnabled,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(stringResource(R.string.button_disconnect))

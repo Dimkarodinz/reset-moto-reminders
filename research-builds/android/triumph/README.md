@@ -2,9 +2,11 @@
 
 Triumph Research is a separate experimental companion application for collecting the evidence needed to evaluate another Triumph motorcycle for Reset Moto Reminders. It installs alongside the main app as `dev.resetlight.research.triumph` and uses the visible name **Triumph Research**.
 
-Current build: **v0.3.0** (`versionCode 3`). It is installed alongside the main app on the Samsung SM-A202F / Android 11 test phone. The revised empty-baseline service form, restoration warning and DTC-clear selection were launch-verified; no motorcycle scan has been run with this version yet.
+The research UI uses the same serious high-contrast dark visual direction as Reset Moto Reminders, including dark system bars and light navigation/status icons.
 
-The tester enters the motorcycle model and model year, selects a paired `vLinker MC-Android`, and runs one session. The app always completes and journals the bounded read phase first. The tester may explicitly add the known kilometre-mode service reset, DTC clear, or both to the same session. The report is evidence for review, not an automatic compatibility decision.
+Current build: **v0.4.0** (`versionCode 4`). It adds the captured miles service command, preserves the selected dashboard unit through test and restoration, and uses the cross-validated single-send DTC-clear transaction. It installs alongside the main app; no motorcycle scan has yet validated this version on another Triumph.
+
+The tester enters the motorcycle model and model year, selects a paired `vLinker MC-Android`, and runs one session. The app always completes and journals the bounded read phase first. The tester may explicitly add the known service reset in the unit currently shown on the motorcycle, DTC clear, or both to the same session. The report is evidence for review, not an automatic compatibility decision.
 
 ## What the scan collects
 
@@ -15,19 +17,19 @@ The tester enters the motorcycle model and model year, selects a paired `vLinker
 - One bounded extended-session attempt if the default-session DTC count is unavailable.
 - Responses from the known Tiger TFT route: instrument status and raw kilometre odometer.
 - Independent candidate classifications for DTC clear and service reset.
-- When explicitly selected and eligible, a minimal kilometre service-reset round trip: write `previous + 100 km` and `previous date + 1 day`, verify the response echoes, then write the entered previous values back and report restoration independently.
-- When explicitly selected and eligible, the exact engine DTC-clear sequence, including positive/rejected responses and post-clear count verification.
+- When explicitly selected and eligible, a minimal service-reset round trip: write `previous + 100` in the selected km/miles unit and `previous date + 1 day`, verify the response echoes, then restore the entered previous values in the same unit and report restoration independently.
+- When explicitly selected and eligible, the exact engine DTC-clear sequence, sent once, including response-pending/final handling and post-clear count verification.
 - Profile hashes, probe outcomes, exact ELM request/response traffic, timing, and the terminal scan outcome.
 
-The application never requests VIN or ECU serial data and never performs arbitrary identifier/address scans, generic writes, RoutineControl, ECU configuration, or streaming bus monitoring. Optional writes use a second exact allowlist: the known `1003`/SecurityAccess/DTC-clear/count-verify path and the known `33xx`/`5Cxx` kilometre service-reset path only. They are attempted only after the corresponding reads match and explicit acknowledgement. A lost/ambiguous test write is never followed by an automatic restore or retry because the write may already have succeeded; the report marks restoration unknown.
+The application never requests VIN or ECU serial data and never performs arbitrary identifier/address scans, generic writes, RoutineControl, ECU configuration, or streaming bus monitoring. Optional writes use a second exact allowlist: the known `1003`/SecurityAccess/DTC-clear/count-verify path and only the observed `33xx` km or `34xx` miles interval plus `5Cxx` date path. They are attempted only after the corresponding reads match and explicit acknowledgement. A lost/ambiguous test write is never followed by an automatic restore or retry because the write may already have succeeded; the report marks restoration unknown.
 
 ## Motorcycle test
 
 1. Pair `vLinker MC-Android` in Android Bluetooth settings with PIN `1234`.
 2. Connect the adapter to the motorcycle.
-3. Keep the motorcycle stationary, engine off, ignition on, battery stable, and dashboard set to kilometres.
+3. Keep the motorcycle stationary, engine off, ignition on and battery stable. Confirm the motorcycle date/time and note whether the dashboard is showing kilometres or miles.
 4. Open **Triumph Research**, enter the exact model and model year, and select the paired adapter.
-5. Leave both optional write tests unchecked for a read-only report, or select the operations needed for this visit. For the service test, keep the dashboard in kilometres and enter the **exact interval and date currently stored/displayed by the motorcycle**. The app cannot read those two values. It temporarily writes `+100 km` and `+1 day`, then restores what you entered. DTC clear permanently erases the stored fault evidence after it has been recorded in the report.
+5. Leave both optional write tests unchecked for a read-only report, or select the operations needed for this visit. For the service test, select the unit currently shown on the dashboard and enter the **exact interval and date currently stored/displayed by the motorcycle**. The app cannot read those two values. It temporarily writes `+100` in the selected unit and `+1 day`, then restores what you entered without conversion. DTC clear permanently erases the stored fault evidence after it has been recorded in the report.
 6. Read and tick the write acknowledgement if either operation is selected.
 7. Tap **Connect and run scan** once. Do not switch off the ignition until the app reports completion or failure.
 8. Tap **Share JSONL report** and save the report locally for project analysis.

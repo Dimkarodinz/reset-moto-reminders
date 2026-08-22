@@ -29,13 +29,37 @@ class ProjectPolicyTest {
     }
 
     @Test
-    fun `light system bars use dark status and navigation icons`() {
+    fun `fixed dark presentation uses light status and navigation icons`() {
         val theme = File("src/main/res/values/themes.xml").readText()
         val api27Theme = File("src/main/res/values-v27/themes.xml").readText()
         val activity = File("src/main/java/dev/resetlight/MainActivity.kt").readText()
+        val composeTheme = File("src/main/java/dev/resetlight/ui/ResetMotoTheme.kt").readText()
 
-        assertTrue(theme.contains("<item name=\"android:windowLightStatusBar\">true</item>"))
-        assertTrue(api27Theme.contains("<item name=\"android:windowLightNavigationBar\">true</item>"))
-        assertTrue(activity.contains("isAppearanceLightNavigationBars = true"))
+        assertTrue(theme.contains("<item name=\"android:windowLightStatusBar\">false</item>"))
+        assertTrue(api27Theme.contains("<item name=\"android:windowLightNavigationBar\">false</item>"))
+        assertTrue(activity.contains("isAppearanceLightNavigationBars = false"))
+        assertTrue(activity.contains("isAppearanceLightStatusBars = false"))
+        assertTrue(activity.contains("ResetMotoTheme"))
+        assertTrue(composeTheme.contains("darkColorScheme"))
+    }
+
+    @Test
+    fun `all motorcycle actions and disconnect are disabled during an operation`() {
+        val activity = File("src/main/java/dev/resetlight/MainActivity.kt").readText()
+        val screen = File("src/main/java/dev/resetlight/features/connection/ConnectionScreen.kt").readText()
+
+        assertTrue(activity.contains("owner.operationInProgress.collectAsState()"))
+        assertTrue(screen.contains("operationInProgress: Boolean"))
+        assertTrue(screen.contains("actionsEnabled = !operationInProgress"))
+        assertTrue(screen.contains("disconnectEnabled = !operationInProgress"))
+    }
+
+    @Test
+    fun `main header uses the action title treatment`() {
+        val screen = File("src/main/java/dev/resetlight/features/connection/ConnectionScreen.kt").readText()
+
+        assertTrue(screen.contains("ActionTitleStyle"))
+        assertTrue(screen.contains("FontWeight.Black"))
+        assertTrue(screen.contains("FontStyle.Italic"))
     }
 }

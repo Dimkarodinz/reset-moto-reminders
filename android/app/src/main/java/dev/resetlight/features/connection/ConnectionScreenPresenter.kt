@@ -19,6 +19,7 @@ data class ConnectionScreenState(
     val showServiceInfoRead: Boolean = false,
     val showDtcClear: Boolean = false,
     val showServiceReset: Boolean = false,
+    val showUnavailableServiceCard: Boolean = false,
     val elmIdentity: String? = null,
     val stnIdentity: String? = null,
     val mapId: String? = null,
@@ -78,9 +79,12 @@ class ConnectionScreenPresenter {
             showDisconnect = true,
             showReadOnlyCapture = researchCaptureEnabled,
             showDtcRead = true,
-            showServiceInfoRead = researchCaptureEnabled,
+            // This bounded read proves the motorcycle itself responded, not
+            // only the Bluetooth adapter, so it is a normal product feature.
+            showServiceInfoRead = true,
             showDtcClear = writeOperationsEnabled,
             showServiceReset = writeOperationsEnabled,
+            showUnavailableServiceCard = !writeOperationsEnabled,
             elmIdentity = state.elmIdentity,
             stnIdentity = state.stnIdentity,
             mapId = state.mapId,

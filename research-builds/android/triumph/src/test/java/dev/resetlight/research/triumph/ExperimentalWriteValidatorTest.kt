@@ -2,6 +2,7 @@ package dev.resetlight.research.triumph
 
 import dev.resetlight.diagnostics.DiagnosticWriteChannel
 import dev.resetlight.diagnostics.WriteIntent
+import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.profiles.EcuProfile
 import dev.resetlight.features.service.ServiceReminderResetFailure
 import java.io.IOException
@@ -43,6 +44,38 @@ class ExperimentalWriteValidatorTest {
         assertTrue(events.events.any { it.name == "service_reset_validation_finished" })
         assertTrue(events.events.any { it.name == "service_reset_restore_finished" })
         assertTrue(events.events.any { it.name == "dtc_clear_validation_finished" })
+        assertEquals(1, channel.commands.count { it.first == ecu.diagnosticTroubleCodes.clear.elmRequest })
+    }
+
+    @Test
+    fun `miles round trip uses captured service 34 for test and restoration`() = runTest {
+        val channel = SuccessfulWriteChannel(ecu)
+        val events = RecordingWriteEvents()
+        val validator = ExperimentalWriteValidator(
+            ecu,
+            channel,
+            ResearchWriteCommandPolicy(ecu),
+            events,
+        )
+
+        val result = validator.validate(
+            readSummary = matchingSummary(),
+            options = ResearchWriteOptions(serviceReset = roundTrip(DistanceUnit.MILES)),
+        )
+
+        assertEquals(ResearchWriteOutcome.VALIDATED, result.serviceReset.outcome)
+        assertEquals(ResearchRestoreOutcome.RESTORED, result.serviceReset.restoreOutcome)
+        assertTrue(channel.commands.any { it.first == "344F" })
+        assertTrue(channel.commands.any { it.first == "344E" })
+        assertTrue(channel.commands.none { it.first.startsWith("33") })
+        assertTrue(
+            events.events.any {
+                it.name == "service_reset_validation_started" &&
+                    it.text?.contains("distance_unit=miles") == true &&
+                    it.text.contains("previous_distance=7800") &&
+                    it.text.contains("test_distance=7900")
+            },
+        )
     }
 
     @Test
@@ -141,10 +174,11 @@ class ExperimentalWriteValidatorTest {
         )
     }
 
-    private fun roundTrip() = ResearchServiceRoundTripRequest(
-        previousDistanceKm = 7_800,
+    private fun roundTrip(unit: DistanceUnit = DistanceUnit.KILOMETERS) = ResearchServiceRoundTripRequest(
+        distanceUnit = unit,
+        previousDistance = 7_800,
         previousNextServiceDate = LocalDate.of(2027, 8, 17),
-        testDistanceKm = 7_900,
+        testDistance = 7_900,
         testNextServiceDate = LocalDate.of(2027, 8, 18),
     )
 
@@ -179,11 +213,15 @@ private class SuccessfulWriteChannel(
             request == ecu.instrumentReadOnlyCapture.odometerElmRequest -> "704 8D0100AED4000000"
             request == "334E" && rejectRestoreDistance -> "704 B3FFFFFFFFFFFFFF"
             request.startsWith("33") -> "704 B3${request.drop(2)}000000000000"
+            request.startsWith("34") -> "704 B4${request.drop(2)}000000000000"
             request.startsWith("5C") -> "704 DC${request.drop(2)}"
             request == ecu.engineSecurityAccess.extendedSessionElmRequest -> "18DAF1D5 02 5003 AAAAAAAAAA"
             request == ecu.engineSecurityAccess.seedRequestElmRequest -> "18DAF1D5 04 6701188B AAAAAA"
             request.startsWith(ecu.engineSecurityAccess.keyRequestElmPrefix) -> "18DAF1D5 02 6702 AAAAAAAAAA"
-            request == ecu.diagnosticTroubleCodes.clear.elmRequest -> "18DAF1D5 01 54 AAAAAAAAAAAA"
+            request == ecu.diagnosticTroubleCodes.clear.elmRequest -> """
+                18DAF1D5 03 7F1478 AAAAAAAA
+                18DAF1D5 01 54 AAAAAAAAAAAA
+            """.trimIndent()
             request == ecu.diagnosticTroubleCodes.clear.verificationElmRequest ->
                 "18DAF1D5 06 59010C000000 AA"
             else -> error("Unexpected write-validation command: $request")

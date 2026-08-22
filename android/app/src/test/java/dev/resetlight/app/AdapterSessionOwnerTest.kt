@@ -9,7 +9,9 @@ import dev.resetlight.profiles.AdapterProfileLoader
 import dev.resetlight.profiles.DtcMapLoader
 import dev.resetlight.profiles.EcuProfileLoader
 import dev.resetlight.features.dtc.DtcReadState
+import dev.resetlight.features.research.InstrumentReadState
 import dev.resetlight.features.research.ReadOnlyCaptureState
+import dev.resetlight.transport.ByteTransport
 import dev.resetlight.transport.ReplayByteTransport
 import dev.resetlight.transport.ReplayExchange
 import dev.resetlight.transport.ReplayInbound
@@ -20,8 +22,10 @@ import java.io.File
 import java.time.Instant
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -207,6 +211,60 @@ class AdapterSessionOwnerTest {
         assertTrue(owner.state.value is ConnectionState.Failed)
     }
 
+    @Test
+    fun `one whole operation blocks another operation and disconnect until it finishes`() = runTest {
+        val adapterProfile = AdapterProfileLoader().load(
+            File("build/generated/profileAssets/profiles/vlinker-mc-android.adaptermap.yaml").readBytes(),
+        )
+        val ecuProfile = EcuProfileLoader().load(
+            File("build/generated/profileAssets/profiles/tiger-900-gt-pro-2021.ecumap.yaml").readBytes(),
+        )
+        val descriptions = DtcMapLoader().load(
+            File("build/generated/profileAssets/profiles/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml").readBytes(),
+        )
+        val replay = ReplayByteTransport(
+            adapterReadyExchanges() + exchange(
+                ecuProfile.diagnosticTroubleCodes.read.countElmRequest,
+                "59010C000000\r>",
+            ),
+        )
+        val blocking = BlockingResponseTransport(
+            replay,
+            ElmCodec.encode(ecuProfile.diagnosticTroubleCodes.read.countElmRequest),
+        )
+        val owner = AdapterSessionOwner(
+            adapterProfile,
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            instrumentReadOnlyCaptureProfile = ecuProfile.instrumentReadOnlyCapture,
+            dtcReadProfile = ecuProfile.diagnosticTroubleCodes.read,
+            dtcDescriptions = descriptions,
+        ) { blocking }
+        owner.connect("synthetic-address")
+        advanceUntilIdle()
+
+        owner.readDiagnosticTroubleCodes()
+        blocking.commandStarted.await()
+        runCurrent()
+        assertTrue(owner.operationInProgress.value)
+
+        owner.readInstrumentServiceInfo()
+        owner.disconnect()
+        runCurrent()
+
+        assertTrue(owner.instrumentReadState.value is InstrumentReadState.Idle)
+        assertTrue(owner.state.value is ConnectionState.AdapterReady)
+
+        blocking.releaseResponse.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(owner.dtcReadState.value is DtcReadState.Complete)
+        assertTrue(owner.instrumentReadState.value is InstrumentReadState.Idle)
+        assertEquals(false, owner.operationInProgress.value)
+        replay.assertConsumed()
+    }
+
     private fun TestScope.readyOwnerWithDtcRead(
         dtcExchanges: List<ReplayExchange>,
         engineResponseCanId: String? = null,
@@ -247,6 +305,44 @@ class AdapterSessionOwnerTest {
         ElmCodec.encode(command),
         listOf(ReplayInbound.Bytes(response.encodeToByteArray())),
     )
+
+    private fun adapterReadyExchanges(): List<ReplayExchange> = listOf(
+        exchange("ATWS", "ATWS\r\rELM327 v2.2\r>"),
+        exchange("ATE0", "ATE0\rOK\r>"),
+        exchange("ATL0", "OK\r>"),
+        exchange("ATS0", "OK\r>"),
+        exchange("STI", "STN1151 v4.3.2\r>"),
+        exchange("ATH1", "OK\r>"),
+    )
+
+    private class BlockingResponseTransport(
+        private val delegate: ByteTransport,
+        private val blockedCommand: ByteArray,
+    ) : ByteTransport {
+        val commandStarted = CompletableDeferred<Unit>()
+        val releaseResponse = CompletableDeferred<Unit>()
+        private var blockNextRead = false
+
+        override suspend fun connect() = delegate.connect()
+
+        override suspend fun write(bytes: ByteArray) {
+            delegate.write(bytes)
+            if (bytes.contentEquals(blockedCommand)) {
+                blockNextRead = true
+                commandStarted.complete(Unit)
+            }
+        }
+
+        override suspend fun read(): ByteArray? {
+            if (blockNextRead) {
+                releaseResponse.await()
+                blockNextRead = false
+            }
+            return delegate.read()
+        }
+
+        override suspend fun close() = delegate.close()
+    }
 
     private class FakeBluetooth(private val devices: List<BondedDevice> = emptyList()) : BluetoothFacade {
         override fun bondedDevices(): Collection<BondedDevice> = devices

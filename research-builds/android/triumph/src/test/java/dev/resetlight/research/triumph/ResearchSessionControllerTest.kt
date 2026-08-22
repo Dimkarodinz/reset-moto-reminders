@@ -1,5 +1,6 @@
 package dev.resetlight.research.triumph
 
+import dev.resetlight.domain.DistanceUnit
 import java.io.File
 import java.time.LocalDate
 import kotlinx.coroutines.CompletableDeferred
@@ -43,9 +44,10 @@ class ResearchSessionControllerTest {
             ResearchWriteOptions(
                 clearDtcs = true,
                 serviceReset = ResearchServiceRoundTripRequest(
-                    previousDistanceKm = 7_800,
+                    distanceUnit = DistanceUnit.KILOMETERS,
+                    previousDistance = 7_800,
                     previousNextServiceDate = LocalDate.of(2027, 8, 17),
-                    testDistanceKm = 7_900,
+                    testDistance = 7_900,
                     testNextServiceDate = LocalDate.of(2027, 8, 18),
                 ),
             ),

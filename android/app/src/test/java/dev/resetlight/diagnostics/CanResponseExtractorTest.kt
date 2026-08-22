@@ -24,6 +24,19 @@ class CanResponseExtractorTest {
     }
 
     @Test
+    fun `extracts pending and final UDS responses returned before one ELM prompt`() {
+        assertEquals(
+            listOf("7F1478", "54"),
+            engine.extractAll(
+                """
+                18DAF1D5037F1478AAAAAAAA
+                18DAF1D50154AAAAAAAAAAAA
+                """.trimIndent(),
+            ),
+        )
+    }
+
+    @Test
     fun `extracts an engine identifier payload from the live framed response`() {
         assertEquals(
             "62F1A0000000",

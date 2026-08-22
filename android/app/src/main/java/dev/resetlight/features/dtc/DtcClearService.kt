@@ -35,8 +35,10 @@ class DtcClearFailure(
  * confirmation before instantiating this service. A refused session or key
  * returns [DtcClearResult.Blocked] without sending the clear.
  *
- * The maximum number of `response-pending` (`0x78`) negatives tolerated while
- * awaiting the final clear response is bounded so a stuck ECU cannot spin.
+ * The clear request is sent exactly once. If the ECU returns response-pending
+ * (`0x78`), the adapter keeps listening until its prompt and returns the pending
+ * and final frames together. Retrying the write after a pending response would
+ * perform a second clear and is therefore forbidden.
  */
 class DtcClearService(
     private val clearProfile: DiagnosticTroubleCodeClearProfile,
@@ -74,8 +76,8 @@ class DtcClearService(
             return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED))
         }
 
-        val clearResponse = awaitFinalClearResponse()
-        if (!clearResponse.isPositive(CLEAR_POSITIVE)) {
+        val clearResponses = clearResponses(execute(clearProfile.elmRequest, WriteIntent.WRITE))
+        if (clearResponses.none { it.isPositive(CLEAR_POSITIVE) }) {
             return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_REJECTED))
         }
 
@@ -85,15 +87,10 @@ class DtcClearService(
         return DtcClearResult.Cleared(remaining)
     }
 
-
-    private suspend fun awaitFinalClearResponse(): String {
-        var response = execute(clearProfile.elmRequest, WriteIntent.WRITE)
-        var pendingWaits = 0
-        while (isResponsePending(response) && pendingWaits < MAX_PENDING_WAITS) {
-            pendingWaits++
-            response = execute(clearProfile.elmRequest, WriteIntent.WRITE)
-        }
-        return response
+    private fun clearResponses(response: String): List<String> = try {
+        extractor?.extractAll(response) ?: response.lines().map(String::hexOnly).filter(String::isNotEmpty)
+    } catch (parse: DiagnosticParseException) {
+        emptyList()
     }
 
     /**
@@ -109,13 +106,6 @@ class DtcClearService(
         } catch (parse: DiagnosticParseException) {
             null
         }
-
-    private fun isResponsePending(response: String): Boolean = try {
-        val parsed = UdsResponseParser.parse(payload(response).hexOnly())
-        parsed is UdsResponse.Negative && parsed.pending
-    } catch (parse: DiagnosticParseException) {
-        false
-    }
 
     private fun String.isPositive(service: Int): Boolean = try {
         val parsed = UdsResponseParser.parse(payload(this).hexOnly())
@@ -141,8 +131,6 @@ class DtcClearService(
     private companion object {
         const val SECURITY_ACCESS_POSITIVE = 0x67
         const val CLEAR_POSITIVE = 0x54
-        const val MAX_PENDING_WAITS = 10
-
         val EMPTY_DESCRIPTIONS = DtcDescriptionLookup { code ->
             dev.resetlight.profiles.DtcMessage(code, dev.resetlight.profiles.DtcMessageStatus.UNKNOWN)
         }

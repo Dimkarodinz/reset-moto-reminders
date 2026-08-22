@@ -1,7 +1,7 @@
 package dev.resetlight.research.triumph
 
 import dev.resetlight.domain.NextServiceDateRules
-import dev.resetlight.domain.ServiceIntervalConstraints
+import dev.resetlight.domain.DistanceUnit
 import java.time.LocalDate
 
 data class ResearchVehicle(
@@ -43,10 +43,18 @@ enum class ResearchScanStage {
 }
 
 data class ResearchServiceRoundTripRequest(
-    val previousDistanceKm: Int,
+    val distanceUnit: DistanceUnit,
+    val previousDistance: Int,
     val previousNextServiceDate: LocalDate,
-    val testDistanceKm: Int,
+    val testDistance: Int,
     val testNextServiceDate: LocalDate,
+)
+
+/** Numeric limits apply directly to whichever dashboard unit the tester selects. */
+data class ResearchDistanceConstraints(
+    val step: Int,
+    val minimum: Int,
+    val maximum: Int,
 )
 
 data class ResearchWriteOptions(
@@ -65,24 +73,28 @@ object ResearchWriteInput {
     fun validate(
         clearDtcs: Boolean,
         resetService: Boolean,
-        distanceKm: String,
+        distanceUnit: DistanceUnit,
+        distance: String,
         nextServiceDate: String,
         today: LocalDate,
-        constraints: ServiceIntervalConstraints,
+        constraints: ResearchDistanceConstraints,
     ): ResearchWriteInputValidation {
         if (!resetService) {
             return ResearchWriteInputValidation.Valid(ResearchWriteOptions(clearDtcs = clearDtcs))
         }
 
-        val parsedDistance = distanceKm.trim().toIntOrNull()
-            ?: return ResearchWriteInputValidation.Invalid("Enter the current stored service interval in kilometres")
-        val testDistance = parsedDistance + constraints.stepKm
-        if (parsedDistance !in constraints.minKm..constraints.maxKm ||
-            parsedDistance % constraints.stepKm != 0
+        val unitLabel = distanceUnit.shortLabel()
+        val parsedDistance = distance.trim().toIntOrNull()
+            ?: return ResearchWriteInputValidation.Invalid(
+                "Enter the current stored service interval in $unitLabel",
+            )
+        val testDistance = parsedDistance + constraints.step
+        if (parsedDistance !in constraints.minimum..constraints.maximum ||
+            parsedDistance % constraints.step != 0
         ) {
             return ResearchWriteInputValidation.Invalid(
-                "Service interval must be ${constraints.minKm} to ${constraints.maxKm} km " +
-                    "in ${constraints.stepKm} km increments",
+                "Service interval must be ${constraints.minimum} to ${constraints.maximum} $unitLabel " +
+                    "in ${constraints.step} $unitLabel increments",
             )
         }
 
@@ -96,10 +108,10 @@ object ResearchWriteInput {
                 "Current date and the +1 day test must both be between today and two years from today",
             )
         }
-        if (testDistance > constraints.maxKm) {
+        if (testDistance > constraints.maximum) {
             return ResearchWriteInputValidation.Invalid(
-                "Current interval must be at most ${constraints.maxKm - constraints.stepKm} km " +
-                    "so the +${constraints.stepKm} km test is representable",
+                "Current interval must be at most ${constraints.maximum - constraints.step} $unitLabel " +
+                    "so the +${constraints.step} $unitLabel test is representable",
             )
         }
 
@@ -107,13 +119,19 @@ object ResearchWriteInput {
             ResearchWriteOptions(
                 clearDtcs = clearDtcs,
                 serviceReset = ResearchServiceRoundTripRequest(
-                    previousDistanceKm = parsedDistance,
+                    distanceUnit = distanceUnit,
+                    previousDistance = parsedDistance,
                     previousNextServiceDate = parsedDate,
-                    testDistanceKm = testDistance,
+                    testDistance = testDistance,
                     testNextServiceDate = testDate,
                 ),
             ),
         )
+    }
+
+    private fun DistanceUnit.shortLabel(): String = when (this) {
+        DistanceUnit.KILOMETERS -> "km"
+        DistanceUnit.MILES -> "mi"
     }
 }
 

@@ -94,23 +94,23 @@
     <string name="error_ecu_no_response">Модуль не відповів. Перевірте, чи ввімкнене запалювання, і спробуйте знову.</string>
 
     <!-- Instrument read -->
-    <string name="instrument_read_title">Зчитування панелі приладів (дослідження)</string>
-    <string name="instrument_read_body_idle">Перший контакт із панеллю приладів. Надсилає лише два зафіксовані запити зчитування та декодує одометр. Ніколи не змінює нагадування про обслуговування.</string>
-    <string name="instrument_read_body_running">Зчитування даних панелі приладів. Залиште запалювання увімкненим.</string>
-    <string name="instrument_read_body_complete">Одометр: %1$d %2$s (%3$s). Статус: %4$s. Поверніться з журналами телефону.</string>
-    <string name="instrument_read_body_blocked">%1$s Поверніться з журналами телефону.</string>
-    <string name="instrument_read_button">Зчитати дані панелі приладів</string>
-    <string name="instrument_read_failed_error">Зчитування даних панелі приладів зупинено через помилку з\'єднання або адаптера.</string>
+    <string name="instrument_read_title">Інформація панелі приладів</string>
+    <string name="instrument_read_body_idle">Зчитує одометр безпосередньо з панелі мотоцикла. Це лише читання, яке ніколи не змінює нагадування про обслуговування.</string>
+    <string name="instrument_read_body_running">Зчитування панелі мотоцикла. Залиште запалювання увімкненим.</string>
+    <string name="instrument_read_body_complete">Мотоцикл відповів. Одометр: %1$d %2$s. Статус панелі: %3$s.</string>
+    <string name="instrument_read_body_blocked">%1$s</string>
+    <string name="instrument_read_button">Зчитати панель</string>
+    <string name="instrument_read_failed_error">Зчитування панелі зупинено через помилку з\'єднання або адаптера.</string>
     <string name="instrument_reason_transport_rejected">Адаптер відхилив команду транспорту панелі приладів %1$s</string>
     <string name="instrument_reason_unrecognized_response">Панель приладів повернула нерозпізнану відповідь; нічого не було записано.</string>
 
     <!-- Trouble-code clear -->
-    <string name="dtc_clear_title">Очищення кодів несправностей (дослідження)</string>
+    <string name="dtc_clear_title">Очищення кодів несправностей (Бета)</string>
     <string name="dtc_clear_body_idle">Виконує доступ безпеки та очищує підтверджені коди двигуна. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.</string>
     <string name="dtc_clear_body_running">Очищення кодів несправностей. Залиште запалювання увімкненим і не залишайте додаток.</string>
     <string name="dtc_clear_body_cleared_none">Очищено. Підтверджених кодів несправностей не залишилося.</string>
     <string name="dtc_clear_body_cleared_remaining">Очищення завершено, але %1$d код(ів) досі присутні.</string>
-    <string name="dtc_clear_body_blocked">%1$s Нічого не було очищено.</string>
+    <string name="dtc_clear_body_blocked">%1$s</string>
     <string name="dtc_clear_button">Очистити коди несправностей</string>
     <string name="dtc_clear_button_again">Очистити знову</string>
     <string name="dtc_clear_warning">Це надсилає запис у ECU двигуна. Підтвердьте, щоб продовжити.</string>
@@ -121,13 +121,17 @@
     <string name="dtc_clear_reason_security_rejected">ECU відхилив доступ безпеки; нічого не було очищено.</string>
     <string name="dtc_clear_reason_rejected">ECU відхилив запит на очищення; жоден код не було очищено.</string>
     <string name="dtc_clear_reason_count_unconfirmed">Очищення завершено, але кількість кодів не вдалося підтвердити.</string>
+    <string name="dtc_clear_reason_write_ambiguous">Спробу очищення розпочато, але надійного результату не отримано. Коди вже могли бути очищені. Перед повторною спробою підключіться знову та прочитайте їх.</string>
+    <string name="dtc_clear_reason_verification_lost">ECU прийняв очищення, але результат подальшої перевірки кількості кодів втрачено. Підключіться знову та прочитайте коди.</string>
 
     <!-- Service reminder reset -->
-    <string name="service_reset_title">Скидання нагадування про обслуговування (дослідження)</string>
+    <string name="service_reset_title">Скидання нагадування про обслуговування</string>
     <string name="service_reset_body_idle">Записує новий інтервал обслуговування та дату наступного обслуговування на панель приладів. Скидання нагадування не виконує обслуговування.</string>
     <string name="service_reset_body_running">Запис нагадування про обслуговування. Залиште запалювання увімкненим і не залишайте додаток.</string>
     <string name="service_reset_body_committed">Записано. Одометр %1$d %2$s, інтервал %3$d %4$s, наступне обслуговування %5$s.</string>
-    <string name="service_reset_body_blocked">%1$s Нічого не було записано.</string>
+    <string name="service_reset_body_blocked">%1$s</string>
+    <string name="service_reset_date_time_reminder">Перед скиданням переконайтеся, що дата й час на мотоциклі правильні.</string>
+    <string name="service_reset_unit_label">Одиниця, вибрана зараз на мотоциклі</string>
     <string name="service_reset_interval_label">Інтервал обслуговування (%1$s)</string>
     <string name="service_reset_interval_error_format">Введіть ціле додатне число.</string>
     <string name="service_reset_interval_error_range">Використовуйте кратне %1$d %2$s, від %3$d до %4$d %2$s.</string>
@@ -139,8 +143,10 @@
     <string name="service_reset_failed_error">Скидання нагадування про обслуговування зупинено через помилку з\'єднання або адаптера.</string>
     <string name="service_reset_reason_invalid_input">Запитаний інтервал або дата виходять за межі підтримуваного діапазону; нічого не було записано.</string>
     <string name="service_reset_reason_unrecognized_status">Панель приладів повернула нерозпізнаний статус; нічого не було записано.</string>
-    <string name="service_reset_reason_distance_rejected">Панель приладів відхилила запис інтервалу обслуговування; нічого не змінено. Це може статися, коли дисплей налаштовано на милі — перемкніть дисплей на кілометри та спробуйте ще раз.</string>
+    <string name="service_reset_reason_distance_rejected">Панель приладів відхилила інтервал обслуговування. Скидання зупинено до зміни дати.</string>
     <string name="service_reset_reason_date_unconfirmed">Панель приладів не підтвердила запис дати обслуговування.</string>
+    <string name="service_reset_reason_partially_applied">Сервісний інтервал прийнято, але дату не підтверджено. Перевірте мотоцикл перед повторною спробою.</string>
+    <string name="service_reset_reason_write_ambiguous">Виконано спробу запису нагадування, але надійного результату не отримано. Інтервал або дата могли змінитися. Перевірте мотоцикл перед повторною спробою.</string>
 
     <!-- Cluster fingerprint gate -->
     <string name="gate_reason_profile_mismatch">Профіль підключеного мотоцикла не відповідає перевіреній панелі приладів.</string>

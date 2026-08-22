@@ -130,6 +130,8 @@ class AdapterSessionOwner(
 
     private val activeTransport = AtomicReference<ByteTransport?>(null)
     private val activeSession = AtomicReference<ElmCommandSession?>(null)
+    private val operationGate = AdapterOperationGate()
+    val operationInProgress: StateFlow<Boolean> = operationGate.inProgress
     private var connectionJob: Job? = null
     private var readOnlyCaptureJob: Job? = null
     private var instrumentReadJob: Job? = null
@@ -182,6 +184,10 @@ class AdapterSessionOwner(
 
     fun disconnect() {
         if (state.value is ConnectionState.Disconnected) return
+        // A write may already have reached the motorcycle. Do not let a button
+        // press cancel the sequence and turn a known outcome into an ambiguous
+        // one; the UI disables Disconnect while this guard is held as well.
+        if (operationInProgress.value) return
         connectionJob?.cancel()
         readOnlyCaptureJob?.cancel()
         instrumentReadJob?.cancel()
@@ -366,6 +372,23 @@ class AdapterSessionOwner(
             ),
             startedEvent = "dtc_clear_started",
             failedEvent = "dtc_clear_failed",
+            recover = { failure ->
+                val outcome = (failure as? DtcClearFailure)?.let {
+                    WriteOutcomePolicy.dtcFailure(it, clearProfile)
+                }
+                if (outcome == null) {
+                    false
+                } else {
+                    mutableDtcClearState.value = outcome
+                    journal.record(
+                        "operation",
+                        "dtc_clear_needs_verification",
+                        outcome = outcome.reason.key.name,
+                    )
+                    if (isTransportFatal(failure)) failSession(failure)
+                    true
+                }
+            },
         ) {
             val result = DtcClearService(
                 clearProfile,
@@ -395,16 +418,17 @@ class AdapterSessionOwner(
      * build; the [ClusterFingerprintGate] inside the service fails closed before
      * any write byte leaves the adapter.
      */
-    fun resetServiceReminder(distanceDisplay: Int, nextServiceDate: LocalDate) {
+    fun resetServiceReminder(
+        distance: Int,
+        distanceUnit: DistanceUnit,
+        nextServiceDate: LocalDate,
+    ) {
         val instrumentProfile = instrumentReadOnlyCaptureProfile ?: return
         val serviceProfile = serviceReminderProfile ?: return
         val gate = clusterFingerprintGate ?: return
         val id = motorcycleId ?: return
         val session = activeSession.get() ?: return
         if (!writeOperationsAvailable) return
-        // The user enters the interval in the dashboard's display unit; the ECU
-        // stores and accepts kilometres on the wire, so convert before writing.
-        val distanceKm = distanceUnits.displayToWire(distanceDisplay)
         runGatedOperation(
             job = ::serviceResetJob,
             stateFlow = mutableServiceResetState,
@@ -415,8 +439,25 @@ class AdapterSessionOwner(
                 UiText(UiMessage.SERVICE_RESET_FAILED_ERROR),
             ),
             startedEvent = "service_reset_started",
-            startedText = "requested distance_display=$distanceDisplay distance_km=$distanceKm date=$nextServiceDate",
+            startedText = "requested distance=$distance unit=$distanceUnit date=$nextServiceDate",
             failedEvent = "service_reset_failed",
+            recover = { failure ->
+                val outcome = (failure as? ServiceReminderResetFailure)?.let {
+                    WriteOutcomePolicy.serviceFailure(it, serviceProfile)
+                }
+                if (outcome == null) {
+                    false
+                } else {
+                    mutableServiceResetState.value = outcome
+                    journal.record(
+                        "operation",
+                        "service_reset_needs_inspection",
+                        outcome = outcome.reason.key.name,
+                    )
+                    if (isTransportFatal(failure)) failSession(failure)
+                    true
+                }
+            },
         ) {
             val result = ServiceReminderResetService(
                 instrumentProfile,
@@ -424,22 +465,20 @@ class AdapterSessionOwner(
                 gate,
                 id,
                 extractor = instrumentExtractor,
-            ).reset(writeChannel(session), distanceKm, nextServiceDate)
-            mutableServiceResetState.value = when (result) {
-                is ServiceReminderResetResult.Committed -> ServiceResetUiState.Committed(
-                    odometerKm = result.odometerKm,
-                    distanceKm = result.distanceKm,
-                    nextServiceDate = result.nextServiceDate,
-                )
-                is ServiceReminderResetResult.Blocked -> ServiceResetUiState.Blocked(result.reason)
-            }
+            ).reset(writeChannel(session), distance, distanceUnit, nextServiceDate)
+            val uiState = WriteOutcomePolicy.serviceResult(result)
+            mutableServiceResetState.value = uiState
             journal.record(
                 layer = "operation",
                 name = "service_reset_finished",
-                text = when (result) {
-                    is ServiceReminderResetResult.Committed ->
-                        "committed odometer_km=${result.odometerKm} distance_km=${result.distanceKm}"
-                    is ServiceReminderResetResult.Blocked -> "blocked reason=${result.reason}"
+                text = when (uiState) {
+                    is ServiceResetUiState.Committed ->
+                        "committed odometer_km=${uiState.odometerKm} distance=${uiState.distance} unit=${uiState.distanceUnit}"
+                    is ServiceResetUiState.NeedsInspection ->
+                        "needs_inspection reason=${uiState.reason}"
+                    is ServiceResetUiState.Blocked -> "blocked reason=${uiState.reason}"
+                    // The policy maps only to the three states above.
+                    else -> error("Unexpected terminal service-reset state: $uiState")
                 },
             )
         }
@@ -471,6 +510,7 @@ class AdapterSessionOwner(
         if (state.value !is ConnectionState.AdapterReady) return
         if (isBusy(stateFlow.value)) return
         if (job.get()?.isActive == true) return
+        val operationLease = operationGate.tryAcquire() ?: return
 
         stateFlow.value = running
         journal.record("operation", startedEvent, text = startedText)
@@ -490,6 +530,8 @@ class AdapterSessionOwner(
                     // disconnecting on it (as the 2026-08-12 trip did, three
                     // times) costs a full reconnect for no benefit.
                     if (isTransportFatal(failure)) failSession(failure)
+                } finally {
+                    operationLease.close()
                 }
             },
         )

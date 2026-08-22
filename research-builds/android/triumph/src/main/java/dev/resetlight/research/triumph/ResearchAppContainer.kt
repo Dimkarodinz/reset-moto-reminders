@@ -9,7 +9,6 @@ import dev.resetlight.adapter.elm.ElmCommandSession
 import dev.resetlight.adapter.elm.InitializationStage
 import dev.resetlight.logging.EventJournal
 import dev.resetlight.logging.FileJournalSink
-import dev.resetlight.domain.ServiceIntervalConstraints
 import dev.resetlight.profiles.AdapterProfile
 import dev.resetlight.profiles.AdapterProfileLoader
 import dev.resetlight.profiles.EcuProfile
@@ -45,10 +44,10 @@ class ResearchAppContainer(context: Context) {
     private val ecuProfile: EcuProfile = applicationContext.assets
         .open("profiles/tiger-900-gt-pro-2021.ecumap.yaml")
         .use(EcuProfileLoader()::load)
-    val serviceIntervalConstraints = ServiceIntervalConstraints(
-        stepKm = ecuProfile.serviceReminder.distanceRawUnitKm,
-        minKm = ecuProfile.serviceReminder.distanceMinimumRaw * ecuProfile.serviceReminder.distanceRawUnitKm,
-        maxKm = ecuProfile.serviceReminder.distanceMaximumRaw * ecuProfile.serviceReminder.distanceRawUnitKm,
+    val serviceDistanceConstraints = ResearchDistanceConstraints(
+        step = ecuProfile.serviceReminder.distanceRawUnit,
+        minimum = ecuProfile.serviceReminder.distanceMinimumRaw * ecuProfile.serviceReminder.distanceRawUnit,
+        maximum = ecuProfile.serviceReminder.distanceMaximumRaw * ecuProfile.serviceReminder.distanceRawUnit,
     )
     private val bluetooth: BluetoothFacade = AndroidBluetoothFacade(applicationContext)
     private val mutableDevices = MutableStateFlow<List<BondedDevice>>(emptyList())
@@ -102,7 +101,8 @@ private class AndroidResearchSessionExecutor(
                 text = "manufacturer=Triumph model=${vehicle.model} model_year=${vehicle.modelYear} " +
                     "adapter_profile_sha256=${adapterProfile.sourceSha256} ecu_profile_sha256=${ecuProfile.sourceSha256} " +
                     "dtc_clear_requested=${request.writeOptions.clearDtcs} " +
-                    "service_reset_requested=${request.writeOptions.serviceReset != null}",
+                    "service_reset_requested=${request.writeOptions.serviceReset != null} " +
+                    "service_reset_unit=${request.writeOptions.serviceReset?.distanceUnit?.name?.lowercase() ?: "none"}",
             )
 
             onStage(ResearchSessionStage.CONNECTING)

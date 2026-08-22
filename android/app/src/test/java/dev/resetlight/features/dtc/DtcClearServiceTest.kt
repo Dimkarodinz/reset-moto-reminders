@@ -38,20 +38,56 @@ class DtcClearServiceTest {
     }
 
     @Test
-    fun `waits through a response-pending negative before the positive clear`() = runTest {
+    fun `accepts pending then positive from one clear request without resending it`() = runTest {
+        val framedExtractor = dev.resetlight.diagnostics.CanResponseExtractor("0x18DAF1D5", isoTp = true)
         val script = ScriptedChannel(
             mapOf(
                 securityProfile.extendedSessionElmRequest to "5003",
                 securityProfile.seedRequestElmRequest to "6701188B",
                 "042702A018" to "6702",
+                clearProfile.elmRequest to """
+                    18DAF1D5037F1478AAAAAAAA
+                    18DAF1D50154AAAAAAAAAAAA
+                """.trimIndent(),
                 clearProfile.verificationElmRequest to "59010C000000",
             ),
-            queued = mapOf(clearProfile.elmRequest to ArrayDeque(listOf("7F1478", "54"))),
         )
 
-        val result = DtcClearService(clearProfile, securityProfile, EngineSeedKeyDerivation(0x4B48), script).clear()
+        val result = DtcClearService(
+            clearProfile,
+            securityProfile,
+            EngineSeedKeyDerivation(0x4B48),
+            script,
+            extractor = framedExtractor,
+        ).clear()
 
         assertEquals(DtcClearResult.Cleared(remainingCount = 0), result)
+        assertEquals(1, script.sent.count { it == clearProfile.elmRequest })
+    }
+
+    @Test
+    fun `pending without a final response blocks and never resends the clear`() = runTest {
+        val framedExtractor = dev.resetlight.diagnostics.CanResponseExtractor("0x18DAF1D5", isoTp = true)
+        val script = ScriptedChannel(
+            mapOf(
+                securityProfile.extendedSessionElmRequest to "5003",
+                securityProfile.seedRequestElmRequest to "6701188B",
+                "042702A018" to "6702",
+                clearProfile.elmRequest to "18DAF1D5037F1478AAAAAAAA",
+            ),
+        )
+
+        val result = DtcClearService(
+            clearProfile,
+            securityProfile,
+            EngineSeedKeyDerivation(0x4B48),
+            script,
+            extractor = framedExtractor,
+        ).clear()
+
+        assertTrue(result is DtcClearResult.Blocked)
+        assertEquals(1, script.sent.count { it == clearProfile.elmRequest })
+        assertTrue(script.sent.none { it == clearProfile.verificationElmRequest })
     }
 
     @Test

@@ -94,23 +94,23 @@
     <string name="error_ecu_no_response">El módulo no respondió. Comprueba que el contacto esté puesto e inténtalo de nuevo.</string>
 
     <!-- Instrument read -->
-    <string name="instrument_read_title">Lectura de instrumentos (investigación)</string>
-    <string name="instrument_read_body_idle">Primer contacto con el cuadro de instrumentos. Envía únicamente las dos lecturas observadas y decodifica el odómetro. Nunca cambia el aviso de mantenimiento.</string>
-    <string name="instrument_read_body_running">Leyendo los datos del instrumento. Mantén el contacto puesto.</string>
-    <string name="instrument_read_body_complete">Odómetro: %1$d %2$s (%3$s). Estado: %4$s. Vuelve con los registros del teléfono.</string>
-    <string name="instrument_read_body_blocked">%1$s Vuelve con los registros del teléfono.</string>
-    <string name="instrument_read_button">Leer datos del instrumento</string>
-    <string name="instrument_read_failed_error">La lectura de datos del instrumento se detuvo tras un error de conexión o del adaptador.</string>
+    <string name="instrument_read_title">Información del tablero</string>
+    <string name="instrument_read_body_idle">Lee el odómetro directamente del tablero de la motocicleta. Es de solo lectura y nunca cambia el aviso de mantenimiento.</string>
+    <string name="instrument_read_body_running">Leyendo el tablero de la motocicleta. Mantén el contacto puesto.</string>
+    <string name="instrument_read_body_complete">La motocicleta respondió. Odómetro: %1$d %2$s. Estado del tablero: %3$s.</string>
+    <string name="instrument_read_body_blocked">%1$s</string>
+    <string name="instrument_read_button">Leer tablero</string>
+    <string name="instrument_read_failed_error">La lectura del tablero se detuvo tras un error de conexión o del adaptador.</string>
     <string name="instrument_reason_transport_rejected">El adaptador rechazó el comando de transporte del instrumento %1$s</string>
     <string name="instrument_reason_unrecognized_response">El instrumento devolvió una respuesta no reconocida; no se escribió nada.</string>
 
     <!-- Trouble-code clear -->
-    <string name="dtc_clear_title">Borrar códigos de avería (investigación)</string>
+    <string name="dtc_clear_title">Borrar códigos de avería (Beta)</string>
     <string name="dtc_clear_body_idle">Ejecuta el acceso de seguridad y borra los códigos confirmados del motor. Borra solo los códigos que ya hayas leído y entendido.</string>
     <string name="dtc_clear_body_running">Borrando los códigos de avería. Mantén el contacto puesto y no salgas de la aplicación.</string>
     <string name="dtc_clear_body_cleared_none">Borrado. No quedan códigos de avería confirmados.</string>
     <string name="dtc_clear_body_cleared_remaining">El borrado se completó, pero todavía hay %1$d código(s) presente(s).</string>
-    <string name="dtc_clear_body_blocked">%1$s No se borró nada.</string>
+    <string name="dtc_clear_body_blocked">%1$s</string>
     <string name="dtc_clear_button">Borrar códigos de avería</string>
     <string name="dtc_clear_button_again">Borrar de nuevo</string>
     <string name="dtc_clear_warning">Esto envía una escritura a la ECU del motor. Confirma para continuar.</string>
@@ -121,13 +121,17 @@
     <string name="dtc_clear_reason_security_rejected">La ECU rechazó el acceso de seguridad; no se borró nada.</string>
     <string name="dtc_clear_reason_rejected">La ECU rechazó la solicitud de borrado; no se borró ningún código.</string>
     <string name="dtc_clear_reason_count_unconfirmed">El borrado se completó pero no se pudo confirmar el recuento de códigos.</string>
+    <string name="dtc_clear_reason_write_ambiguous">Se inició el intento de borrado, pero no se recibió un resultado fiable. Es posible que los códigos ya se hayan borrado. Vuelve a conectar y léelos antes de intentarlo de nuevo.</string>
+    <string name="dtc_clear_reason_verification_lost">La ECU aceptó el borrado, pero se perdió la lectura posterior del número de códigos. Vuelve a conectar y lee los códigos.</string>
 
     <!-- Service reminder reset -->
-    <string name="service_reset_title">Restablecer el aviso de mantenimiento (investigación)</string>
+    <string name="service_reset_title">Restablecer el aviso de mantenimiento</string>
     <string name="service_reset_body_idle">Escribe un nuevo intervalo de mantenimiento y la fecha del próximo mantenimiento en el cuadro de instrumentos. Restablecer un aviso no realiza el mantenimiento.</string>
     <string name="service_reset_body_running">Escribiendo el aviso de mantenimiento. Mantén el contacto puesto y no salgas de la aplicación.</string>
     <string name="service_reset_body_committed">Confirmado. Odómetro %1$d %2$s, intervalo %3$d %4$s, próximo mantenimiento %5$s.</string>
-    <string name="service_reset_body_blocked">%1$s No se escribió nada.</string>
+    <string name="service_reset_body_blocked">%1$s</string>
+    <string name="service_reset_date_time_reminder">Antes de restablecer, compruebe que la fecha y la hora de la moto sean correctas.</string>
+    <string name="service_reset_unit_label">Unidad seleccionada actualmente en la moto</string>
     <string name="service_reset_interval_label">Intervalo de mantenimiento (%1$s)</string>
     <string name="service_reset_interval_error_format">Introduce un número entero positivo.</string>
     <string name="service_reset_interval_error_range">Usa un múltiplo de %1$d %2$s, entre %3$d y %4$d %2$s.</string>
@@ -139,8 +143,10 @@
     <string name="service_reset_failed_error">El restablecimiento del aviso de mantenimiento se detuvo tras un error de conexión o del adaptador.</string>
     <string name="service_reset_reason_invalid_input">El intervalo o la fecha solicitados están fuera del rango admitido; no se escribió nada.</string>
     <string name="service_reset_reason_unrecognized_status">El instrumento devolvió un estado no reconocido; no se escribió nada.</string>
-    <string name="service_reset_reason_distance_rejected">El cuadro de instrumentos rechazó la escritura del intervalo de servicio; no se cambió nada. Esto puede ocurrir cuando la pantalla está configurada en millas: cambie la pantalla a kilómetros e inténtelo de nuevo.</string>
+    <string name="service_reset_reason_distance_rejected">El cuadro de instrumentos rechazó el intervalo de servicio. El restablecimiento se detuvo antes de cambiar la fecha.</string>
     <string name="service_reset_reason_date_unconfirmed">El cuadro de instrumentos no confirmó la escritura de la fecha de mantenimiento.</string>
+    <string name="service_reset_reason_partially_applied">El intervalo de servicio fue aceptado, pero la fecha no se confirmó. Comprueba la moto antes de volver a intentarlo.</string>
+    <string name="service_reset_reason_write_ambiguous">Se intentó escribir el recordatorio, pero no se recibió un resultado fiable. El intervalo o la fecha pueden haber cambiado. Comprueba la moto antes de volver a intentarlo.</string>
 
     <!-- Cluster fingerprint gate -->
     <string name="gate_reason_profile_mismatch">El perfil de la motocicleta conectada no coincide con el cuadro de instrumentos validado.</string>

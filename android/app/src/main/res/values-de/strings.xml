@@ -94,23 +94,23 @@
     <string name="error_ecu_no_response">Das Modul hat nicht geantwortet. Prüfen Sie, ob die Zündung eingeschaltet ist, und versuchen Sie es erneut.</string>
 
     <!-- Instrument read -->
-    <string name="instrument_read_title">Instrumentenauslesung (Forschung)</string>
-    <string name="instrument_read_body_idle">Erster Kontakt mit dem Kombiinstrument. Sendet nur die zwei beobachteten Lesevorgänge und dekodiert den Kilometerzähler. Die Serviceerinnerung wird niemals geändert.</string>
-    <string name="instrument_read_body_running">Instrumentendaten werden gelesen. Lassen Sie die Zündung eingeschaltet.</string>
-    <string name="instrument_read_body_complete">Kilometerzähler: %1$d %2$s (%3$s). Status: %4$s. Kehren Sie mit den Telefonprotokollen zurück.</string>
-    <string name="instrument_read_body_blocked">%1$s Kehren Sie mit den Telefonprotokollen zurück.</string>
-    <string name="instrument_read_button">Instrumentendaten auslesen</string>
-    <string name="instrument_read_failed_error">Das Auslesen der Instrumentendaten wurde nach einem Verbindungs- oder Adapterfehler gestoppt.</string>
+    <string name="instrument_read_title">Dashboard-Informationen</string>
+    <string name="instrument_read_body_idle">Liest den Kilometerzähler direkt vom Motorrad-Dashboard. Dies ist schreibgeschützt und ändert niemals die Serviceerinnerung.</string>
+    <string name="instrument_read_body_running">Motorrad-Dashboard wird gelesen. Lassen Sie die Zündung eingeschaltet.</string>
+    <string name="instrument_read_body_complete">Motorrad hat geantwortet. Kilometerzähler: %1$d %2$s. Dashboard-Status: %3$s.</string>
+    <string name="instrument_read_body_blocked">%1$s</string>
+    <string name="instrument_read_button">Dashboard lesen</string>
+    <string name="instrument_read_failed_error">Das Lesen des Dashboards wurde nach einem Verbindungs- oder Adapterfehler beendet.</string>
     <string name="instrument_reason_transport_rejected">Adapter hat den Instrumenten-Transportbefehl %1$s abgelehnt</string>
     <string name="instrument_reason_unrecognized_response">Das Instrument gab eine nicht erkannte Antwort zurück; es wurde nichts geschrieben.</string>
 
     <!-- Trouble-code clear -->
-    <string name="dtc_clear_title">Fehlercodes löschen (Forschung)</string>
+    <string name="dtc_clear_title">Fehlercodes löschen (Beta)</string>
     <string name="dtc_clear_body_idle">Führt den Sicherheitszugriff aus und löscht bestätigte Motorcodes. Löschen Sie nur Codes, die Sie bereits ausgelesen und verstanden haben.</string>
     <string name="dtc_clear_body_running">Fehlercodes werden gelöscht. Lassen Sie die Zündung eingeschaltet und verlassen Sie die App nicht.</string>
     <string name="dtc_clear_body_cleared_none">Gelöscht. Es verbleiben keine bestätigten Fehlercodes.</string>
     <string name="dtc_clear_body_cleared_remaining">Löschen abgeschlossen, aber %1$d Code(s) sind noch vorhanden.</string>
-    <string name="dtc_clear_body_blocked">%1$s Es wurde nichts gelöscht.</string>
+    <string name="dtc_clear_body_blocked">%1$s</string>
     <string name="dtc_clear_button">Fehlercodes löschen</string>
     <string name="dtc_clear_button_again">Erneut löschen</string>
     <string name="dtc_clear_warning">Dadurch wird ein Schreibvorgang an das Motorsteuergerät gesendet. Bestätigen Sie, um fortzufahren.</string>
@@ -121,13 +121,17 @@
     <string name="dtc_clear_reason_security_rejected">Das Steuergerät hat den Sicherheitszugriff abgelehnt; es wurde nichts gelöscht.</string>
     <string name="dtc_clear_reason_rejected">Das Steuergerät hat die Löschanforderung abgelehnt; es wurden keine Codes gelöscht.</string>
     <string name="dtc_clear_reason_count_unconfirmed">Das Löschen wurde abgeschlossen, aber die Anzahl der Codes konnte nicht bestätigt werden.</string>
+    <string name="dtc_clear_reason_write_ambiguous">Der Löschversuch wurde begonnen, aber es kam kein zuverlässiges Ergebnis zurück. Codes könnten bereits gelöscht sein. Stellen Sie die Verbindung wieder her und lesen Sie die Fehlercodes vor einem erneuten Versuch.</string>
+    <string name="dtc_clear_reason_verification_lost">Das Steuergerät hat das Löschen bestätigt, aber die anschließende Code-Anzahl ging verloren. Stellen Sie die Verbindung wieder her und lesen Sie die Fehlercodes.</string>
 
     <!-- Service reminder reset -->
-    <string name="service_reset_title">Serviceerinnerung zurücksetzen (Forschung)</string>
+    <string name="service_reset_title">Serviceerinnerung zurücksetzen</string>
     <string name="service_reset_body_idle">Schreibt ein neues Serviceintervall und das nächste Servicedatum in das Kombiinstrument. Das Zurücksetzen einer Erinnerung führt keine Wartung durch.</string>
     <string name="service_reset_body_running">Die Serviceerinnerung wird geschrieben. Lassen Sie die Zündung eingeschaltet und verlassen Sie die App nicht.</string>
     <string name="service_reset_body_committed">Übernommen. Kilometerzähler %1$d %2$s, Intervall %3$d %4$s, nächster Service %5$s.</string>
-    <string name="service_reset_body_blocked">%1$s Es wurde nichts geschrieben.</string>
+    <string name="service_reset_body_blocked">%1$s</string>
+    <string name="service_reset_date_time_reminder">Stellen Sie vor dem Zurücksetzen sicher, dass Datum und Uhrzeit des Motorrads korrekt sind.</string>
+    <string name="service_reset_unit_label">Aktuell am Motorrad ausgewählte Einheit</string>
     <string name="service_reset_interval_label">Serviceintervall (%1$s)</string>
     <string name="service_reset_interval_error_format">Geben Sie eine positive ganze Zahl ein.</string>
     <string name="service_reset_interval_error_range">Verwenden Sie ein Vielfaches von %1$d %2$s, zwischen %3$d und %4$d %2$s.</string>
@@ -139,8 +143,10 @@
     <string name="service_reset_failed_error">Das Zurücksetzen der Serviceerinnerung wurde nach einem Verbindungs- oder Adapterfehler gestoppt.</string>
     <string name="service_reset_reason_invalid_input">Das angeforderte Intervall oder Datum liegt außerhalb des unterstützten Bereichs; es wurde nichts geschrieben.</string>
     <string name="service_reset_reason_unrecognized_status">Das Instrument gab einen nicht erkannten Status zurück; es wurde nichts geschrieben.</string>
-    <string name="service_reset_reason_distance_rejected">Das Kombiinstrument hat den Schreibvorgang des Serviceintervalls abgelehnt; es wurde nichts geändert. Das kann passieren, wenn das Display auf Meilen eingestellt ist – stellen Sie das Display auf Kilometer und versuchen Sie es erneut.</string>
+    <string name="service_reset_reason_distance_rejected">Das Kombiinstrument hat den Serviceintervall-Schreibvorgang abgelehnt. Die Zurücksetzung wurde vor der Datumsänderung beendet.</string>
     <string name="service_reset_reason_date_unconfirmed">Das Kombiinstrument hat den Schreibvorgang des Servicedatums nicht bestätigt.</string>
+    <string name="service_reset_reason_partially_applied">Das Serviceintervall wurde akzeptiert, aber das Datum nicht bestätigt. Prüfen Sie das Motorrad vor einem erneuten Versuch.</string>
+    <string name="service_reset_reason_write_ambiguous">Das Schreiben der Erinnerung wurde versucht, aber es kam kein zuverlässiges Ergebnis zurück. Intervall oder Datum könnten geändert worden sein. Prüfen Sie das Motorrad vor einem erneuten Versuch.</string>
 
     <!-- Cluster fingerprint gate -->
     <string name="gate_reason_profile_mismatch">Das verbundene Motorradprofil stimmt nicht mit dem validierten Kombiinstrument überein.</string>

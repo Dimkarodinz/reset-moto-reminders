@@ -2,7 +2,7 @@
 
 Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph Tiger 900 GT Pro (2021–2023) from your phone. Free community build, source available, no dealer visit.
 
-Reset Moto Reminders is an unofficial Android app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter and does three things: read trouble codes, clear trouble codes, and reset the service reminder. Nothing else.
+Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter to read the dashboard odometer, read or clear trouble codes, and reset the service reminder. Nothing else.
 
 ## Why this exists
 
@@ -12,6 +12,7 @@ Most routine service is an oil change and an air filter. You can do it yourself 
 
 ## What it does
 
+- **Read dashboard information.** Reads the odometer from the TFT instrument as a simple, read-only proof that the motorcycle responded.
 - **Read trouble codes.** Reads confirmed DTCs from the engine ECU and decodes them into plain descriptions.
 - **Clear trouble codes.** Shows the current codes, then clears them only after you confirm. Clearing removes the stored fault record; it does not repair the fault.
 - **Reset the service reminder.** Sets the next-service distance and date on the instrument cluster. Resetting the reminder does not perform any maintenance.
@@ -28,12 +29,12 @@ Most routine service is an oil change and an air filter. You can do it yourself 
 
 Safety is built into the design, not bolted on afterward:
 
-- The app performs **only the three operations above** — there is no code path that flashes firmware, writes calibration, or reprograms a module.
+- The app performs **only the bounded operations above** — there is no code path that flashes firmware, writes calibration, or reprograms a module.
 - Every command it sends is a **byte sequence observed from a real Tiger 900**. It never guesses, fuzzes, or probes unknown commands.
 - Writes are **fail-closed and gated**: the app refuses to write unless it recognizes the exact motorcycle profile, and it asks you to confirm each write. An unknown or mismatched bike stays read-only.
 - It **never retries a write** after a disconnect or an unclear result.
 
-Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. DTC clear is built and gated but still awaiting hardware validation. Write features remain research-only until their release gates are satisfied.
+Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. A successful miles-mode reset has now been captured and implemented, but still needs its first validation through this app. DTC clear is built, marked Beta and gated, but still awaits its first project-app motorcycle test. Write features remain debug-only until their release gates are satisfied.
 
 ## Supported models
 
@@ -41,7 +42,7 @@ Reading trouble codes and the kilometre-mode service reset are validated on a re
 
 | Motorcycle | Adapter | Status |
 | --- | --- | --- |
-| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset (km mode) validated on hardware; DTC clear implemented and gated, hardware validation pending. With the dashboard set to miles the cluster rejects the reset — switch the dash to km and retry |
+| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset (km mode) validated through this app. Miles reset is capture-validated and implemented, pending its first project-app test. DTC clear is implemented, gated and marked Beta, with hardware validation pending. |
 
 ### Potentially supported (not tested)
 
@@ -58,7 +59,7 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 
 - **A Bluetooth OBD-II adapter** based on the ELM327 / STN command set (an "ECU linker" / OBD tool). It must expose the bike's diagnostic CAN bus.
 - Tested with the **vLinker MC+** OBD adapter (it pairs as `vLinker MC-Android` over Bluetooth Classic on Android, and advertises as `vLinker MC-IOS` over BLE on iPhone). This adapter profile has been captured on both iPhone and Android hardware.
-- An Android 8+ phone. (An iOS app is planned but not yet released — see below.)
+- An Android 8+ phone, or an iPhone running iOS 16+ for the source/self-build version.
 
 *Personal note: the vLinker MC+ costs about €40, has no subscription, and does not wear out. It works with almost any car or motorcycle OBD-II port. Worth buying well beyond this app — a general diagnostic tool you keep for years.*
 
@@ -66,11 +67,11 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 
 Download the APK from the project releases and install it on your Android phone. Every release APK is built from a public source tag and published with a SHA-256 checksum so you can verify it.
 
-Build instructions and the full hardware-test procedure are in [`android/README.md`](android/README.md).
+Android build instructions and the full hardware-test procedure are in [`android/README.md`](android/README.md). The iPhone app is currently a source/self-build preview; see [`ios/README.md`](ios/README.md).
 
 ## Help test another Triumph
 
-The separate **Triumph Research** Android app performs one bounded compatibility session. It asks for model/year, saves the known Triumph engine/TFT read evidence first, and can optionally test the exact kilometre service reset and DTC-clear sequences in that same connection after an explicit warning and acknowledgement. The service test uses the entered current values, temporarily writes `+100 km`/`+1 day`, then restores the entered baseline. It never requests VIN/serial data, fuzzes commands, or tries generic writes.
+The separate **Triumph Research** Android app performs one bounded compatibility session. It asks for model/year, saves the known Triumph engine/TFT read evidence first, and can optionally test the exact selected-unit service reset and DTC-clear sequences in that same connection after an explicit warning and acknowledgement. The service test uses the entered current values, temporarily writes `+100` in km or miles plus `+1 day`, then restores the entered baseline in the same unit. It never requests VIN/serial data, fuzzes commands, or tries generic writes.
 
 Build and motorcycle-test instructions are in [`research-builds/android/triumph/README.md`](research-builds/android/triumph/README.md). A successful report identifies evidence for the entered motorcycle; it does not by itself declare an entire model family supported. Optional writes can alter stored data: DTC clear erases fault evidence, and service restoration cannot be guaranteed after disconnect or an ambiguous result.
 
@@ -83,7 +84,7 @@ scanning addresses or guessing commands. See
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
-- **iOS** — planned. The Swift/CoreBluetooth app is not built yet; the vLinker MC+ BLE transport has been captured but its command channel is still being validated. Distribution will be source plus self-build instructions.
+- **iOS** — native SwiftUI/CoreBluetooth preview implemented and build-verified for iOS 16+. It mirrors dashboard read, DTC read, DTC clear (Beta), and km/miles service reset. Its first physical-phone test is still pending: every connection proves the primary MC-IOS command channel with `ATI` before any motorcycle command, and disconnects if that check fails. Distribution is source plus Xcode self-build instructions.
 
 ## Unofficial project
 
