@@ -90,5 +90,10 @@ func hex(_ bytes: [UInt8]) -> String { bytes.map { String(format: "%02X", $0) }.
 
 func configurationAccepted(command: String, response: String) -> Bool {
   let normalized = response.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-  return normalized == "OK" || normalized == command.uppercased()
+  if command.uppercased() == "ATWS" {
+    return normalized.contains("ELM327")
+  }
+  return normalized.split(whereSeparator: \.isNewline).contains { line in
+    line.trimmingCharacters(in: .whitespacesAndNewlines) == "OK"
+  }
 }

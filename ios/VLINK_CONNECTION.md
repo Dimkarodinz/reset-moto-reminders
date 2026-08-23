@@ -2,7 +2,7 @@
 
 ## Current status
 
-The 2026-08-08 nRF Connect screenshots and Bluetooth HCI capture establish how to discover and connect to the adapter, its complete GATT layout and how notifications were enabled. They do **not** establish which writable characteristic carries ELM commands: no `ATI` bytes were written and no adapter response notification was captured.
+The 2026-08-08 nRF Connect screenshots and Bluetooth HCI capture establish discovery, the complete GATT layout and notification setup. That capture did not include an `ATI` exchange. The 2026-08-23 production-app run subsequently reached **Motorcycle connected**, which requires an acknowledged, prompt-complete and accepted `ATI` exchange on the primary split channel. This establishes `0x2AF1` for commands and `0x2AF0` for responses, although the exact identity text and fragment transcript were not retained.
 
 Use [`adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) as the machine-readable source of truth. Treat handles as evidence only; resolve services and characteristics by UUID at runtime because handles can change with firmware.
 
@@ -83,18 +83,18 @@ On iOS, do not write `01 00` to the CCCD directly. Call `setNotifyValue(true, fo
 6. Reject the adapter profile if `0x2AF0` lacks Notify/Indicate or `0x2AF1` lacks Write/Write Without Response.
 7. Call `setNotifyValue(true, for: responseCharacteristic2AF0)` and wait for successful notification-state confirmation.
 8. Ask `maximumWriteValueLength(for: .withResponse)` before sending data. Do not request or assume an ATT MTU directly; CoreBluetooth manages it.
-9. Perform the one-time adapter-only proof below. Do not connect to an ECU for this test.
-10. Wait for the successful `didWriteValueFor` acknowledgement and append every `didUpdateValueFor` payload in arrival order. Treat the command as complete only after both the acknowledgement and a response ending with ASCII `>` (`0x3E`) arrive; either callback may arrive first. That prompt framing is not yet observed on this MC-IOS transport.
+9. Send the session-local adapter-only `ATI` gate below before any motorcycle command.
+10. Wait for the successful `didWriteValueFor` acknowledgement and append every `didUpdateValueFor` payload in arrival order. Treat the command as complete only after both the acknowledgement and a response ending with ASCII `>` (`0x3E`) arrive; either callback may arrive first. The production app has completed this gate, but the fragment shape was not retained.
 11. Ignore callbacks that do not belong to the retained central/peripheral session. Disconnect after the proof, on app backgrounding, or on any error or unexpected response.
 
-## Pending adapter-only proof
+## Observed primary channel
 
-The safest first candidate is the split `0x18F0` channel because it is advertised and exposes a conventional response characteristic plus command characteristic. This is a hypothesis, not a captured fact.
+The production app successfully completed its strict identity gate over the split `0x18F0` channel. The primary path is therefore observed; the exact returned identity remains unretained evidence.
 
 > **Tooling:** [`ResetLightProbe/`](ResetLightProbe/) implements exactly this proof (both candidate channels, one shot each, JSONL journal). Prefer it over a manual nRF Connect attempt — it performs the sequence deterministically and captures the evidence.
 
 ```text
-Status: proposed, unverified
+Status: project-app observed through the ATI gate
 Enable notifications: service 0x18F0 / characteristic 0x2AF0
 Write target: service 0x18F0 / characteristic 0x2AF1
 Write type: withResponse first
@@ -103,11 +103,11 @@ Hex payload: 41 54 49 0D
 Expected response class: adapter identity text followed by >
 ```
 
-If the write succeeds but produces no notification, stop and preserve the capture. In a separate adapter-only attempt, the custom all-in-one characteristic may be tested once by enabling its notifications and writing the same four bytes with response. Do not automatically probe both paths in production code.
+If a future primary-channel attempt succeeds in writing but produces no notification, stop and preserve the evidence. The custom all-in-one characteristic remains a maintainer-probe-only fallback and must never be auto-tried in production code.
 
-Until one path returns an adapter identity, the application must report `unsupported/unvalidated adapter transport` and must not send motorcycle diagnostic commands.
+The application must continue reporting `unsupported/unvalidated adapter transport` and sending no motorcycle command whenever the primary path does not return an accepted adapter identity.
 
-The production preview in [`ResetMotoReminders/`](ResetMotoReminders/) now performs this primary-channel check at the start of every connection. It does not expose or auto-try the alternate channel. A recognizable `vLinker`/`ELM`/`STN` identity and complete prompt unlock the session; any failure disconnects before motorcycle traffic. The first physical iPhone run is still needed to promote the map from `proposed_unverified` to observed.
+The production preview in [`ResetMotoReminders/`](ResetMotoReminders/) performs this primary-channel check at the start of every connection. It does not expose or auto-try the alternate channel. A recognizable `vLinker`/`ELM`/`STN` identity and complete prompt unlock the session; any failure disconnects before motorcycle traffic. The next physical test is the corrected v0.1.3 dashboard and DTC read path.
 
 ## Screenshot coverage
 

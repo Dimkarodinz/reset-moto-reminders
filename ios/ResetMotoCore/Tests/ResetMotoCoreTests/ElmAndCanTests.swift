@@ -66,4 +66,20 @@ final class ElmAndCanTests: XCTestCase {
     acknowledgementFirst.receive(response: "OK")
     XCTAssertEqual("OK", acknowledgementFirst.completedResponse)
   }
+
+  func testWarmStartAcceptsTheObservedElmIdentityBanner() {
+    XCTAssertTrue(configurationAccepted(command: "ATWS", response: "ELM327 v2.2"))
+  }
+
+  func testOrdinaryConfigurationRequiresAnOkLineAndRejectsEchoOnly() {
+    XCTAssertTrue(configurationAccepted(command: "ATE0", response: "SEARCHING…\nOK"))
+    XCTAssertFalse(configurationAccepted(command: "ATE0", response: "ATE0"))
+  }
+
+  func testConfigurationFailureHasAnActionableUserMessage() {
+    XCTAssertEqual(
+      "The adapter rejected setup command ATWS. Disconnect and try again.",
+      DiagnosticOperationError.configurationRejected("ATWS").errorDescription
+    )
+  }
 }

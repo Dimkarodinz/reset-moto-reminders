@@ -14,7 +14,7 @@ The app is English-only in this first iOS version. It contains no map flashing, 
 
 ## Safety boundary
 
-The MC-IOS GATT command endpoint is not yet proven by a powered-adapter capture. Every live session therefore begins with one bounded adapter-only `ATI` check over the primary `18F0` channel. The app must disconnect and send no motorcycle command when the expected service layout, notification path, write acknowledgement, ELM prompt, or usable adapter identity is missing.
+The production app has completed its bounded adapter-only `ATI` check over the primary `18F0` channel on a powered MC-IOS. Every live session still repeats that fail-closed check and sends no motorcycle command when the expected service layout, notification path, write acknowledgement, ELM prompt, or usable adapter identity is missing.
 
 Only the primary channel is used. The alternate characteristic remains exclusive to the maintainer probe and is never auto-probed by the production app.
 
@@ -30,7 +30,7 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 6. Add failing DTC-clear and service-reset transcript tests, including response-pending, rejected prerequisites, partial service writes, ambiguous writes, and no automatic retry; then implement both write use cases.
 7. Add failing operation-serialization tests; then implement the whole-operation gate.
 8. Build the SwiftUI UI and CoreBluetooth transport around the tested core. Keep UUIDs and motorcycle bytes in the bundled profile rather than feature views.
-9. Build without signing for the simulator and generic iOS device. Physical installation and launch are complete; the first powered-adapter test is adapter identification, and motorcycle operations run only after that succeeds in the same connection.
+9. Build without signing for the simulator and generic iOS device. Physical installation, launch and primary-channel adapter identification are complete. The first motorcycle run exposed an `ATWS` client-validation defect; v0.1.3 fixes it and awaits the read-only retest.
 
 ## Review checklist
 
@@ -45,6 +45,6 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 
 ## Critical/high-risk review
 
-The unresolved critical boundary is the unproven MC-IOS command channel. The session-local `ATI` gate and immediate disconnect address it without guessing a fallback channel; only a powered-adapter test can promote that transport evidence.
+The primary MC-IOS command channel is observed through the production app's successful `ATI` gate. The unresolved hardware boundary is the corrected initialization and motorcycle read path; the alternate channel remains out of the production app.
 
-The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. Whole-operation serialization, single-send writes, live instrument fingerprinting and explicit partial/ambiguous outcomes remain mandatory. No known critical or very-high code issue remains after this review; physical MC-IOS and motorcycle validation is still required.
+The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. The first live run then exposed a deterministic interoperability bug: `ATWS` returns an `ELM327` banner, not bare `OK`. A regression test now protects that special case while ordinary setup commands still require `OK`. Whole-operation serialization, single-send writes, live instrument fingerprinting and explicit partial/ambiguous outcomes remain mandatory. No known critical or very-high code issue remains; corrected motorcycle behavior still requires physical validation.

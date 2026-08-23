@@ -11,6 +11,18 @@ public enum DiagnosticOperationError: Error, Equatable {
   case inconsistentDTCCount(reported: Int, decoded: Int)
 }
 
+extension DiagnosticOperationError: LocalizedError {
+  public var errorDescription: String? {
+    switch self {
+    case .configurationRejected(let command):
+      return "The adapter rejected setup command \(command). Disconnect and try again."
+    case .inconsistentDTCCount(let reported, let decoded):
+      return
+        "The motorcycle reported \(reported) trouble code(s), but \(decoded) complete record(s) were received. Read again before clearing."
+    }
+  }
+}
+
 public struct DashboardResult: Equatable, Sendable {
   public let statusASCII: String
   public let odometerKilometres: Int
