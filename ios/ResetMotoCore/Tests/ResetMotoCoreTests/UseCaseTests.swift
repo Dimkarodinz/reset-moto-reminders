@@ -64,6 +64,7 @@ final class UseCaseTests: XCTestCase {
     let commands = await channel.commands
     let intents = await channel.intents
     XCTAssertEqual(1, commands.filter { $0 == profile.engine.dtcClearCommand }.count)
+    XCTAssertEqual(.read, intents[seedKey], "Security unlock is not a state-changing write")
     XCTAssertEqual(.write, intents[profile.engine.dtcClearCommand])
   }
 
@@ -72,7 +73,7 @@ final class UseCaseTests: XCTestCase {
     let channel = FakeCommandChannel(
       responses: responseMap(
         profile.engine.configurationCommands,
-        extras: [profile.engine.extendedSessionCommand: "7F1012"]
+        extras: [profile.engine.extendedSessionCommand: "18DAF1D5 03 7F1012 AAAAAAAA"]
       ))
 
     let outcome = try await DTCUseCase(

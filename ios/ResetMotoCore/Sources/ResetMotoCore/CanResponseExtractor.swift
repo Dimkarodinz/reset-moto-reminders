@@ -39,7 +39,7 @@ public struct CanResponseExtractor: Sendable {
     }
     guard !frames.isEmpty else { throw DiagnosticParseError.invalidHex }
     let matching = frames.filter { $0.hasPrefix(header) && $0.count > header.count }
-    guard !matching.isEmpty else { return frames }
+    guard !matching.isEmpty else { throw DiagnosticParseError.unexpectedResponse }
     let dataFrames = matching.map { String($0.dropFirst(header.count)) }
     guard isoTP else { return dataFrames }
 

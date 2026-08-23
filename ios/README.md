@@ -4,7 +4,9 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-Version 0.1.1 (`build 2`) is signed, installed and launch-verified on an iPhone 12. Its full-width centered actions, consistent content margins, spaced app name and Android-family icon are visually/build verified. All existing 27 protocol/use-case tests plus two presentation-contract tests pass. A physical iPhone has not yet run this production app against the powered `vLinker MC-IOS` adapter. For that reason every connection first performs one harmless adapter-only `ATI` identity check on the primary `18F0` GATT channel. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command.
+Version 0.1.2 (`build 3`) is signed, installed and launch-verified on an iPhone 12. Its full-width centered actions, consistent content margins, spaced app name and Android-family icon are visually/build verified. All 32 protocol/use-case tests plus two presentation-contract tests pass. The safety review now requires both a successful GATT write acknowledgement and the complete ELM prompt, rejects diagnostic replies from the wrong CAN module, consumes DTC-clear authorization when a read/clear starts, ignores callbacks from obsolete BLE sessions, and closes the connection when the app backgrounds. If backgrounding follows a state-changing write, the result is reported as ambiguous and is never retried.
+
+A physical iPhone has not yet run this production app against the powered `vLinker MC-IOS` adapter. For that reason every connection first performs one harmless adapter-only `ATI` identity check on the primary `18F0` GATT channel. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command.
 
 ## Build and install with a free Apple ID
 

@@ -2,7 +2,7 @@ import ResetMotoCore
 import SwiftUI
 
 struct ContentView: View {
-  @StateObject private var session = AdapterSession()
+  @ObservedObject var session: AdapterSession
   @State private var distanceUnit: DistanceUnit = .kilometres
   @State private var distance = "10000"
   @State private var nextServiceDate =

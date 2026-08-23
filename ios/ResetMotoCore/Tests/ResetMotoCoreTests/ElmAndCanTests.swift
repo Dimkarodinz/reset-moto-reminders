@@ -44,4 +44,26 @@ final class ElmAndCanTests: XCTestCase {
     let extractor = CanResponseExtractor(responseCANID: "704", isoTP: false)
     XCTAssertThrowsError(try extractor.extract("NO DATA"))
   }
+
+  func testConfiguredHeaderRejectsAReplyFromAnotherModule() {
+    let extractor = CanResponseExtractor(responseCANID: "704", isoTP: false)
+
+    XCTAssertThrowsError(try extractor.extract("7E8 DE303433FFFFFFFF")) { error in
+      XCTAssertEqual(error as? DiagnosticParseError, .unexpectedResponse)
+    }
+  }
+
+  func testCommandCompletionNeedsBothGattAcknowledgementAndElmPrompt() {
+    var responseFirst = CommandCompletionGate()
+    responseFirst.receive(response: "OK")
+    XCTAssertNil(responseFirst.completedResponse)
+    responseFirst.acknowledgeWrite()
+    XCTAssertEqual("OK", responseFirst.completedResponse)
+
+    var acknowledgementFirst = CommandCompletionGate()
+    acknowledgementFirst.acknowledgeWrite()
+    XCTAssertNil(acknowledgementFirst.completedResponse)
+    acknowledgementFirst.receive(response: "OK")
+    XCTAssertEqual("OK", acknowledgementFirst.completedResponse)
+  }
 }

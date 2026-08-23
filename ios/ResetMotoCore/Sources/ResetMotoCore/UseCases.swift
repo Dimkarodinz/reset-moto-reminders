@@ -72,7 +72,9 @@ public struct DTCUseCase: Sendable {
     let seed = try extractor.extract(await channel.execute(profile.seedCommand, intent: .read))
     let keyRequest = try SeedKeyDerivation(multiplier: profile.seedMultiplier)
       .keyRequest(seedResponse: seed, prefix: profile.keyRequestPrefix)
-    let key = try extractor.extract(await channel.execute(keyRequest, intent: .write))
+    // Security access unlocks the following request but does not itself change
+    // diagnostic memory, so an interrupted key exchange is not a write outcome.
+    let key = try extractor.extract(await channel.execute(keyRequest, intent: .read))
     guard key.hasPrefix("6702") else { return .blocked }
 
     // The state-changing request is deliberately sent once. Response-pending

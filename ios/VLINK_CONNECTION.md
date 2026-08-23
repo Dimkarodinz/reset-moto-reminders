@@ -84,8 +84,8 @@ On iOS, do not write `01 00` to the CCCD directly. Call `setNotifyValue(true, fo
 7. Call `setNotifyValue(true, for: responseCharacteristic2AF0)` and wait for successful notification-state confirmation.
 8. Ask `maximumWriteValueLength(for: .withResponse)` before sending data. Do not request or assume an ATT MTU directly; CoreBluetooth manages it.
 9. Perform the one-time adapter-only proof below. Do not connect to an ECU for this test.
-10. Append every `didUpdateValueFor` payload in arrival order. A complete ELM response is expected to end with ASCII `>` (`0x3E`), but that framing is not yet observed on this MC-IOS transport.
-11. Disconnect after the proof or on any error or unexpected response.
+10. Wait for the successful `didWriteValueFor` acknowledgement and append every `didUpdateValueFor` payload in arrival order. Treat the command as complete only after both the acknowledgement and a response ending with ASCII `>` (`0x3E`) arrive; either callback may arrive first. That prompt framing is not yet observed on this MC-IOS transport.
+11. Ignore callbacks that do not belong to the retained central/peripheral session. Disconnect after the proof, on app backgrounding, or on any error or unexpected response.
 
 ## Pending adapter-only proof
 
