@@ -44,7 +44,7 @@ adapter:
     ios:
       compatible: true
       api: core_bluetooth
-      knowledge_status: expected_not_project_tested
+      knowledge_status: project_app_ati_observed
 
   transport:
     kind: bluetooth_low_energy_gatt
@@ -66,7 +66,7 @@ adapter:
 
     channel:
       kind: gatt_characteristics
-      knowledge_status: proposed_unverified
+      knowledge_status: project_app_ati_observed
       command_endpoint:
         type: gatt_characteristic
         service_uuid: "0x18F0"
@@ -107,7 +107,7 @@ adapter:
           observed_result: ATT Write Response
 
     framing:
-      knowledge_status: expected_unverified
+      knowledge_status: project_app_ati_observed
       command_encoding: ASCII
       command_terminator_hex: "0D"
       response_line_terminator_hex: "0D"
@@ -227,7 +227,7 @@ adapter:
           observed_result: success
 
     identify_adapter:
-      knowledge_status: proposed_unverified
+      knowledge_status: project_app_observed
       channel: primary
       prerequisites:
         - primary_response_notifications_enabled
@@ -240,7 +240,7 @@ adapter:
       response:
         completion_prompt_hex: "3E"
         expected_pattern: "<adapter identity text><0x3E prompt>"
-        identity_value: unknown
+        identity_value: accepted_by_project_app_not_retained
       alternate_attempts:
         - channel: custom_bidirectional_characteristic
           usage: separate_adapter_only_attempt_after_primary_path_is_captured_as_no_response
@@ -252,7 +252,7 @@ adapter:
             preferred_write_type: with_response
 
     initialize_adapter:
-      knowledge_status: blocked_pending_identity_transport_proof
+      knowledge_status: warm_start_reached_client_validation_fix_pending_retest
       motorcycle_specific_configuration_excluded: true
       wait_for_prompt_after_every_command: true
       sequence: []
@@ -276,9 +276,9 @@ adapter:
 
   validation:
     transport_profile: captured_once
-    command_channel: unconfirmed
-    adapter_identity: not_observed
-    common_initialization: pending
-    response_fragmentation: unconfirmed
+    command_channel: project_app_ati_confirmed
+    adapter_identity: accepted_not_retained
+    common_initialization: atws_client_validation_fixed_pending_retest
+    response_fragmentation: prompt_completed_fragment_shape_not_retained
     independent_replay: pending
     production_ready: false

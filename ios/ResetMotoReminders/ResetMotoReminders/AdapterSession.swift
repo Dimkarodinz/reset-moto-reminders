@@ -1,5 +1,6 @@
 import CoreBluetooth
 import Foundation
+import OSLog
 import ResetMotoCore
 
 enum AdapterConnectionState: Equatable {
@@ -66,6 +67,8 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var state: AdapterConnectionState = .disconnected
   @Published private(set) var adapterIdentity: String?
   @Published private(set) var dashboard: DashboardResult?
+  @Published private(set) var dashboardStatus =
+    "Read the dashboard to confirm the motorcycle is responding."
   @Published private var dtcReadState = DTCReadState()
   @Published private(set) var dtcStatus = "Read the motorcycle to check confirmed trouble codes."
   @Published private(set) var serviceStatus = "Set the next interval and date after connecting."
@@ -82,6 +85,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   private var pending: PendingCommand?
   private var timeoutTask: Task<Void, Never>?
   private let operationGate = OperationGate()
+  private let logger = Logger(subsystem: "dev.resetlight.ios", category: "DiagnosticSession")
   private var operationSentStateChangingWrite = false
   private var backgroundInterruptedAfterWrite = false
 
@@ -101,6 +105,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   func connect() {
     guard state == .disconnected || isFailed else { return }
     resetFeatureState()
+    logger.info("Starting MC-IOS connection")
     state = .waitingForBluetooth
     central = CBCentralManager(delegate: self, queue: .main)
   }
@@ -108,6 +113,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   func disconnect() {
     guard !operationRunning, state != .disconnected else { return }
     state = .disconnecting
+    logger.info("Disconnect requested")
     timeoutTask?.cancel()
     if pending != nil {
       finishPending(.failure(BLECommandError.disconnected))
@@ -131,15 +137,19 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
       backgroundInterruptedAfterWrite
       ? failure.localizedDescription
       : "Connection closed when the app entered the background. Reconnect before continuing."
+    logger.notice(
+      "Closing connection in background; ambiguous=\(self.backgroundInterruptedAfterWrite)")
     failAndDisconnect(reason, pendingFailure: failure)
   }
 
   func readDashboard() {
     guard canStartOperation else { return }
     dashboard = nil
+    dashboardStatus = "Reading dashboard…"
     runOperation("Reading motorcycle") { channel in
       let result = try await DashboardUseCase(profile: self.profile.instrument).read(using: channel)
       self.dashboard = result
+      self.dashboardStatus = "Motorcycle responded."
     }
   }
 
@@ -211,6 +221,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   private func resetFeatureState() {
     adapterIdentity = nil
     dashboard = nil
+    dashboardStatus = "Read the dashboard to confirm the motorcycle is responding."
     dtcReadState = DTCReadState()
     dtcStatus = "Read the motorcycle to check confirmed trouble codes."
     serviceStatus = "Set the next interval and date after connecting."
@@ -225,6 +236,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     operationTitle = title
     operationSentStateChangingWrite = false
     backgroundInterruptedAfterWrite = false
+    logger.info("Operation started: \(title, privacy: .public)")
     Task { @MainActor in
       guard let lease = await operationGate.tryAcquire() else {
         operationTitle = nil
@@ -233,6 +245,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
       }
       do {
         try await action(SessionCommandChannel(session: self))
+        logger.info("Operation completed: \(title, privacy: .public)")
       } catch {
         let reportedError: Error =
           backgroundInterruptedAfterWrite
@@ -240,6 +253,9 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
           : error
         let message =
           (reportedError as? LocalizedError)?.errorDescription ?? reportedError.localizedDescription
+        logger.error(
+          "Operation failed: \(title, privacy: .public); \(message, privacy: .public)")
+        if title == "Reading motorcycle" { dashboardStatus = message }
         if title.contains("trouble") || title.contains("Clearing") { dtcStatus = message }
         if title.contains("service") { serviceStatus = message }
         if reportedError is BLECommandError { failAndDisconnect(message) }
@@ -267,6 +283,9 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
       throw BLECommandError.unsupportedLayout
     }
     assembler = ElmResponseAssembler(promptByte: profile.adapter.promptByte)
+    let commandTag = logTag(for: command)
+    logger.debug(
+      "Sending command \(commandTag, privacy: .public); write=\(intent == .write)")
     return try await withCheckedThrowingContinuation { continuation in
       pending = PendingCommand(
         command: command, intent: intent, continuation: continuation, sent: true,
@@ -282,6 +301,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     timeoutTask = Task { @MainActor [weak self] in
       try? await Task.sleep(nanoseconds: 5_000_000_000)
       guard !Task.isCancelled, let self, self.pending != nil else { return }
+      self.logger.error("Command timed out: \(self.logTag(for: command), privacy: .public)")
       let error: BLECommandError = intent == .write ? .ambiguousWrite(command) : .timeout(command)
       self.finishPending(.failure(error))
     }
@@ -296,8 +316,16 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   private func finishPendingIfComplete() {
-    guard let response = pending?.completion.completedResponse else { return }
+    guard let pending, let response = pending.completion.completedResponse else { return }
+    logger.debug(
+      "Command completed: \(self.logTag(for: pending.command), privacy: .public); responseCharacters=\(response.count)"
+    )
     finishPending(.success(response))
+  }
+
+  private func logTag(for command: String) -> String {
+    command.uppercased().hasPrefix("AT")
+      ? command.uppercased() : String(command.prefix(8)).uppercased()
   }
 
   private func beginIdentification() {
@@ -311,6 +339,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
         }
         adapterIdentity = identity
         state = .ready
+        logger.info("Adapter identity accepted; diagnostic session ready")
       } catch {
         failAndDisconnect(
           (error as? LocalizedError)?.errorDescription ?? error.localizedDescription)
@@ -322,6 +351,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     _ reason: String,
     pendingFailure: BLECommandError? = nil
   ) {
+    logger.error("Connection failed: \(reason, privacy: .public)")
     let activePeripheral = peripheral
     if let pending {
       let failure =

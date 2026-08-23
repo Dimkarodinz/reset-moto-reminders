@@ -132,9 +132,11 @@ final class UseCaseTests: XCTestCase {
 
   private func responseMap(_ configuration: [String], extras: [String: String]) -> [String: String]
   {
-    Dictionary(uniqueKeysWithValues: configuration.map { ($0, "OK") }).merging(extras) { _, new in
-      new
-    }
+    Dictionary(
+      uniqueKeysWithValues: configuration.map {
+        ($0, $0 == "ATWS" ? "ELM327 v2.2" : "OK")
+      }
+    ).merging(extras) { _, new in new }
   }
 }
 

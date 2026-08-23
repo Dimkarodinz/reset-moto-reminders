@@ -102,12 +102,10 @@ struct ContentView: View {
   private var dashboardCard: some View {
     Card {
       Text("Motorcycle").font(.headline)
+      Text(session.dashboardStatus).foregroundStyle(.secondary)
       if let dashboard = session.dashboard {
         LabeledContent("Odometer", value: "\(dashboard.odometerKilometres) km")
         LabeledContent("Dashboard status", value: dashboard.statusASCII)
-      } else {
-        Text("Read the dashboard to confirm the motorcycle is responding.")
-          .foregroundStyle(.secondary)
       }
       Button {
         session.readDashboard()

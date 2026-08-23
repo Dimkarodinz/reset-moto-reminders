@@ -4,9 +4,9 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-Version 0.1.2 (`build 3`) is signed, installed and launch-verified on an iPhone 12. Its full-width centered actions, consistent content margins, spaced app name and Android-family icon are visually/build verified. All 32 protocol/use-case tests plus two presentation-contract tests pass. The safety review now requires both a successful GATT write acknowledgement and the complete ELM prompt, rejects diagnostic replies from the wrong CAN module, consumes DTC-clear authorization when a read/clear starts, ignores callbacks from obsolete BLE sessions, and closes the connection when the app backgrounds. If backgrounding follows a state-changing write, the result is reported as ambiguous and is never retried.
+Version 0.1.3 (`build 4`) is installed and launch-verified on the iPhone 12. It fixes the first powered-adapter failure: the app reached **Motorcycle connected**, proving the primary `18F0` GATT channel and `ATI` identity gate, but each feature stopped at `ATWS`. The client incorrectly expected `OK` although a warm start correctly returns an `ELM327` identity banner. The parser now handles that response explicitly while continuing to require a standalone `OK` from ordinary setup commands. All 35 protocol/use-case tests plus two presentation-contract tests pass.
 
-A physical iPhone has not yet run this production app against the powered `vLinker MC-IOS` adapter. For that reason every connection first performs one harmless adapter-only `ATI` identity check on the primary `18F0` GATT channel. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command.
+The corrected dashboard, DTC and service flows still need their first motorcycle retest. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers.
 
 ## Build and install with a free Apple ID
 
@@ -32,7 +32,7 @@ Use ignition on and engine off unless the motorcycle procedure requires otherwis
 5. Only after the two reads succeed, test service reset with the intended dashboard unit and date. Check the iPhone date/time first and verify the dashboard afterward.
 6. Treat **Clear trouble codes (Beta)** as destructive diagnostic evidence removal. Read and record the codes first, then clear only if that is intentional.
 
-The first successful `ATI` run should be captured with the maintainer probe if the adapter map needs to be promoted to observed evidence.
+If a read still fails, preserve the exact on-screen message and keep the phone connected to the Mac so the bounded system log can be inspected.
 
 ## Developer checks
 

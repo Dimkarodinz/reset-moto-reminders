@@ -12,7 +12,7 @@ Build the iOS app natively with Swift, SwiftUI and CoreBluetooth. Do not introdu
 
 The native iOS preview is implemented in [`ResetMotoReminders/`](ResetMotoReminders/), with the tested platform-neutral protocol/use-case layer in [`ResetMotoCore/`](ResetMotoCore/). Reuse Android behavior, wording, maps and test scenarios—not Android Bluetooth code or forced pixel-identical layouts.
 
-The remaining boundary is physical validation of the MC-IOS primary GATT command channel. The production app handles that conservatively in every connection: it discovers only the primary `18F0` split channel, enables `2AF0` notifications, sends one adapter-only `ATI` through `2AF1`, and requires a recognizable adapter identity plus ELM prompt before enabling motorcycle features. Failure disconnects without sending a motorcycle command. Never add automatic fallback-channel probing.
+The production app has now validated the MC-IOS primary GATT command channel far enough to complete its `ATI` identity gate. It discovers only the primary `18F0` split channel, enables `2AF0` notifications, sends `ATI` through `2AF1`, and requires a recognizable adapter identity plus ELM prompt before enabling motorcycle features. The remaining boundary is a successful motorcycle read after the v0.1.3 `ATWS` response fix. Never add automatic fallback-channel probing.
 
 **Transport-characterization tooling (2026-08-13):** [`ResetLightProbe/`](ResetLightProbe/) remains the maintainer-only tool for testing the alternate channel or collecting a focused JSONL journal. Its platform-neutral logic lives in [`ProbeKit/`](ProbeKit/). The probe run against the powered adapter has not happened yet, and its earlier free signature may have expired.
 
@@ -26,7 +26,7 @@ The remaining boundary is physical validation of the MC-IOS primary GATT command
 | [`../adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) | iOS adapter profile: BLE advertisement, GATT layout and current validation state |
 | [`../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml`](../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml) | Current motorcycle/module protocol evidence |
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Shared user-facing DTC dictionary with observed and reference-only entries kept distinct |
-| [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | CoreBluetooth discovery, GATT details and pending adapter-only proof |
+| [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | CoreBluetooth discovery, GATT details, observed primary channel and remaining motorcycle proof |
 | [`PLAN.md`](PLAN.md) | Reviewed production implementation plan and safety checklist |
 | [`ResetMotoCore/`](ResetMotoCore/) | Typed generated profile, ELM/CAN/UDS logic, use cases and deterministic tests |
 | [`ResetMotoReminders/`](ResetMotoReminders/) | SwiftUI application, CoreBluetooth session and Xcode project |
@@ -58,9 +58,9 @@ iOS UI and lifecycle
 ## Current feature gates
 
 - The SwiftUI app and all four feature flows are implemented and compile for simulator and physical iOS targets. The core has deterministic transcript tests; none of these results substitutes for a physical iPhone/motorcycle test.
-- Version `0.1.2` (`build 3`) is installed and launch-verified on an iPhone 12. The screen uses consistent 20-point outer margins and full-width centered main actions. Both compiled name fields contain `Reset Moto Reminders`, and the AppIcon is generated directly from the Android launcher family. This validates installation and presentation only; the powered MC-IOS/ECU path remains untested.
+- Version `0.1.3` (`build 4`) contains the first powered-adapter fix. The first run reached **Motorcycle connected**, which proves the primary GATT notification/write path and accepted `ATI` identity. Every motorcycle feature then failed at `ATWS` because the iOS validator expected `OK` instead of the observed `ELM327` warm-start banner. The corrected feature path is pending a motorcycle retest.
 - The critical/high safety review requires both the CoreBluetooth write acknowledgement and the prompt-complete ELM reply, requires the configured CAN response ID for live diagnostic replies, invalidates DTC-clear eligibility as soon as a new read or clear begins, rejects callbacks from obsolete BLE objects, and closes the connection on app backgrounding. A state-changing write interrupted by backgrounding remains explicitly ambiguous and is never replayed.
-- The MC-IOS primary command channel is still capture-unproven. A session-local successful `ATI` gate is mandatory before any motorcycle command; unexpected layout, missing prompt, timeout or unknown identity disconnects.
+- The MC-IOS primary command channel has been exercised by the production app through its `ATI` gate, although its exact response transcript was not retained. A session-local successful `ATI` gate remains mandatory; unexpected layout, missing prompt, timeout or unknown identity disconnects.
 - Dashboard and DTC reads, DTC clear (Beta), and service reset use the same captured Tiger 900 commands and response rules as Android. No other motorcycle profile is selectable.
 - Service writes require the exact bundled motorcycle profile and live `043` instrument fingerprint. DTC clear retains the Beta label and explicit destructive confirmation.
 - Unknown map schemas, characteristic layouts, adapter identities, instrument fingerprints or response shapes fail closed. Writes are never automatically retried after an ambiguous result.
@@ -74,7 +74,7 @@ iOS UI and lifecycle
 - Preserve notification fragments in arrival order and declare an ELM response complete only after the prompt is observed and validated.
 - Do not automatically probe both candidate GATT channels. Test the primary path once, preserve the capture, and test the fallback only in a separate adapter-only attempt.
 - Cancel the connection on unexpected layout, response, timeout or application shutdown. Never silently replay an interrupted write.
-- The production app does not export logs. The maintainer probe must redact peripheral identifiers, serial numbers and VINs from any shared journal.
+- The production app does not export logs. It may emit bounded Apple system-log events for state, command tags and outcomes, but never raw adapter/ECU replies, peripheral identifiers, serial numbers or VINs. The maintainer probe must apply the same redaction to any shared journal.
 
 ## UI safety behavior
 
