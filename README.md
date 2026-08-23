@@ -86,7 +86,7 @@ the scan itself remains intentionally unchanged and read-only.
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
-- **iOS** — native SwiftUI/CoreBluetooth preview implemented and build-verified for iOS 16+. It mirrors dashboard read, DTC read, DTC clear (Beta), and km/miles service reset. Its first physical-phone test is still pending: every connection proves the primary MC-IOS command channel with `ATI` before any motorcycle command, and disconnects if that check fails. Distribution is source plus Xcode self-build instructions.
+- **iOS** — native SwiftUI/CoreBluetooth preview implemented for iOS 16+. Version 0.1.1 is installed and launch-verified on an iPhone 12; it mirrors dashboard read, DTC read, DTC clear (Beta), and km/miles service reset. Its first powered-adapter test is still pending: every connection proves the primary MC-IOS command channel with `ATI` before any motorcycle command, and disconnects if that check fails. Distribution is source plus Xcode self-build instructions.
 
 ## Unofficial project
 

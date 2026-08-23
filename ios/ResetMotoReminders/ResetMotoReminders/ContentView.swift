@@ -38,7 +38,10 @@ struct ContentView: View {
           .font(.footnote)
           .foregroundStyle(.secondary)
         }
-        .padding(16)
+        .frame(maxWidth: 640, alignment: .leading)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
       }
 
       if session.operationRunning {
@@ -85,10 +88,13 @@ struct ContentView: View {
           .foregroundStyle(.secondary)
       }
       if session.state.isBusy { ProgressView() }
-      Button(connectionButtonTitle) {
+      Button {
         session.state.isReady || session.state.isBusy ? session.disconnect() : session.connect()
+      } label: {
+        ActionButtonLabel(connectionButtonTitle)
       }
       .buttonStyle(.borderedProminent)
+      .controlSize(.large)
       .disabled(session.operationRunning)
     }
   }
@@ -103,8 +109,13 @@ struct ContentView: View {
         Text("Read the dashboard to confirm the motorcycle is responding.")
           .foregroundStyle(.secondary)
       }
-      Button("Read motorcycle") { session.readDashboard() }
-        .buttonStyle(.borderedProminent)
+      Button {
+        session.readDashboard()
+      } label: {
+        ActionButtonLabel("Read motorcycle")
+      }
+      .buttonStyle(.borderedProminent)
+      .controlSize(.large)
     }
   }
 
@@ -119,8 +130,13 @@ struct ContentView: View {
         }
         .padding(.vertical, 3)
       }
-      Button("Read trouble codes") { session.readDTCs() }
-        .buttonStyle(.borderedProminent)
+      Button {
+        session.readDTCs()
+      } label: {
+        ActionButtonLabel("Read trouble codes")
+      }
+      .buttonStyle(.borderedProminent)
+      .controlSize(.large)
     }
   }
 
@@ -145,10 +161,15 @@ struct ContentView: View {
           .font(.footnote)
           .foregroundStyle(.orange)
       }
-      Button("Clear trouble codes", role: .destructive) { confirmClear = true }
-        .buttonStyle(.bordered)
-        .disabled(
-          !DTCActionPolicy.canClear(hasCurrentRead: session.hasReadDTCs, count: session.dtcs.count))
+      Button(role: .destructive) {
+        confirmClear = true
+      } label: {
+        ActionButtonLabel("Clear trouble codes")
+      }
+      .buttonStyle(.bordered)
+      .controlSize(.large)
+      .disabled(
+        !DTCActionPolicy.canClear(hasCurrentRead: session.hasReadDTCs, count: session.dtcs.count))
     }
   }
 
@@ -179,15 +200,18 @@ struct ContentView: View {
           .foregroundStyle(.orange)
       }
       if let inputMessage { Text(inputMessage).font(.footnote).foregroundStyle(.red) }
-      Button("Reset service reminder") {
+      Button {
         guard validDistance != nil else {
           inputMessage = "Enter a value from 100 to 25,500 in 100-unit steps."
           return
         }
         inputMessage = nil
         confirmReset = true
+      } label: {
+        ActionButtonLabel("Reset service reminder")
       }
       .buttonStyle(.borderedProminent)
+      .controlSize(.large)
       .disabled(session.dashboard == nil)
     }
   }
@@ -220,6 +244,18 @@ struct ContentView: View {
   private func performReset() {
     guard let value = validDistance else { return }
     session.resetService(distance: value, unit: distanceUnit, date: nextServiceDate)
+  }
+}
+
+private struct ActionButtonLabel: View {
+  let title: String
+
+  init(_ title: String) { self.title = title }
+
+  var body: some View {
+    Text(title)
+      .font(.headline)
+      .frame(maxWidth: .infinity, minHeight: 28, alignment: .center)
   }
 }
 

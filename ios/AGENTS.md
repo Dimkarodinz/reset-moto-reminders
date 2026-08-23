@@ -31,6 +31,7 @@ The remaining boundary is physical validation of the MC-IOS primary GATT command
 | [`ResetMotoCore/`](ResetMotoCore/) | Typed generated profile, ELM/CAN/UDS logic, use cases and deterministic tests |
 | [`ResetMotoReminders/`](ResetMotoReminders/) | SwiftUI application, CoreBluetooth session and Xcode project |
 | [`tools/sync_profiles.rb`](tools/sync_profiles.rb) | Regenerates the bundled iOS JSON profile from shared YAML maps |
+| [`tools/build_app_icon.swift`](tools/build_app_icon.swift) | Rebuilds the opaque 1024px iOS icon from the Android launcher foreground and shared teal background |
 
 Do not load [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) as an iOS transport profile. It uses Bluetooth Classic SPP/RFCOMM, which CoreBluetooth does not expose.
 
@@ -57,6 +58,7 @@ iOS UI and lifecycle
 ## Current feature gates
 
 - The SwiftUI app and all four feature flows are implemented and compile for simulator and physical iOS targets. The core has deterministic transcript tests; none of these results substitutes for a physical iPhone/motorcycle test.
+- Version `0.1.1` (`build 2`) is installed and launch-verified on an iPhone 12. The screen uses consistent 20-point outer margins and full-width centered main actions. Both compiled name fields contain `Reset Moto Reminders`, and the AppIcon is generated directly from the Android launcher family. This validates installation and presentation only; the powered MC-IOS/ECU path remains untested.
 - The MC-IOS primary command channel is still capture-unproven. A session-local successful `ATI` gate is mandatory before any motorcycle command; unexpected layout, missing prompt, timeout or unknown identity disconnects.
 - Dashboard and DTC reads, DTC clear (Beta), and service reset use the same captured Tiger 900 commands and response rules as Android. No other motorcycle profile is selectable.
 - Service writes require the exact bundled motorcycle profile and live `043` instrument fingerprint. DTC clear retains the Beta label and explicit destructive confirmation.

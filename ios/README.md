@@ -4,7 +4,7 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-The app and its protocol core build offline and pass deterministic tests. A physical iPhone has not yet run this production app against the powered `vLinker MC-IOS` adapter. For that reason every connection first performs one harmless adapter-only `ATI` identity check on the primary `18F0` GATT channel. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command.
+Version 0.1.1 (`build 2`) is signed, installed and launch-verified on an iPhone 12. Its full-width centered actions, consistent content margins, spaced app name and Android-family icon are visually/build verified. All existing 27 protocol/use-case tests plus two presentation-contract tests pass. A physical iPhone has not yet run this production app against the powered `vLinker MC-IOS` adapter. For that reason every connection first performs one harmless adapter-only `ATI` identity check on the primary `18F0` GATT channel. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command.
 
 ## Build and install with a free Apple ID
 
@@ -14,6 +14,10 @@ The app and its protocol core build offline and pass deterministic tests. A phys
 4. Press **Run**. Accept the Bluetooth permission prompt on first connection.
 
 A free Personal Team signature normally needs redeployment after about seven days. Do not publish or share a Personal-Team/development-signed IPA.
+
+After the iPhone trusts the Personal Team once, a maintainer can build, sign,
+install and launch later updates from the command line while the phone is
+connected and unlocked; pressing Xcode's Run button is not required each time.
 
 ## First phone test
 
