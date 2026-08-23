@@ -45,4 +45,6 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 
 ## Critical/high-risk review
 
-The critical issue is the unproven MC-IOS command channel. The session-local `ATI` gate and immediate disconnect address it without guessing a fallback channel. The remaining high-risk issues—concurrent route changes, blind write retries, profile mismatch, and partial service writes—are addressed by whole-operation serialization, single-send write semantics, the live instrument fingerprint, and explicit ambiguous/partial outcomes.
+The unresolved critical boundary is the unproven MC-IOS command channel. The session-local `ATI` gate and immediate disconnect address it without guessing a fallback channel; only a powered-adapter test can promote that transport evidence.
+
+The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. Whole-operation serialization, single-send writes, live instrument fingerprinting and explicit partial/ambiguous outcomes remain mandatory. No known critical or very-high code issue remains after this review; physical MC-IOS and motorcycle validation is still required.

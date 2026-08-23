@@ -66,8 +66,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var state: AdapterConnectionState = .disconnected
   @Published private(set) var adapterIdentity: String?
   @Published private(set) var dashboard: DashboardResult?
-  @Published private(set) var dtcs: [DiagnosticTroubleCode] = []
-  @Published private(set) var hasReadDTCs = false
+  @Published private var dtcReadState = DTCReadState()
   @Published private(set) var dtcStatus = "Read the motorcycle to check confirmed trouble codes."
   @Published private(set) var serviceStatus = "Set the next interval and date after connecting."
   @Published private(set) var operationRunning = false
@@ -83,6 +82,11 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   private var pending: PendingCommand?
   private var timeoutTask: Task<Void, Never>?
   private let operationGate = OperationGate()
+  private var operationSentStateChangingWrite = false
+  private var backgroundInterruptedAfterWrite = false
+
+  var dtcs: [DiagnosticTroubleCode] { dtcReadState.codes }
+  var hasReadDTCs: Bool { dtcReadState.hasCurrentRead }
 
   override init() {
     do {
@@ -113,7 +117,26 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     finishDisconnected()
   }
 
+  func applicationDidEnterBackground() {
+    guard state != .disconnected, !isFailed else { return }
+    backgroundInterruptedAfterWrite = OperationInterruptionPolicy.isAmbiguous(
+      operationRunning: operationRunning,
+      stateChangingWriteSent: operationSentStateChangingWrite
+    )
+    let failure: BLECommandError =
+      backgroundInterruptedAfterWrite
+      ? .ambiguousWrite(operationTitle ?? "operation interrupted")
+      : .disconnected
+    let reason =
+      backgroundInterruptedAfterWrite
+      ? failure.localizedDescription
+      : "Connection closed when the app entered the background. Reconnect before continuing."
+    failAndDisconnect(reason, pendingFailure: failure)
+  }
+
   func readDashboard() {
+    guard canStartOperation else { return }
+    dashboard = nil
     runOperation("Reading motorcycle") { channel in
       let result = try await DashboardUseCase(profile: self.profile.instrument).read(using: channel)
       self.dashboard = result
@@ -121,13 +144,15 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func readDTCs() {
+    guard canStartOperation else { return }
+    dtcReadState.beginRead()
+    dtcStatus = "Reading confirmed trouble codes…"
     runOperation("Reading trouble codes") { channel in
       let result = try await DTCUseCase(
         profile: self.profile.engine,
         descriptions: self.profile.dtcDescriptions
       ).read(using: channel)
-      self.dtcs = result
-      self.hasReadDTCs = true
+      self.dtcReadState.completeRead(result)
       self.dtcStatus =
         result.isEmpty
         ? "No confirmed trouble codes reported." : "\(result.count) confirmed trouble code(s)."
@@ -135,6 +160,8 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func clearDTCs() {
+    guard canStartOperation, dtcReadState.canClear else { return }
+    dtcReadState.beginClearAttempt()
     runOperation("Clearing trouble codes") { channel in
       let result = try await DTCUseCase(
         profile: self.profile.engine,
@@ -142,8 +169,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
       ).clear(using: channel)
       switch result {
       case .cleared:
-        self.dtcs = []
-        self.hasReadDTCs = true
+        self.dtcReadState.completeRead([])
         self.dtcStatus = "Confirmed trouble-code memory cleared. This does not repair a fault."
       case .blocked:
         self.dtcStatus = "Clear was refused before it could be confirmed."
@@ -180,11 +206,12 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     return false
   }
 
+  private var canStartOperation: Bool { state == .ready && !operationRunning }
+
   private func resetFeatureState() {
     adapterIdentity = nil
     dashboard = nil
-    dtcs = []
-    hasReadDTCs = false
+    dtcReadState = DTCReadState()
     dtcStatus = "Read the motorcycle to check confirmed trouble codes."
     serviceStatus = "Set the next interval and date after connecting."
   }
@@ -193,21 +220,34 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     _ title: String,
     action: @escaping @MainActor (SessionCommandChannel) async throws -> Void
   ) {
-    guard state == .ready, !operationRunning else { return }
+    guard canStartOperation else { return }
+    operationRunning = true
+    operationTitle = title
+    operationSentStateChangingWrite = false
+    backgroundInterruptedAfterWrite = false
     Task { @MainActor in
-      guard let lease = await operationGate.tryAcquire() else { return }
-      operationRunning = true
-      operationTitle = title
+      guard let lease = await operationGate.tryAcquire() else {
+        operationTitle = nil
+        operationRunning = false
+        return
+      }
       do {
         try await action(SessionCommandChannel(session: self))
       } catch {
-        let message = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        let reportedError: Error =
+          backgroundInterruptedAfterWrite
+          ? BLECommandError.ambiguousWrite(title)
+          : error
+        let message =
+          (reportedError as? LocalizedError)?.errorDescription ?? reportedError.localizedDescription
         if title.contains("trouble") || title.contains("Clearing") { dtcStatus = message }
         if title.contains("service") { serviceStatus = message }
-        if error is BLECommandError { failAndDisconnect(message) }
+        if reportedError is BLECommandError { failAndDisconnect(message) }
       }
       operationTitle = nil
       operationRunning = false
+      operationSentStateChangingWrite = false
+      backgroundInterruptedAfterWrite = false
       await lease.release()
     }
   }
@@ -229,7 +269,9 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     assembler = ElmResponseAssembler(promptByte: profile.adapter.promptByte)
     return try await withCheckedThrowingContinuation { continuation in
       pending = PendingCommand(
-        command: command, intent: intent, continuation: continuation, sent: true)
+        command: command, intent: intent, continuation: continuation, sent: true,
+        completion: CommandCompletionGate())
+      if intent == .write { operationSentStateChangingWrite = true }
       peripheral.writeValue(payload, for: characteristic, type: .withResponse)
       startTimeout(command: command, intent: intent)
     }
@@ -253,6 +295,11 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     pending.continuation.resume(with: result)
   }
 
+  private func finishPendingIfComplete() {
+    guard let response = pending?.completion.completedResponse else { return }
+    finishPending(.success(response))
+  }
+
   private func beginIdentification() {
     state = .identifying
     Task { @MainActor in
@@ -271,13 +318,26 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     }
   }
 
-  private func failAndDisconnect(_ reason: String) {
+  private func failAndDisconnect(
+    _ reason: String,
+    pendingFailure: BLECommandError? = nil
+  ) {
+    let activePeripheral = peripheral
+    if let pending {
+      let failure =
+        pendingFailure
+        ?? (pending.intent == .write && pending.sent
+          ? BLECommandError.ambiguousWrite(pending.command)
+          : BLECommandError.bluetooth(reason))
+      finishPending(.failure(failure))
+    }
     state = .failed(reason)
     central?.stopScan()
-    if let peripheral { central?.cancelPeripheralConnection(peripheral) }
+    if let activePeripheral { central?.cancelPeripheralConnection(activePeripheral) }
     self.peripheral = nil
     commandCharacteristic = nil
     responseCharacteristic = nil
+    central = nil
   }
 
   private func finishDisconnected() {
@@ -294,6 +354,7 @@ private struct PendingCommand {
   let intent: CommandIntent
   let continuation: CheckedContinuation<String, Error>
   let sent: Bool
+  var completion: CommandCompletionGate
 }
 
 private final class SessionCommandChannel: DiagnosticCommanding, @unchecked Sendable {
@@ -335,7 +396,9 @@ extension AdapterSession: CBCentralManagerDelegate {
   ) {
     Task { @MainActor in
       let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name
-      guard self.state == .scanning, name == self.profile.adapter.advertisedName else { return }
+      guard self.central === central, self.state == .scanning,
+        name == self.profile.adapter.advertisedName
+      else { return }
       central.stopScan()
       self.peripheral = peripheral
       peripheral.delegate = self
@@ -347,7 +410,7 @@ extension AdapterSession: CBCentralManagerDelegate {
   nonisolated func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral)
   {
     Task { @MainActor in
-      guard self.peripheral === peripheral else { return }
+      guard self.central === central, self.peripheral === peripheral else { return }
       self.state = .discovering
       peripheral.discoverServices([CBUUID(string: self.profile.adapter.serviceUUID)])
     }
@@ -357,6 +420,7 @@ extension AdapterSession: CBCentralManagerDelegate {
     _ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?
   ) {
     Task { @MainActor in
+      guard self.central === central, self.peripheral === peripheral else { return }
       self.failAndDisconnect(error?.localizedDescription ?? "Could not connect to the adapter.")
     }
   }
@@ -365,18 +429,14 @@ extension AdapterSession: CBCentralManagerDelegate {
     _ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?
   ) {
     Task { @MainActor in
-      if let pending = self.pending {
-        let failure: BLECommandError =
-          pending.intent == .write && pending.sent
-          ? .ambiguousWrite(pending.command)
-          : .disconnected
-        self.finishPending(.failure(failure))
-      }
-      if self.state != .disconnected && self.state != .disconnecting {
-        self.state = .failed(error?.localizedDescription ?? "Adapter disconnected.")
-      } else {
-        self.finishDisconnected()
-      }
+      guard self.central === central, self.peripheral === peripheral else { return }
+      let failure: BLECommandError =
+        self.pending?.intent == .write && self.pending?.sent == true
+        ? .ambiguousWrite(self.pending?.command ?? "write")
+        : .disconnected
+      let reason =
+        failure.errorDescription ?? error?.localizedDescription ?? "Adapter disconnected."
+      self.failAndDisconnect(reason, pendingFailure: failure)
     }
   }
 }
@@ -384,6 +444,7 @@ extension AdapterSession: CBCentralManagerDelegate {
 extension AdapterSession: CBPeripheralDelegate {
   nonisolated func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
     Task { @MainActor in
+      guard self.peripheral === peripheral else { return }
       guard error == nil,
         let service = peripheral.services?.first(where: {
           $0.uuid == CBUUID(string: self.profile.adapter.serviceUUID)
@@ -407,6 +468,7 @@ extension AdapterSession: CBPeripheralDelegate {
     error: Error?
   ) {
     Task { @MainActor in
+      guard self.peripheral === peripheral else { return }
       guard error == nil else {
         return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
       }
@@ -436,6 +498,7 @@ extension AdapterSession: CBPeripheralDelegate {
     error: Error?
   ) {
     Task { @MainActor in
+      guard self.peripheral === peripheral else { return }
       guard error == nil, characteristic === self.responseCharacteristic, characteristic.isNotifying
       else {
         return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
@@ -449,14 +512,20 @@ extension AdapterSession: CBPeripheralDelegate {
     didWriteValueFor characteristic: CBCharacteristic,
     error: Error?
   ) {
-    guard let error else { return }
     Task { @MainActor in
-      guard let pending = self.pending else { return }
-      let failure: BLECommandError =
-        pending.intent == .write && pending.sent
-        ? .ambiguousWrite(pending.command)
-        : .bluetooth(error.localizedDescription)
-      self.finishPending(.failure(failure))
+      guard self.peripheral === peripheral, characteristic === self.commandCharacteristic,
+        var pending = self.pending
+      else { return }
+      if let error {
+        let failure: BLECommandError =
+          pending.intent == .write && pending.sent
+          ? .ambiguousWrite(pending.command)
+          : .bluetooth(error.localizedDescription)
+        return self.finishPending(.failure(failure))
+      }
+      pending.completion.acknowledgeWrite()
+      self.pending = pending
+      self.finishPendingIfComplete()
     }
   }
 
@@ -466,7 +535,9 @@ extension AdapterSession: CBPeripheralDelegate {
     error: Error?
   ) {
     Task { @MainActor in
-      guard characteristic === self.responseCharacteristic, self.pending != nil else { return }
+      guard self.peripheral === peripheral, characteristic === self.responseCharacteristic,
+        self.pending != nil
+      else { return }
       if let error {
         return self.finishPending(.failure(BLECommandError.bluetooth(error.localizedDescription)))
       }
@@ -474,7 +545,8 @@ extension AdapterSession: CBPeripheralDelegate {
       do {
         if let frame = try self.assembler.append(value) {
           let response = frame.normalized(removingEcho: self.pending?.command)
-          self.finishPending(.success(response))
+          self.pending?.completion.receive(response: response)
+          self.finishPendingIfComplete()
         }
       } catch {
         self.finishPending(.failure(error))
