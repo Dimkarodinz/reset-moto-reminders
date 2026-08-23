@@ -18,7 +18,7 @@ The application exposes only the bounded operations above. ECU-map files are an 
 Build and maintain two native applications:
 
 1. Android first, using Kotlin, Jetpack Compose and Android's Bluetooth APIs.
-2. iOS using Swift, SwiftUI and CoreBluetooth. The offline implementation is complete; its first physical-phone/adapter proof is pending.
+2. iOS using Swift, SwiftUI and CoreBluetooth. On-device installation and launch are validated; its first powered-adapter proof is pending.
 
 Do not start with Flutter/Dart or another shared UI runtime. The product has a small UI, while its critical transport code is platform-specific: Android currently uses Bluetooth Classic RFCOMM and iOS uses BLE GATT. A cross-platform layer would still depend on different native plugins or Kotlin/Swift bridges, adding another failure and debugging boundary around safety-sensitive I/O.
 
@@ -48,9 +48,9 @@ Keep this file as the project index, safety policy and current research status. 
 ## Current cross-platform checkpoint — 2026-08-23
 
 - Main Android **v0.7.0** (`versionCode 11`), Triumph Research **v0.4.0** (`versionCode 4`) and General Motorcycle Research **v0.2.0** (`versionCode 2`) pass their respective unit tests, lint and debug builds and are installed on the Samsung SM-A202F. All three use the fixed dark theme plus a bold italic action-style title. The main app hides profile-gate wording before connection; service reset is a normal supported-profile action and only DTC clear is labelled Beta. General Research remains a finite read-only standard-OBD collector and must not inherit Triumph write commands.
-- Native iOS preview **v0.1.0** is implemented in [`ios/ResetMotoReminders/`](ios/ResetMotoReminders/) with its platform-neutral TDD core in [`ios/ResetMotoCore/`](ios/ResetMotoCore/). **27** Swift tests pass; unsigned simulator and generic-device builds pass in Xcode 26.6.
+- Native iOS preview **v0.1.1** (`build 2`) is implemented in [`ios/ResetMotoReminders/`](ios/ResetMotoReminders/) with its platform-neutral TDD core in [`ios/ResetMotoCore/`](ios/ResetMotoCore/). All **27** existing protocol/use-case tests plus **2** presentation-contract tests pass; unsigned simulator and signed physical-device builds pass in Xcode 26.6. The app is installed and launch-verified on an iPhone 12.
 - The iOS app mirrors dashboard/odometer read, DTC read, DTC clear (Beta), and km/miles service reset. Commands and DTC descriptions are generated into a typed JSON resource from the shared adapter/ECU/DTC maps by [`ios/tools/sync_profiles.rb`](ios/tools/sync_profiles.rb); feature views contain no protocol bytes.
-- Physical iPhone testing is still pending. Each connection uses only the primary `18F0` split channel, enables notifications through CoreBluetooth, sends one adapter-only `ATI`, requires a recognizable `vLinker`/`ELM`/`STN` identity and prompt, and sends no motorcycle command if this gate fails. The alternate GATT channel remains probe-only and is never auto-tried.
+- Physical installation and the dark UI are verified, including consistent content margins, full-width centered actions, the spaced app name and the Android-family launcher icon. The powered MC-IOS test is still pending. Each connection uses only the primary `18F0` split channel, enables notifications through CoreBluetooth, sends one adapter-only `ATI`, requires a recognizable `vLinker`/`ELM`/`STN` identity and prompt, and sends no motorcycle command if this gate fails. The alternate GATT channel remains probe-only and is never auto-tried.
 - iOS operations are serialized for the complete multi-command flow. DTC clear sends the clear request once through response-pending and verifies the count. Service reset validates distance/date before traffic, fingerprints status `043` before writing, accepts dates only from today through two years ahead, and reports partial or ambiguous results without retrying.
 
 ## Current implementation checkpoint — 2026-08-11
