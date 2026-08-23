@@ -39,7 +39,15 @@ let bounds = CGRect(x: 0, y: 0, width: 1024, height: 1024)
 context.setFillColor(red: 0x33 / 255, green: 0x5C / 255, blue: 0x67 / 255, alpha: 1)
 context.fill(bounds)
 context.interpolationQuality = .high
-context.draw(foregroundImage, in: bounds)
+// Android adaptive icons reserve a large transparent safe zone. iOS does not,
+// so scale the shared foreground until its visible gauge fills about 80% of
+// the square while retaining room for the system's rounded icon mask.
+let foregroundScale: CGFloat = 1.70
+let foregroundBounds = bounds.insetBy(
+  dx: -bounds.width * (foregroundScale - 1) / 2,
+  dy: -bounds.height * (foregroundScale - 1) / 2
+)
+context.draw(foregroundImage, in: foregroundBounds)
 guard let icon = context.makeImage() else {
   fputs("cannot render icon image\n", stderr)
   exit(1)
