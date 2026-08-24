@@ -34,6 +34,28 @@ struct AppPresentationContractTests {
     #expect(icon[25] == 2, "The App Store icon must be true-color without an alpha channel")
   }
 
+  @Test("service input is dismissible, step-validated, and refers to the motorcycle date")
+  func serviceInputSafety() throws {
+    let source = try String(contentsOf: appSource("ContentView.swift"), encoding: .utf8)
+
+    #expect(source.contains("@FocusState private var distanceFieldFocused"))
+    #expect(source.contains("ToolbarItemGroup(placement: .keyboard)"))
+    #expect(source.contains("Button(\"Done\")"))
+    #expect(source.contains("value.isMultiple(of: 100)"))
+    #expect(source.contains("motorcycle's date"))
+    #expect(!source.contains("iPhone date"))
+  }
+
+  @Test("dashboard fingerprint is explained instead of presented as an unknown status")
+  func dashboardFingerprintExplanation() throws {
+    let source = try String(contentsOf: appSource("ContentView.swift"), encoding: .utf8)
+
+    #expect(source.contains("Supported dashboard recognized"))
+    #expect(source.contains("Diagnostic fingerprint"))
+    #expect(source.contains("not a fault code"))
+    #expect(!source.contains("LabeledContent(\"Dashboard status\", value: dashboard.statusASCII)"))
+  }
+
   private var iosRoot: URL {
     URL(fileURLWithPath: #filePath)
       .deletingLastPathComponent()

@@ -30,7 +30,7 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 6. Add failing DTC-clear and service-reset transcript tests, including response-pending, rejected prerequisites, partial service writes, ambiguous writes, and no automatic retry; then implement both write use cases.
 7. Add failing operation-serialization tests; then implement the whole-operation gate.
 8. Build the SwiftUI UI and CoreBluetooth transport around the tested core. Keep UUIDs and motorcycle bytes in the bundled profile rather than feature views.
-9. Build without signing for the simulator and generic iOS device. Physical installation, launch and primary-channel adapter identification are complete. The first motorcycle run exposed an `ATWS` client-validation defect; v0.1.3 fixes it and awaits the read-only retest.
+9. Build without signing for the simulator and generic iOS device. Physical installation, launch, primary-channel adapter identification and the corrected dashboard read are complete. v0.1.4 addresses the form issues found in that follow-up test.
 
 ## Review checklist
 
@@ -45,6 +45,6 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 
 ## Critical/high-risk review
 
-The primary MC-IOS command channel is observed through the production app's successful `ATI` gate. The unresolved hardware boundary is the corrected initialization and motorcycle read path; the alternate channel remains out of the production app.
+The primary MC-IOS command channel, corrected initialization and dashboard read are physically observed through the production app. The alternate channel remains out of the production app; DTC clear and service modes retain their operation-specific validation gates.
 
 The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. The first live run then exposed a deterministic interoperability bug: `ATWS` returns an `ELM327` banner, not bare `OK`. A regression test now protects that special case while ordinary setup commands still require `OK`. Whole-operation serialization, single-send writes, live instrument fingerprinting and explicit partial/ambiguous outcomes remain mandatory. No known critical or very-high code issue remains; corrected motorcycle behavior still requires physical validation.

@@ -10,6 +10,7 @@ struct ContentView: View {
   @State private var confirmClear = false
   @State private var confirmReset = false
   @State private var inputMessage: String?
+  @FocusState private var distanceFieldFocused: Bool
 
   var body: some View {
     ZStack {
@@ -43,6 +44,7 @@ struct ContentView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
       }
+      .scrollDismissesKeyboard(.interactively)
 
       if session.operationRunning {
         Color.black.opacity(0.45).ignoresSafeArea()
@@ -75,6 +77,15 @@ struct ContentView: View {
     } message: {
       Text(resetConfirmationText)
     }
+    .toolbar {
+      ToolbarItemGroup(placement: .keyboard) {
+        Spacer()
+        Button("Done") {
+          validateDistanceInput(distance)
+          distanceFieldFocused = false
+        }
+      }
+    }
   }
 
   private var connectionCard: some View {
@@ -105,7 +116,12 @@ struct ContentView: View {
       Text(session.dashboardStatus).foregroundStyle(.secondary)
       if let dashboard = session.dashboard {
         LabeledContent("Odometer", value: "\(dashboard.odometerKilometres) km")
-        LabeledContent("Dashboard status", value: dashboard.statusASCII)
+        LabeledContent("Dashboard", value: "Supported dashboard recognized")
+        Text(
+          "Diagnostic fingerprint \(dashboard.statusASCII) is a compatibility check, not a fault code."
+        )
+        .font(.footnote)
+        .foregroundStyle(.secondary)
       }
       Button {
         session.readDashboard()
@@ -183,13 +199,15 @@ struct ContentView: View {
       TextField("Interval", text: $distance)
         .keyboardType(.numberPad)
         .textFieldStyle(.roundedBorder)
+        .focused($distanceFieldFocused)
+        .onChange(of: distance) { validateDistanceInput($0) }
       DatePicker(
         "Next service date",
         selection: $nextServiceDate,
         in: Date()...(Calendar.current.date(byAdding: .year, value: 2, to: Date()) ?? Date()),
         displayedComponents: .date
       )
-      Text("Use 100-unit steps, from 100 to 25,500. Check the iPhone date and time first.")
+      Text("Use 100-unit steps, from 100 to 25,500. Check that your motorcycle's date is correct.")
         .font(.footnote)
         .foregroundStyle(.secondary)
       if session.dashboard == nil {
@@ -203,6 +221,7 @@ struct ContentView: View {
           inputMessage = "Enter a value from 100 to 25,500 in 100-unit steps."
           return
         }
+        distanceFieldFocused = false
         inputMessage = nil
         confirmReset = true
       } label: {
@@ -210,7 +229,7 @@ struct ContentView: View {
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
-      .disabled(session.dashboard == nil)
+      .disabled(session.dashboard == nil || validDistance == nil)
     }
   }
 
@@ -236,7 +255,21 @@ struct ContentView: View {
   private var resetConfirmationText: String {
     let odometer = session.dashboard.map { "Current odometer: \($0.odometerKilometres) km. " } ?? ""
     return odometer
-      + "Set \(distance) \(unitLabel) and \(nextServiceDate.formatted(date: .abbreviated, time: .omitted)). Check that the iPhone date and time are correct."
+      + "Set \(distance) \(unitLabel) and \(nextServiceDate.formatted(date: .abbreviated, time: .omitted)). Check that your motorcycle's date is correct."
+  }
+
+  private func validateDistanceInput(_ input: String) {
+    let digits = input.filter(\.isNumber)
+    if digits != input {
+      distance = digits
+      return
+    }
+    guard !digits.isEmpty else {
+      inputMessage = nil
+      return
+    }
+    inputMessage =
+      validDistance == nil ? "Enter a value from 100 to 25,500 in 100-unit steps." : nil
   }
 
   private func performReset() {
