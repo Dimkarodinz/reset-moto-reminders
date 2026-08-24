@@ -4,9 +4,9 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-Version 0.1.3 (`build 4`) is installed and launch-verified on the iPhone 12. It fixes the first powered-adapter failure: the app reached **Motorcycle connected**, proving the primary `18F0` GATT channel and `ATI` identity gate, but each feature stopped at `ATWS`. The client incorrectly expected `OK` although a warm start correctly returns an `ELM327` identity banner. The parser now handles that response explicitly while continuing to require a standalone `OK` from ordinary setup commands. All 35 protocol/use-case tests plus two presentation-contract tests pass.
+Version 0.1.4 (`build 5`) is signed and installed on the iPhone 12 after a successful v0.1.3 motorcycle/dashboard read. It adds a **Done** action and interactive dismissal for the numeric keyboard, gives immediate feedback and blocks confirmation unless the interval is an exact 100-unit step from 100 through 25,500, and correctly tells the rider to check the motorcycle date. The dashboard now explains observed value `043` as a compatibility fingerprint rather than an unexplained status or fault code. All 35 protocol/use-case tests plus four presentation-contract tests pass.
 
-The corrected dashboard, DTC and service flows still need their first motorcycle retest. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers.
+The corrected connection and dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta until a controlled nonzero-DTC test is retained, and individual service-write modes keep their existing evidence gates.
 
 ## Build and install with a free Apple ID
 
@@ -29,7 +29,7 @@ Use ignition on and engine off unless the motorcycle procedure requires otherwis
 2. Confirm the app reaches **Motorcycle connected** and shows an adapter identity. If it stops earlier, preserve the exact on-screen error; do not keep retrying write features.
 3. Tap **Read motorcycle**. Confirm the odometer is plausible.
 4. Tap **Read trouble codes**. Confirm the count/list is plausible.
-5. Only after the two reads succeed, test service reset with the intended dashboard unit and date. Check the iPhone date/time first and verify the dashboard afterward.
+5. Only after the two reads succeed, test service reset with the intended dashboard unit and date. Check that the motorcycle date is correct and verify the dashboard afterward.
 6. Treat **Clear trouble codes (Beta)** as destructive diagnostic evidence removal. Read and record the codes first, then clear only if that is intentional.
 
 If a read still fails, preserve the exact on-screen message and keep the phone connected to the Mac so the bounded system log can be inspected.

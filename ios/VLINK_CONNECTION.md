@@ -107,7 +107,7 @@ If a future primary-channel attempt succeeds in writing but produces no notifica
 
 The application must continue reporting `unsupported/unvalidated adapter transport` and sending no motorcycle command whenever the primary path does not return an accepted adapter identity.
 
-The production preview in [`ResetMotoReminders/`](ResetMotoReminders/) performs this primary-channel check at the start of every connection. It does not expose or auto-try the alternate channel. A recognizable `vLinker`/`ELM`/`STN` identity and complete prompt unlock the session; any failure disconnects before motorcycle traffic. The next physical test is the corrected v0.1.3 dashboard and DTC read path.
+The production preview in [`ResetMotoReminders/`](ResetMotoReminders/) performs this primary-channel check at the start of every connection. It does not expose or auto-try the alternate channel. A recognizable `vLinker`/`ELM`/`STN` identity and complete prompt unlock the session; any failure disconnects before motorcycle traffic. The corrected v0.1.3 dashboard/odometer read is physically validated; a retained nonzero-DTC read/clear remains a separate operation-level test.
 
 ## Screenshot coverage
 

@@ -86,7 +86,7 @@ the scan itself remains intentionally unchanged and read-only.
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
-- **iOS** — native SwiftUI/CoreBluetooth preview implemented for iOS 16+. Version 0.1.3 (`build 4`) has proved the primary MC-IOS GATT channel and `ATI` identity gate on an iPhone 12. Its first feature run exposed and fixed an `ATWS` response-validation bug; dashboard, DTC and service behavior now await a motorcycle retest. The transport requires the GATT acknowledgement and complete ELM response, rejects wrong-module replies and closes on backgrounding without retrying an ambiguous write. Distribution is source plus Xcode self-build instructions.
+- **iOS** — native SwiftUI/CoreBluetooth preview implemented for iOS 16+. Version 0.1.4 (`build 5`) follows a successful connection and dashboard read on an iPhone 12. It includes the `ATWS` response fix, strict 100-unit service input, a dismissible numeric keyboard, corrected motorcycle-date guidance and a human explanation of the dashboard compatibility fingerprint. The transport requires the GATT acknowledgement and complete ELM response, rejects wrong-module replies and closes on backgrounding without retrying an ambiguous write. Distribution is source plus Xcode self-build instructions.
 
 ## Unofficial project
 
