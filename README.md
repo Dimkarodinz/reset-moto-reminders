@@ -75,26 +75,31 @@ with the project release key and published with a SHA-256 checksum.
 Android build instructions and the full hardware-test procedure are in
 [`android/README.md`](android/README.md). The iPhone app is installed from the
 public Xcode project with the rider's own Apple Account; see the
-[step-by-step iPhone guide](docs/install-ios.html) and [`ios/README.md`](ios/README.md).
+[step-by-step iPhone guide](https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html)
+and [`ios/README.md`](ios/README.md).
 
 ## Help test another Triumph
 
-The separate **Triumph Research** Android app performs one bounded compatibility session. It asks for model/year, saves the known Triumph engine/TFT read evidence first, and can optionally test the exact selected-unit service reset and DTC-clear sequences in that same connection after an explicit warning and acknowledgement. The service test uses the entered current values, temporarily writes `+100` in km or miles plus `+1 day`, then restores the entered baseline in the same unit. It never requests VIN/serial data, fuzzes commands, or tries generic writes.
+Own a Triumph that is not listed above? The Android-only **Triumph Research** app
+runs one compatibility scan and creates a report for your exact model and year:
 
-Build and motorcycle-test instructions are in [`research-builds/android/triumph/README.md`](research-builds/android/triumph/README.md). A successful report identifies evidence for the entered motorcycle; it does not by itself declare an entire model family supported. Optional writes can alter stored data: DTC clear erases fault evidence, and service restoration cannot be guaranteed after disconnect or an ambiguous result.
+1. Enter the motorcycle model and year.
+2. Connect the vLinker with the ignition on and engine off.
+3. Run the scan once, then tap **Share JSONL report**.
+4. Attach the report to a [GitHub issue](https://github.com/Dimkarodinz/reset-moto-reminders/issues/new).
 
-The separate **Motorcycle Research** Android app is the read-only first pass for
-other motorcycle families. It records a finite set of standard OBD capabilities
-and DTC responses without requesting VIN, clearing codes, resetting service data,
-scanning addresses or guessing commands. See
-[`research-builds/android/general/README.md`](research-builds/android/general/README.md).
-Its v0.2.0 interface now matches the fixed dark presentation of the other apps;
-the scan itself remains intentionally unchanged and read-only.
+The scan is read-only by default. Optional service-reset and DTC-clear tests can
+change stored motorcycle data and must be enabled explicitly. See the
+[Triumph Research instructions](research-builds/android/triumph/README.md).
+
+For other motorcycle brands, use the separate read-only
+[Motorcycle Research collector](research-builds/android/general/README.md).
 
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
-- **iOS** — native SwiftUI/CoreBluetooth preview implemented for iOS 16+. Version 0.1.4 (`build 5`) follows a successful connection and dashboard read on an iPhone 12. It includes the `ATWS` response fix, strict 100-unit service input, a dismissible numeric keyboard, corrected motorcycle-date guidance and a human explanation of the dashboard compatibility fingerprint. The transport requires the GATT acknowledgement and complete ELM response, rejects wrong-module replies and closes on backgrounding without retrying an ambiguous write. Distribution is source plus Xcode self-build instructions.
+- **iOS** — native app for iOS 16+. Install it from Xcode with your own Apple
+  Account. Connection and dashboard reading are validated on an iPhone 12.
 
 ## Unofficial project
 
