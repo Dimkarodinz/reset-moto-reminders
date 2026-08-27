@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Install Reset Moto Reminders on iPhone with Xcode</title>
-  <meta name="description" content="Step-by-step iPhone installation guide for Reset Moto Reminders using a free Apple Account, a Mac and Xcode. No paid Apple Developer membership required.">
+  <title>Install Reset Moto Reminders on iPhone | IPA or Xcode</title>
+  <meta name="description" content="Download Reset Moto Reminders for iPhone and install the IPA with AltServer, or build it yourself with Xcode. No paid Apple Developer membership required.">
   <meta name="robots" content="index,follow,max-snippet:-1">
   <link rel="canonical" href="https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html">
   <link rel="icon" href="assets/app-icon.png" type="image/png">
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="assets/styles.css">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Install Reset Moto Reminders on iPhone">
-  <meta property="og:description" content="Build and install Reset Moto Reminders on an iPhone with a free Apple Account and Xcode.">
+  <meta property="og:description" content="Install Reset Moto Reminders on an iPhone from the IPA, or build it yourself with Xcode.">
   <meta property="og:url" content="https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html">
   <meta property="og:site_name" content="Reset Moto Reminders">
   <meta property="og:image" content="https://dimkarodinz.github.io/reset-moto-reminders/assets/app-icon.png">
@@ -29,37 +29,43 @@
   <main>
     <section class="hero">
       <div class="wrap">
-        <p class="eyebrow">iPhone · free local signing</p>
-        <h1>Install with Xcode in about ten minutes.</h1>
-        <p class="lede">You need a Mac, an iPhone running iOS 16 or later, Xcode, and any Apple Account. No paid Apple Developer membership is required. A free install expires after seven days and can be rebuilt the same way.</p>
-        <div class="actions"><a class="button" href="https://github.com/Dimkarodinz/reset-moto-reminders/releases/latest">Download the iPhone source package</a><a class="button secondary" href="https://github.com/Dimkarodinz/reset-moto-reminders">Browse source</a></div>
+        <p class="eyebrow">iPhone · iOS 16 or later</p>
+        <h1>Install Reset Moto Reminders on iPhone.</h1>
+        <p class="lede">Use the ready-made IPA, or build the app yourself with Xcode. Both options use your own Apple Account and require no paid developer membership.</p>
+        <div class="actions"><a class="button" href="https://github.com/Dimkarodinz/reset-moto-reminders/releases/download/ios-v0.1.4/reset-moto-reminders-ios-v0.1.4.ipa">Download iPhone app (.ipa)</a><a class="button secondary" href="#build">Build it yourself</a></div>
       </div>
     </section>
     <section class="section">
       <div class="wrap">
-        <p class="warning">There is intentionally no shared IPA. You sign the public Xcode project locally with your own Apple Account. Never send your Apple password, certificate, device ID or provisioning profile to this project.</p>
+        <p class="warning">A free Apple Account signs the app for seven days. Repeat the installation when it expires.</p>
+        <p class="eyebrow">Easiest option</p>
+        <h2>Install the IPA with AltServer</h2>
         <ol class="steps">
-          <li><h2>Install Xcode</h2><p>Install the current Xcode from the Mac App Store. Open it once and allow its requested components to finish installing.</p></li>
-          <li><h2>Download and open the project</h2><p>Download the iPhone source ZIP from the latest release and extract it. Open <code>ios/ResetMotoReminders/ResetMotoReminders.xcodeproj</code>.</p></li>
-          <li><h2>Add your Apple Account</h2><p>In Xcode, open <strong>Xcode → Settings → Accounts</strong>, add your Apple Account, then return to the project.</p></li>
-          <li><h2>Select your signing team</h2><p>Select the blue <strong>ResetMotoReminders</strong> project, select the app target, then open <strong>Signing &amp; Capabilities</strong>. Leave <strong>Automatically manage signing</strong> enabled and select your Personal Team. If the bundle identifier is unavailable, replace <code>dev.resetlight.ios</code> with something unique such as <code>com.yourname.resetmotoreminders</code>.</p></li>
-          <li><h2>Connect and trust the iPhone</h2><p>Connect the unlocked iPhone to the Mac with a cable. Tap <strong>Trust</strong> on the iPhone if asked, enter the device passcode, and select the iPhone as the Xcode run destination.</p></li>
-          <li><h2>Build and install</h2><p>Press the triangular <strong>Run</strong> button in Xcode. If the iPhone asks for Developer Mode, open <strong>Settings → Privacy &amp; Security → Developer Mode</strong>, enable it, restart, and confirm.</p></li>
-          <li><h2>Trust the developer certificate if asked</h2><p>If iOS says the developer app is untrusted, open <strong>Settings → General → VPN &amp; Device Management</strong>, select the Developer App entry for your Apple Account, and choose <strong>Trust</strong>. Run the app again.</p></li>
-          <li><h2>Connect to the motorcycle</h2><p>Power the vLinker MC+ from the motorcycle, keep ignition on and engine off, open Reset Moto Reminders, allow Bluetooth access, and select <strong>Connect</strong>. Read the motorcycle before attempting a reset or DTC clear.</p></li>
+          <li><h3>Download the IPA</h3><p>Use the button above. You can also <a href="https://github.com/Dimkarodinz/reset-moto-reminders/releases/download/ios-v0.1.4/reset-moto-reminders-ios-v0.1.4.ipa.sha256">download its SHA-256 checksum</a>.</p></li>
+          <li><h3>Install AltServer</h3><p>Follow the official <a href="https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos">Mac guide</a> or <a href="https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows">Windows guide</a>.</p></li>
+          <li><h3>Connect the iPhone</h3><p>Connect and unlock the iPhone, then accept the Trust prompt.</p></li>
+          <li><h3>Sideload the IPA</h3><p>Hold <strong>Option</strong> on Mac or <strong>Shift</strong> on Windows while clicking the AltServer icon. Choose <strong>Sideload .ipa…</strong>, select the downloaded file, then follow the signing prompts.</p></li>
+          <li><h3>Allow the app</h3><p>If asked, enable <strong>Settings → Privacy &amp; Security → Developer Mode</strong>. Then open <strong>Settings → General → VPN &amp; Device Management</strong> and trust your Developer App certificate.</p></li>
         </ol>
-        <p class="warning">Free Personal Team provisioning expires after seven days. Reconnect the iPhone, reopen the same Xcode project and press Run again. Your app data may be replaced during reinstall, so always rely on the motorcycle read-back rather than app history.</p>
       </div>
     </section>
-    <section class="section faq">
+    <section class="section" id="build">
       <div class="wrap">
-        <p class="eyebrow">Troubleshooting</p>
-        <h2>If Xcode will not install the app</h2>
-        <details><summary>The iPhone is not listed in Xcode</summary><p>Unlock it, reconnect the cable, accept the Trust prompt on both devices, and use Xcode's device window to wait for pairing to finish.</p></details>
-        <details><summary>The bundle identifier is unavailable</summary><p>Use any reverse-domain identifier unique to your Apple Account, for example <code>com.yourname.resetmotoreminders</code>. This does not change the app name shown on the phone.</p></details>
-        <details><summary>“Developer App certificate is not trusted”</summary><p>On the iPhone, open Settings → General → VPN &amp; Device Management, select your Developer App certificate, and trust it.</p></details>
-        <details><summary>Will the project see my Apple Account?</summary><p>No. Xcode handles local signing. The repository and application do not receive or transmit your Apple Account credentials, signing certificate, provisioning profile, or iPhone identifier.</p></details>
-        <p class="muted">Official references: <a href="https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices">Apple: run an app on a physical device</a>, <a href="https://developer.apple.com/help/account/basics/about-your-developer-account">Apple: Personal Team limits and seven-day expiry</a>, and <a href="https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device">Apple: Developer Mode</a>.</p>
+        <p class="eyebrow">Alternative</p>
+        <h2>Build it yourself with Xcode</h2>
+        <ol class="steps">
+          <li><h3>Download the source</h3><p><a href="https://github.com/Dimkarodinz/reset-moto-reminders/releases/download/ios-v0.1.4/reset-moto-reminders-ios-v0.1.4-source.zip">Download and extract the iPhone source package</a>.</p></li>
+          <li><h3>Open the project</h3><p>Open <code>ios/ResetMotoReminders/ResetMotoReminders.xcodeproj</code> in Xcode.</p></li>
+          <li><h3>Select your account</h3><p>In <strong>Signing &amp; Capabilities</strong>, select your Personal Team. If needed, change the bundle identifier to something unique.</p></li>
+          <li><h3>Run on the iPhone</h3><p>Connect and unlock the iPhone, select it in Xcode, and press <strong>Run</strong>.</p></li>
+        </ol>
+        <p class="muted">Reset Moto Reminders does not receive your Apple Account credentials. AltServer or Xcode handles signing locally.</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="wrap">
+        <h2>Connect to the motorcycle</h2>
+        <p>Power the vLinker MC+ from the motorcycle, keep the ignition on and engine off, open the app, allow Bluetooth access, and tap <strong>Connect</strong>. Read the motorcycle before resetting the reminder or clearing DTCs.</p>
       </div>
     </section>
   </main>
