@@ -35,7 +35,36 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 ./gradlew --offline --no-daemon clean testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
-The installable debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`. The release task also verifies that the optimized release variant can be assembled; it is not a distributable signed release.
+The installable debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+Without release-signing environment variables, `assembleRelease` produces an
+unsigned, read-only release build for verification only.
+
+The maintainer's public APK is built with the dedicated protected project key:
+
+```sh
+./tools/build-android-release.sh
+```
+
+Run that command from the repository root at an exact, clean public Git tag. It
+retrieves the signing password from the maintainer's macOS Keychain, builds and
+tests the release, rejects the Android debug certificate, verifies the APK
+Signature Scheme v2 signature, and writes the versioned APK plus SHA-256 file to
+the gitignored `dist/` directory. The keystore and password remain outside the
+repository. `ALLOW_UNTAGGED_RELEASE=1` exists only for local signing-pipeline
+verification before the first public tag; never use it for a published binary.
+
+Project Android release certificate SHA-256:
+
+```text
+2fdf4e70325bd00d6f7140deff1285eda368d6711f0dc53415b863661eb50ad6
+```
+
+The protected keystore is stored locally at
+`~/Library/Application Support/Reset Moto Reminders/signing/reset-moto-reminders-release.p12`;
+its password is stored in the macOS Keychain service
+`dev.resetlight.android.release-signing`. Neither is part of the repository.
+Back up both securely: losing the private key prevents future APKs from updating
+installations signed with this certificate.
 
 ## Remaining motorcycle validation (v0.7.0)
 
@@ -117,9 +146,7 @@ licensed official paid store build may be offered later after the release gates
 are met. If the community build saved you a dealer visit, you can support
 development:
 
-- Buy Me a Coffee: <https://www.buymeacoffee.com/CHANGE_ME>
-- Ko-fi: <https://ko-fi.com/CHANGE_ME>
-- GitHub Sponsors: <https://github.com/sponsors/CHANGE_ME>
+- Ko-fi: <https://ko-fi.com/pippicat>
 
 Support is entirely optional and buys no features, priority, warranty, or
 commercial license rights. See the repository's [`LICENSE`](../LICENSE) and

@@ -47,6 +47,17 @@ Keep this file as the project index, safety policy and current research status. 
 
 ## Current cross-platform checkpoint — 2026-08-24
 
+- **Android release signing (2026-08-27):** a dedicated RSA-4096 project key now
+  signs maintainer release builds through environment variables populated by
+  [`tools/build-android-release.sh`](tools/build-android-release.sh). The private
+  PKCS#12 keystore is outside Git, its password is in the macOS Keychain, and
+  `dist/` is ignored. The build script requires a clean exact tag for public
+  output, rejects the Android debug certificate, verifies APK Signature Scheme
+  v2 and emits a SHA-256 file. Release-certificate SHA-256 is
+  `2fdf4e70325bd00d6f7140deff1285eda368d6711f0dc53415b863661eb50ad6`.
+  A locally verified signed v0.7.0 APK exists, but it remains read-only because
+  `RESEARCH_BUILD=false`; signing completion does not waive the separate
+  write-capable release gates below.
 - Main Android **v0.7.0** (`versionCode 11`), Triumph Research **v0.4.0** (`versionCode 4`) and General Motorcycle Research **v0.2.0** (`versionCode 2`) pass their respective unit tests, lint and debug builds and are installed on the Samsung SM-A202F. All three use the fixed dark theme plus a bold italic action-style title. The main app hides profile-gate wording before connection; service reset is a normal supported-profile action and only DTC clear is labelled Beta. General Research remains a finite read-only standard-OBD collector and must not inherit Triumph write commands.
 - Native iOS preview **v0.1.4** (`build 5`) is implemented in [`ios/ResetMotoReminders/`](ios/ResetMotoReminders/) with its platform-neutral TDD core in [`ios/ResetMotoCore/`](ios/ResetMotoCore/). All **35** protocol/use-case tests plus **4** presentation-contract tests pass; unsigned simulator/generic-device and signed physical-device builds pass. The v0.1.3 follow-up physically completed connection and dashboard/odometer read on the iPhone 12. v0.1.4 adds number-pad dismissal, immediate exact-100 interval validation, corrected motorcycle-date guidance and a human-readable explanation of the `043` compatibility fingerprint; the signed build is installed on the iPhone.
 - The first powered iOS run reached **Motorcycle connected** but stopped at `ATWS`; v0.1.3 fixed that command-specific response without weakening ordinary setup validation. The follow-up completed the dashboard/odometer read and recognized the exact `043` instrument fingerprint. This validates the corrected read path, not DTC clear or every service-write mode.
