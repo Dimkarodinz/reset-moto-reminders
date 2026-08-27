@@ -7,6 +7,8 @@ Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph T
 Project website and installation guides:
 <https://dimkarodinz.github.io/reset-moto-reminders/>
 
+The website and both main apps support English, German, Spanish, French and Ukrainian. English is the default and fallback.
+
 Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter to read the dashboard odometer, read or clear trouble codes, and reset the service reminder. Nothing else.
 
 ## Why this exists

@@ -80,11 +80,21 @@ public struct DTCDecoder: Sendable {
   }
 
   private func fallback(_ code: String) -> String {
-    let names: [Character: String] = [
-      "P": "Powertrain", "C": "Chassis", "B": "Body", "U": "Network",
+    let defaults: [Character: String] = [
+      "P":
+        "Powertrain diagnostic trouble code {code}. No validated manufacturer description is available.",
+      "C":
+        "Chassis diagnostic trouble code {code}. No validated manufacturer description is available.",
+      "B":
+        "Body diagnostic trouble code {code}. No validated manufacturer description is available.",
+      "U":
+        "Network diagnostic trouble code {code}. No validated manufacturer description is available.",
     ]
-    return
-      "\(names[code.first ?? "?"] ?? "Unrecognized") diagnostic trouble code \(code). No validated manufacturer description is available."
+    guard let prefix = code.first, let defaultTemplate = defaults[prefix] else {
+      return descriptions["__unknown"] ?? "Unrecognized diagnostic trouble code format."
+    }
+    let template = descriptions["__generic_\(prefix)"] ?? defaultTemplate
+    return template.replacingOccurrences(of: "{code}", with: code)
   }
 }
 

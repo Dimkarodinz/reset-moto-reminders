@@ -13,6 +13,23 @@ public struct ResetMotoProfile: Codable, Equatable, Sendable {
   public let engine: EngineProfile
   public let instrument: InstrumentProfile
   public let dtcDescriptions: [String: String]
+  public let dtcDescriptionsByLanguage: [String: [String: String]]?
+
+  public var dtcDescriptionLanguages: [String] {
+    let localized = dtcDescriptionsByLanguage?.keys.map { $0 } ?? []
+    return Array(Set(localized).union(["en"])).sorted()
+  }
+
+  public func dtcDescriptions(forLanguage identifier: String?) -> [String: String] {
+    guard let identifier else { return dtcDescriptions }
+    let language =
+      identifier
+      .replacingOccurrences(of: "_", with: "-")
+      .split(separator: "-")
+      .first
+      .map { String($0).lowercased() } ?? "en"
+    return dtcDescriptionsByLanguage?[language] ?? dtcDescriptions
+  }
 
   public static func decode(_ data: Data) throws -> ResetMotoProfile {
     let schema = try JSONSerialization.jsonObject(with: data) as? [String: Any]

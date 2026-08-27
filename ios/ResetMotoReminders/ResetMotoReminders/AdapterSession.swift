@@ -16,14 +16,14 @@ enum AdapterConnectionState: Equatable {
 
   var title: String {
     switch self {
-    case .disconnected: return "Not connected"
-    case .waitingForBluetooth: return "Checking Bluetooth…"
-    case .scanning: return "Looking for vLinker MC-IOS…"
-    case .connecting: return "Connecting…"
-    case .discovering: return "Checking adapter…"
-    case .identifying: return "Identifying adapter…"
-    case .ready: return "Motorcycle connected"
-    case .disconnecting: return "Disconnecting…"
+    case .disconnected: return L10n.text("status_disconnected_title")
+    case .waitingForBluetooth: return L10n.text("ios_status_waiting_bluetooth")
+    case .scanning: return L10n.text("ios_status_scanning")
+    case .connecting: return L10n.text("status_connecting_title")
+    case .discovering: return L10n.text("ios_status_discovering")
+    case .identifying: return L10n.text("status_identifying_title")
+    case .ready: return L10n.text("ios_status_motorcycle_connected")
+    case .disconnecting: return L10n.text("status_disconnecting_title")
     case .failed(let reason): return reason
     }
   }
@@ -49,14 +49,12 @@ enum BLECommandError: LocalizedError, Equatable {
 
   var errorDescription: String? {
     switch self {
-    case .notReady: return "Connect to the motorcycle first."
-    case .unsupportedLayout: return "This adapter does not expose the expected MC-IOS connection."
-    case .invalidIdentity: return "The adapter identification reply was not recognized."
-    case .timeout: return "The motorcycle did not answer in time."
-    case .ambiguousWrite:
-      return
-        "The connection ended after a write. Its result is unknown—inspect the motorcycle before trying again."
-    case .disconnected: return "The adapter disconnected."
+    case .notReady: return L10n.text("ios_error_connect_first")
+    case .unsupportedLayout: return L10n.text("ios_error_unsupported_layout")
+    case .invalidIdentity: return L10n.text("ios_error_invalid_identity")
+    case .timeout: return L10n.text("ios_error_timeout")
+    case .ambiguousWrite: return L10n.text("ios_error_ambiguous_write")
+    case .disconnected: return L10n.text("ios_error_disconnected")
     case .bluetooth(let message): return message
     }
   }
@@ -67,11 +65,10 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var state: AdapterConnectionState = .disconnected
   @Published private(set) var adapterIdentity: String?
   @Published private(set) var dashboard: DashboardResult?
-  @Published private(set) var dashboardStatus =
-    "Read the dashboard to confirm the motorcycle is responding."
+  @Published private(set) var dashboardStatus = L10n.text("instrument_read_body_idle")
   @Published private var dtcReadState = DTCReadState()
-  @Published private(set) var dtcStatus = "Read the motorcycle to check confirmed trouble codes."
-  @Published private(set) var serviceStatus = "Set the next interval and date after connecting."
+  @Published private(set) var dtcStatus = L10n.text("dtc_read_body_idle")
+  @Published private(set) var serviceStatus = L10n.text("service_reset_body_idle")
   @Published private(set) var operationRunning = false
   @Published private(set) var operationTitle: String?
 
@@ -131,12 +128,12 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     )
     let failure: BLECommandError =
       backgroundInterruptedAfterWrite
-      ? .ambiguousWrite(operationTitle ?? "operation interrupted")
+      ? .ambiguousWrite(operationTitle ?? L10n.text("ios_operation_interrupted"))
       : .disconnected
     let reason =
       backgroundInterruptedAfterWrite
       ? failure.localizedDescription
-      : "Connection closed when the app entered the background. Reconnect before continuing."
+      : L10n.text("ios_background_closed")
     logger.notice(
       "Closing connection in background; ambiguous=\(self.backgroundInterruptedAfterWrite)")
     failAndDisconnect(reason, pendingFailure: failure)
@@ -145,63 +142,61 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   func readDashboard() {
     guard canStartOperation else { return }
     dashboard = nil
-    dashboardStatus = "Reading dashboard…"
-    runOperation("Reading motorcycle") { channel in
+    dashboardStatus = L10n.text("instrument_read_body_running")
+    runOperation(.dashboard) { channel in
       let result = try await DashboardUseCase(profile: self.profile.instrument).read(using: channel)
       self.dashboard = result
-      self.dashboardStatus = "Motorcycle responded."
+      self.dashboardStatus = L10n.text("ios_dashboard_responded")
     }
   }
 
   func readDTCs() {
     guard canStartOperation else { return }
     dtcReadState.beginRead()
-    dtcStatus = "Reading confirmed trouble codes…"
-    runOperation("Reading trouble codes") { channel in
+    dtcStatus = L10n.text("dtc_read_body_running")
+    runOperation(.dtcRead) { channel in
       let result = try await DTCUseCase(
         profile: self.profile.engine,
-        descriptions: self.profile.dtcDescriptions
+        descriptions: self.localizedDTCDescriptions
       ).read(using: channel)
       self.dtcReadState.completeRead(result)
       self.dtcStatus =
         result.isEmpty
-        ? "No confirmed trouble codes reported." : "\(result.count) confirmed trouble code(s)."
+        ? L10n.text("dtc_read_body_none") : L10n.format("dtc_read_body_count", result.count)
     }
   }
 
   func clearDTCs() {
     guard canStartOperation, dtcReadState.canClear else { return }
     dtcReadState.beginClearAttempt()
-    runOperation("Clearing trouble codes") { channel in
+    runOperation(.dtcClear) { channel in
       let result = try await DTCUseCase(
         profile: self.profile.engine,
-        descriptions: self.profile.dtcDescriptions
+        descriptions: self.localizedDTCDescriptions
       ).clear(using: channel)
       switch result {
       case .cleared:
         self.dtcReadState.completeRead([])
-        self.dtcStatus = "Confirmed trouble-code memory cleared. This does not repair a fault."
+        self.dtcStatus = L10n.text("ios_dtc_cleared")
       case .blocked:
-        self.dtcStatus = "Clear was refused before it could be confirmed."
+        self.dtcStatus = L10n.text("ios_dtc_clear_blocked")
       case .needsVerification:
-        self.dtcStatus = "Clear may have run, but verification did not confirm an empty memory."
+        self.dtcStatus = L10n.text("ios_dtc_clear_unverified")
       }
     }
   }
 
   func resetService(distance: Int, unit: DistanceUnit, date: Date) {
-    runOperation("Resetting service reminder") { channel in
+    runOperation(.serviceReset) { channel in
       let outcome = try await ServiceReminderUseCase(profile: self.profile.instrument)
         .reset(distance: distance, unit: unit, nextServiceDate: date, using: channel)
       switch outcome {
       case .committed(let odometer):
-        self.serviceStatus =
-          "Service reminder reset at \(odometer) km. Maintenance was not performed by the app."
+        self.serviceStatus = L10n.format("ios_service_committed_format", odometer)
       case .blocked:
-        self.serviceStatus = "Reset was refused before a complete reminder update was confirmed."
+        self.serviceStatus = L10n.text("ios_service_blocked")
       case .partiallyApplied:
-        self.serviceStatus =
-          "Distance may be updated, but the date was not confirmed. Inspect the dashboard before retrying."
+        self.serviceStatus = L10n.text("ios_service_partial")
       }
     }
   }
@@ -218,20 +213,25 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
 
   private var canStartOperation: Bool { state == .ready && !operationRunning }
 
+  private var localizedDTCDescriptions: [String: String] {
+    profile.dtcDescriptions(forLanguage: Locale.preferredLanguages.first)
+  }
+
   private func resetFeatureState() {
     adapterIdentity = nil
     dashboard = nil
-    dashboardStatus = "Read the dashboard to confirm the motorcycle is responding."
+    dashboardStatus = L10n.text("instrument_read_body_idle")
     dtcReadState = DTCReadState()
-    dtcStatus = "Read the motorcycle to check confirmed trouble codes."
-    serviceStatus = "Set the next interval and date after connecting."
+    dtcStatus = L10n.text("dtc_read_body_idle")
+    serviceStatus = L10n.text("service_reset_body_idle")
   }
 
   private func runOperation(
-    _ title: String,
+    _ operation: OperationKind,
     action: @escaping @MainActor (SessionCommandChannel) async throws -> Void
   ) {
     guard canStartOperation else { return }
+    let title = L10n.text(operation.titleKey)
     operationRunning = true
     operationTitle = title
     operationSentStateChangingWrite = false
@@ -251,13 +251,14 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
           backgroundInterruptedAfterWrite
           ? BLECommandError.ambiguousWrite(title)
           : error
-        let message =
-          (reportedError as? LocalizedError)?.errorDescription ?? reportedError.localizedDescription
+        let message = L10n.message(for: reportedError)
         logger.error(
           "Operation failed: \(title, privacy: .public); \(message, privacy: .public)")
-        if title == "Reading motorcycle" { dashboardStatus = message }
-        if title.contains("trouble") || title.contains("Clearing") { dtcStatus = message }
-        if title.contains("service") { serviceStatus = message }
+        switch operation {
+        case .dashboard: dashboardStatus = message
+        case .dtcRead, .dtcClear: dtcStatus = message
+        case .serviceReset: serviceStatus = message
+        }
         if reportedError is BLECommandError { failAndDisconnect(message) }
       }
       operationTitle = nil
@@ -379,6 +380,22 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 }
 
+private enum OperationKind {
+  case dashboard
+  case dtcRead
+  case dtcClear
+  case serviceReset
+
+  var titleKey: String {
+    switch self {
+    case .dashboard: return "ios_operation_reading_motorcycle"
+    case .dtcRead: return "ios_operation_reading_dtc"
+    case .dtcClear: return "ios_operation_clearing_dtc"
+    case .serviceReset: return "ios_operation_resetting_service"
+    }
+  }
+}
+
 private struct PendingCommand {
   let command: String
   let intent: CommandIntent
@@ -407,11 +424,11 @@ extension AdapterSession: CBCentralManagerDelegate {
         self.state = .scanning
         central.scanForPeripherals(withServices: [CBUUID(string: self.profile.adapter.serviceUUID)])
       case .unauthorized:
-        self.failAndDisconnect("Bluetooth permission is required to connect to the adapter.")
+        self.failAndDisconnect(L10n.text("ios_error_bluetooth_permission"))
       case .poweredOff:
-        self.failAndDisconnect("Bluetooth is off.")
+        self.failAndDisconnect(L10n.text("ios_error_bluetooth_off"))
       case .unsupported:
-        self.failAndDisconnect("Bluetooth Low Energy is not supported on this device.")
+        self.failAndDisconnect(L10n.text("ios_error_ble_unsupported"))
       default:
         break
       }
@@ -451,7 +468,7 @@ extension AdapterSession: CBCentralManagerDelegate {
   ) {
     Task { @MainActor in
       guard self.central === central, self.peripheral === peripheral else { return }
-      self.failAndDisconnect(error?.localizedDescription ?? "Could not connect to the adapter.")
+      self.failAndDisconnect(error?.localizedDescription ?? L10n.text("ios_error_connect_failed"))
     }
   }
 

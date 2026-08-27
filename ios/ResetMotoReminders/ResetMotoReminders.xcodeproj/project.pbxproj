@@ -49,7 +49,7 @@
 			buildConfigurationList = BB10000D20260823 /* Build configuration list for PBXProject "ResetMotoReminders" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base,);
+			knownRegions = (en, de, es, fr, uk, Base,);
 			mainGroup = BB10000520260823;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (BB10000E20260823 /* XCLocalSwiftPackageReference "../ResetMotoCore" */,);
