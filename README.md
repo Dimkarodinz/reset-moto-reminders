@@ -39,7 +39,7 @@ Safety is built into the design, not bolted on afterward:
 - Writes are **fail-closed and gated**: the app refuses to write unless it recognizes the exact motorcycle profile, and it asks you to confirm each write. An unknown or mismatched bike stays read-only.
 - It **never retries a write** after a disconnect or an unclear result.
 
-Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. A successful miles-mode reset has now been captured and implemented, but still needs its first validation through this app. DTC clear is built, marked Beta and gated, but still awaits its first project-app motorcycle test. Write features remain debug-only until their release gates are satisfied.
+Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. The miles-mode reset is implemented from a successful captured reset and deterministic replay tests. DTC clear is available, clearly marked Beta, and still awaits its first controlled project-app motorcycle test.
 
 ## Supported models
 
@@ -70,9 +70,10 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 
 ## Install
 
-Android releases will be published only after the write-capable release gate is
-complete. Each distributable APK will be built from a public source tag, signed
-with the project release key and published with a SHA-256 checksum.
+Download the signed Android APK and its SHA-256 checksum from
+[GitHub Releases](https://github.com/Dimkarodinz/reset-moto-reminders/releases/latest).
+The APK is built from its public source tag and signed with the project release
+key.
 
 Android build instructions and the full hardware-test procedure are in
 [`android/README.md`](android/README.md). The iPhone app is installed from the

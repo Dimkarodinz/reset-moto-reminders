@@ -16,6 +16,18 @@
     <string name="action_ok">OK</string>
     <string name="action_read_again">Erneut auslesen</string>
 
+    <!-- First-launch safety acknowledgement -->
+    <string name="consent_title">Vor dem Verbinden</string>
+    <string name="consent_intro">Lesen und akzeptieren Sie diese Bedingungen, bevor Sie Funktionen verwenden, die Daten am Motorrad ändern.</string>
+    <string name="consent_unofficial">Inoffizielle Community-App. Nicht mit Triumph Motorcycles verbunden oder von Triumph unterstützt.</string>
+    <string name="consent_no_warranty">Die App wird ohne Gewährleistung bereitgestellt. Brechen Sie ab, wenn Motorrad, Adapter oder Antwort nicht genau dem erwarteten Ergebnis entsprechen.</string>
+    <string name="consent_reset_not_maintenance">Das Zurücksetzen der Service-Erinnerung führt keine Wartung durch.</string>
+    <string name="consent_clear_not_repair">Das Löschen eines Fehlercodes entfernt Diagnoseinformationen; es repariert den Fehler nicht.</string>
+    <string name="consent_owner_responsibility">Verwenden Sie die App nur an einem eigenen Motorrad oder wenn Sie zur Wartung berechtigt sind. Sie sind für die Prüfung des Ergebnisses verantwortlich.</string>
+    <string name="consent_right_to_repair">Dieses Projekt unterstützt Wartung durch Eigentümer und unabhängige Werkstätten. Es ändert keine ECU-Kennfelder, Kalibrierungs-, Emissions- oder Wegfahrsperren-Einstellungen.</string>
+    <string name="consent_checkbox">Ich verstehe und akzeptiere diese Bedingungen.</string>
+    <string name="consent_continue">Akzeptieren und fortfahren</string>
+
     <!-- Connection status -->
     <string name="status_disconnected_title">Getrennt</string>
     <string name="status_disconnected_detail_selected">Ausgewählter Adapter: %1$s</string>
