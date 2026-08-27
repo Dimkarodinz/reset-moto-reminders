@@ -18,6 +18,9 @@ research-builds/android/**/build/
 research-builds/android/**/local.properties
 *.apk
 *.aab
+*.p12
+*.pem
+dist/
 
 # iOS local/build state
 ios/**/.build/

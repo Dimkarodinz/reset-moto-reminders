@@ -4,6 +4,23 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val releaseKeystoreFile = providers.environmentVariable("RESET_MOTO_KEYSTORE_FILE")
+val releaseKeystorePassword = providers.environmentVariable("RESET_MOTO_KEYSTORE_PASSWORD")
+val releaseKeyAlias = providers.environmentVariable("RESET_MOTO_KEY_ALIAS")
+val releaseKeyPassword = providers.environmentVariable("RESET_MOTO_KEY_PASSWORD")
+val releaseSigningValues = listOf(
+    releaseKeystoreFile,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+)
+val hasAnyReleaseSigningValue = releaseSigningValues.any { it.isPresent }
+val hasAllReleaseSigningValues = releaseSigningValues.all { it.isPresent }
+
+require(!hasAnyReleaseSigningValue || hasAllReleaseSigningValues) {
+    "Android release signing requires all RESET_MOTO_KEYSTORE_* and RESET_MOTO_KEY_* environment variables"
+}
+
 android {
     namespace = "dev.resetlight"
     compileSdk = 36
@@ -17,6 +34,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasAllReleaseSigningValues) {
+            create("projectRelease") {
+                storeFile = file(releaseKeystoreFile.get())
+                storePassword = releaseKeystorePassword.get()
+                keyAlias = releaseKeyAlias.get()
+                keyPassword = releaseKeyPassword.get()
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField("boolean", "RESEARCH_BUILD", "true")
@@ -25,6 +57,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             buildConfigField("boolean", "RESEARCH_BUILD", "false")
+            if (hasAllReleaseSigningValues) {
+                signingConfig = signingConfigs.getByName("projectRelease")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
