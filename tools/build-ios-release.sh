@@ -74,7 +74,7 @@ cp "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/THIRD_PARTY_NOTICES.txt"
 
 mkdir -p "$PAYLOAD"
 ditto "$APP" "$PAYLOAD/Reset Moto Reminders.app"
-(cd "$WORK" && ditto -c -k --sequesterRsrc --keepParent Payload "$DIST/$IPA_NAME")
+(cd "$WORK" && /usr/bin/zip -qry -X "$DIST/$IPA_NAME" Payload)
 
 git archive \
   --format=zip \
