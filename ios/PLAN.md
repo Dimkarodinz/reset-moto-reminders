@@ -30,7 +30,7 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 6. Add failing DTC-clear and service-reset transcript tests, including response-pending, rejected prerequisites, partial service writes, ambiguous writes, and no automatic retry; then implement both write use cases.
 7. Add failing operation-serialization tests; then implement the whole-operation gate.
 8. Build the SwiftUI UI and CoreBluetooth transport around the tested core. Keep UUIDs and motorcycle bytes in the bundled profile rather than feature views.
-9. Build without signing for the simulator and generic iOS device. Physical installation, launch, primary-channel adapter identification and the corrected dashboard read are complete. v0.1.4 addresses the form issues found in that follow-up test.
+9. Build without signing for the simulator and generic iOS device. Physical installation, launch, primary-channel adapter identification and the corrected dashboard read are complete. v0.1.4 addressed the form issues found in that follow-up test; v0.1.5 adds the five supported localizations without changing diagnostic commands.
 
 ## Review checklist
 

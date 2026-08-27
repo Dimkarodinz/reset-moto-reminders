@@ -4,7 +4,7 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-The development branch after version 0.1.4 (`build 5`) adds English-default German, Spanish, French and Ukrainian localization for the complete interface, Bluetooth/diagnostic errors and DTC descriptions. It retains number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint. All 36 protocol/use-case tests plus five presentation-contract tests pass.
+Version 0.1.5 (`build 6`) adds English-default German, Spanish, French and Ukrainian localization for the complete interface, Bluetooth/diagnostic errors and DTC descriptions. It retains number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint. All 36 protocol/use-case tests plus five presentation-contract tests pass.
 
 The corrected connection and dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta until a controlled nonzero-DTC test is retained, and individual service-write modes keep their existing evidence gates.
 
