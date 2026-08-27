@@ -1,0 +1,32 @@
+# Reset Moto Reminders
+
+Reset Moto Reminders is an unofficial, noncommercial source-available motorcycle diagnostic application for Android and iPhone. Its narrow purpose is to read diagnostic trouble codes and reset the service reminder on explicitly validated motorcycle profiles.
+
+Canonical website: https://dimkarodinz.github.io/reset-moto-reminders/
+Source repository: https://github.com/Dimkarodinz/reset-moto-reminders
+License: PolyForm Noncommercial License 1.0.0
+
+## Verified compatibility
+
+- Test motorcycle: Triumph Tiger 900 GT Pro, model year 2021.
+- Declared model range: Triumph Tiger 900 GT Pro, 2021–2023, subject to the exact module/profile checks enforced by the app.
+- Tested adapter: vLinker MC+.
+- Android transport: Bluetooth Classic to vLinker MC-Android.
+- iPhone transport: Bluetooth Low Energy to vLinker MC-IOS.
+- Dashboard read, engine DTC read and kilometre service-reminder reset are physically validated through the project app.
+- Miles service reset is trace-validated and implemented but awaits its first project-app motorcycle validation.
+- DTC clear is marked Beta and awaits controlled hardware validation.
+
+## Scope
+
+The main app reads the TFT odometer and compatibility fingerprint, reads confirmed engine DTCs, clears DTCs only after confirmation, and sets the next-service distance/date. It does not flash firmware, edit ECU maps, tune the engine, change emissions settings, code an immobilizer, run actuator tests, fuzz commands or expose an arbitrary diagnostic console.
+
+## Installation
+
+- iPhone: https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html
+- Android: https://dimkarodinz.github.io/reset-moto-reminders/install-android.html
+- Privacy: https://dimkarodinz.github.io/reset-moto-reminders/privacy.html
+
+## Important qualifications
+
+This project is not affiliated with Triumph Motorcycles. Similar ECU suppliers or TFT hardware do not prove compatibility. Clearing a DTC removes diagnostic evidence but does not repair the fault. Resetting a reminder does not perform maintenance. The software comes with no warranty.

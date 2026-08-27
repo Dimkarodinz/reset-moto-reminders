@@ -1,0 +1,10 @@
+{
+  "name": "Reset Moto Reminders",
+  "short_name": "Reset Moto",
+  "description": "Triumph Tiger 900 service reminder reset and DTC utility",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#091215",
+  "theme_color": "#315f69",
+  "icons": [{"src":"assets/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

@@ -2,6 +2,9 @@
 
 Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph Tiger 900 GT Pro (2021–2023) from your phone. Free community build, source available, no dealer visit.
 
+Project website and installation guides:
+<https://dimkarodinz.github.io/reset-moto-reminders/>
+
 Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter to read the dashboard odometer, read or clear trouble codes, and reset the service reminder. Nothing else.
 
 ## Why this exists
@@ -65,9 +68,14 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 
 ## Install
 
-Download the APK from the project releases and install it on your Android phone. Every release APK is built from a public source tag and published with a SHA-256 checksum so you can verify it.
+Android releases will be published only after the write-capable release gate is
+complete. Each distributable APK will be built from a public source tag, signed
+with the project release key and published with a SHA-256 checksum.
 
-Android build instructions and the full hardware-test procedure are in [`android/README.md`](android/README.md). The iPhone app is currently a source/self-build preview; see [`ios/README.md`](ios/README.md).
+Android build instructions and the full hardware-test procedure are in
+[`android/README.md`](android/README.md). The iPhone app is installed from the
+public Xcode project with the rider's own Apple Account; see the
+[step-by-step iPhone guide](docs/install-ios.html) and [`ios/README.md`](ios/README.md).
 
 ## Help test another Triumph
 
@@ -100,9 +108,7 @@ store build may be offered later, after the safety and release gates are met.
 If the community build saved you a dealer visit, you can chip in — entirely
 optional and unrelated to features, support, or license rights:
 
-- Buy Me a Coffee: <https://www.buymeacoffee.com/CHANGE_ME>
-- Ko-fi: <https://ko-fi.com/CHANGE_ME>
-- GitHub Sponsors: <https://github.com/sponsors/CHANGE_ME>
+- Ko-fi: <https://ko-fi.com/pippicat>
 
 ## License
 

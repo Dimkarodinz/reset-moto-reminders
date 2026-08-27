@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reset Moto Reminders — Triumph Tiger 900 service reset app</title>
+  <meta name="description" content="Reset the service reminder and read or clear diagnostic trouble codes on a supported Triumph Tiger 900 using a vLinker MC+ adapter. No account or subscription.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <link rel="canonical" href="https://dimkarodinz.github.io/reset-moto-reminders/">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="assets/styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Reset Moto Reminders">
+  <meta property="og:description" content="Reset the service reminder and read motorcycle fault codes on a supported Triumph Tiger 900.">
+  <meta property="og:url" content="https://dimkarodinz.github.io/reset-moto-reminders/">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Reset Moto Reminders",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Android 8 or later; iOS 16 or later",
+    "description": "An unofficial motorcycle utility for a supported Triumph Tiger 900. It reads dashboard information and DTCs, clears DTCs after confirmation, and resets the service reminder.",
+    "softwareVersion": "Android 0.7.0; iOS 0.1.4",
+    "isAccessibleForFree": true,
+    "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
+    "url": "https://dimkarodinz.github.io/reset-moto-reminders/",
+    "codeRepository": "https://github.com/Dimkarodinz/reset-moto-reminders",
+    "keywords": ["Triumph Tiger 900", "service reminder reset", "service light reset", "DTC reader", "motorcycle diagnostics", "vLinker MC+"]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <a class="brand" href="./"><img src="assets/logo.svg" alt=""><span>Reset Moto Reminders</span></a>
+      <div class="nav-links">
+        <a href="#supported">Supported motorcycles</a>
+        <a href="#usage">How to use</a>
+        <a href="install-android.html">Android</a>
+        <a href="install-ios.html">iPhone</a>
+        <a href="https://github.com/Dimkarodinz/reset-moto-reminders">Source</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-simple">
+        <img class="hero-mark" src="assets/logo.svg" alt="Reset Moto Reminders app icon" width="96" height="96">
+        <div>
+          <h1>Reset the service reminder on your Triumph Tiger 900.</h1>
+          <p class="lede">The app connects your phone to the motorcycle through a vLinker MC+ adapter. It resets the service date and distance, reads fault codes, and clears them when you choose.</p>
+          <p class="lede"><strong>No account, subscription, advertising, dealer visit, or ECU tuning.</strong></p>
+          <div class="actions">
+            <a class="button" href="install-android.html">Android installation</a>
+            <a class="button secondary" href="install-ios.html">iPhone installation</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap narrow">
+        <h2>What is it for?</h2>
+        <p>After you service the motorcycle yourself or use an independent workshop, the dashboard can continue showing the service warning. Reset Moto Reminders lets you finish that job without paying a dealer or buying an annual diagnostic-app subscription.</p>
+        <p>It also reads engine diagnostic trouble codes (DTCs), explains known codes in plain language, and can clear stored codes after you have read them. Clearing a code does not repair the fault that caused it.</p>
+      </div>
+    </section>
+
+    <section class="section" id="supported">
+      <div class="wrap narrow">
+        <h2>Supported motorcycles</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Motorcycle</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Triumph Tiger 900 GT Pro, 2021</td><td><strong>Tested.</strong> Dashboard read, DTC read, and service reset in kilometres have been completed with this app.</td></tr>
+              <tr><td>Triumph Tiger 900 GT Pro, 2022–2023</td><td><strong>Profile included, not physically tested yet.</strong> Read the motorcycle first; unknown or mismatched responses block writes.</td></tr>
+              <tr><td>Other Tiger 900 models and other Triumph motorcycles</td><td><strong>Not supported yet.</strong> Similar hardware is not enough to assume compatibility.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="warning">Miles-mode service reset is implemented from a successful captured transaction but still needs its first reset through this app. DTC clear is marked Beta and still needs a controlled motorcycle test.</p>
+      </div>
+    </section>
+
+    <section class="section" id="usage">
+      <div class="wrap narrow">
+        <h2>What you need</h2>
+        <ul class="check-list">
+          <li>An Android phone or iPhone.</li>
+          <li>A vLinker MC+ Bluetooth OBD adapter.</li>
+          <li>The correct diagnostic-port cable for your motorcycle, if required.</li>
+        </ul>
+
+        <h2>How to use it</h2>
+        <ol class="steps compact">
+          <li><h3>Connect the adapter</h3><p>Plug the vLinker MC+ into the motorcycle diagnostic port. Turn the ignition on and leave the engine off.</p></li>
+          <li><h3>Connect the phone</h3><p>On Android, pair <code>vLinker MC-Android</code> in Bluetooth settings with PIN <code>1234</code>. On iPhone, connect to <code>vLinker MC-IOS</code> from inside the app.</p></li>
+          <li><h3>Read the motorcycle first</h3><p>Tap <strong>Connect</strong>, then <strong>Read motorcycle</strong>. Check that the displayed odometer is plausible before doing anything else.</p></li>
+          <li><h3>Choose one job</h3><p>Read fault codes, clear the displayed codes, or set the next service distance and date. The app asks for confirmation before a change.</p></li>
+          <li><h3>Verify on the dashboard</h3><p>After a reset, check the service date and distance on the motorcycle. After clearing codes, read them again.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap narrow">
+        <h2>Why use this app?</h2>
+        <ul class="check-list">
+          <li><strong>Focused:</strong> it resets the service reminder and reads or clears DTCs. It does not tune, flash, remap, or code the ECU.</li>
+          <li><strong>No recurring cost:</strong> the app has no account, subscription, advertising, analytics, or paid feature unlock.</li>
+          <li><strong>Inspectable:</strong> the complete application source and motorcycle profiles are published on GitHub under a noncommercial source-available license.</li>
+          <li><strong>Cautious writes:</strong> the app checks the expected adapter and motorcycle response, asks for confirmation, sends a write once, and does not automatically retry an unclear result.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap narrow">
+        <h2>Download and installation</h2>
+        <p>Android uses an APK from the project’s GitHub Releases page. iPhone uses the public Xcode project and your own Apple Account; a free iPhone installation lasts seven days and can then be reinstalled.</p>
+        <div class="actions">
+          <a class="button" href="install-android.html">Android instructions</a>
+          <a class="button secondary" href="install-ios.html">iPhone instructions</a>
+          <a class="button secondary" href="https://github.com/Dimkarodinz/reset-moto-reminders">View source on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap narrow">
+        <h2>Optional support</h2>
+        <p>The community project is free for personal, noncommercial use. If it saved you a dealer visit, you can optionally support its development. Donations do not unlock features or support.</p>
+        <div class="actions"><a class="button" href="https://ko-fi.com/pippicat" rel="me">Support on Ko-fi</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-grid wrap">
+      <span>Unofficial project. Not affiliated with Triumph Motorcycles. No warranty.</span>
+      <div class="footer-links"><a href="privacy.html">Privacy</a><a href="https://github.com/Dimkarodinz/reset-moto-reminders/blob/main/LICENSE">License</a><a href="https://github.com/Dimkarodinz/reset-moto-reminders/issues">Issues</a></div>
+    </div>
+  </footer>
+</body>
+</html>
