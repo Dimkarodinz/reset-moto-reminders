@@ -47,7 +47,14 @@ a:hover { color: #fff; }
 }
 
 .brand { display: flex; align-items: center; gap: .75rem; color: var(--text); text-decoration: none; font-weight: 800; }
-.brand img { width: 38px; height: 38px; }
+.brand img {
+  display: block;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 9px;
+  object-fit: cover;
+}
 .nav-links { display: flex; flex-wrap: wrap; gap: 1rem; }
 .nav-links a { color: var(--muted); text-decoration: none; font-size: .94rem; }
 .nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--text); }
@@ -57,7 +64,7 @@ main { min-height: 70vh; }
 .hero { padding: 4.5rem 0; }
 .hero-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 3rem; align-items: center; }
 .hero-simple { display: grid; grid-template-columns: 96px 1fr; gap: 1.5rem; align-items: start; }
-.hero-mark { width: 96px; height: 96px; border-radius: 22px; }
+.hero-mark { display: block; width: 96px; height: 96px; border-radius: 22px; object-fit: cover; }
 .eyebrow { margin: 0 0 .75rem; color: var(--brand-strong); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .8rem; }
 h1, h2, h3 { line-height: 1.12; letter-spacing: -.025em; }
 h1 { margin: 0; max-width: 22ch; font-size: clamp(2.35rem, 6vw, 4rem); }
