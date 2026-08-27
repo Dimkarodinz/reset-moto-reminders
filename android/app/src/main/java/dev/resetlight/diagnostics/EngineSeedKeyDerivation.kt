@@ -7,9 +7,9 @@ import java.util.Locale
  * engine ECU. The transform is a plain unsigned 16-bit multiply-modulo, not
  * general-purpose cryptography, and is scoped to that one engine-ECU path only.
  *
- * This type is only ever instantiated from the research build for the DTC-clear
- * operation, behind the exact-cluster fingerprint gate and an explicit user
- * confirmation. It never runs for a default-session read.
+ * This type is instantiated only for the mapped DTC-clear operation, behind the
+ * exact motorcycle profile and explicit user confirmation. It never runs for a
+ * default-session read.
  */
 class EngineSeedKeyDerivation(private val multiplier: Int) {
     /** Derives the two-byte key (as four hex characters) for a raw two-byte seed. */

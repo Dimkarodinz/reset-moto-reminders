@@ -16,6 +16,18 @@
     <string name="action_ok">OK</string>
     <string name="action_read_again">Прочитати знову</string>
 
+    <!-- First-launch safety acknowledgement -->
+    <string name="consent_title">Перед підключенням</string>
+    <string name="consent_intro">Прочитайте та прийміть ці умови перед використанням функцій, які змінюють дані мотоцикла.</string>
+    <string name="consent_unofficial">Неофіційний застосунок спільноти. Не пов\'язаний із Triumph Motorcycles і не схвалений нею.</string>
+    <string name="consent_no_warranty">Застосунок надається без гарантій. Зупиніться, якщо мотоцикл, адаптер або відповідь не відповідають очікуваному результату.</string>
+    <string name="consent_reset_not_maintenance">Скидання нагадування про сервіс не виконує технічне обслуговування.</string>
+    <string name="consent_clear_not_repair">Очищення коду несправності видаляє діагностичні дані, але не усуває несправність.</string>
+    <string name="consent_owner_responsibility">Використовуйте застосунок лише на власному мотоциклі або маючи дозвіл на його обслуговування. Ви відповідаєте за перевірку результату.</string>
+    <string name="consent_right_to_repair">Проєкт підтримує самостійне та незалежне обслуговування. Він не змінює карти ECU, калібрування, викиди чи налаштування іммобілайзера.</string>
+    <string name="consent_checkbox">Я розумію та приймаю ці умови.</string>
+    <string name="consent_continue">Прийняти й продовжити</string>
+
     <!-- Connection status -->
     <string name="status_disconnected_title">Роз\'єднано</string>
     <string name="status_disconnected_detail_selected">Вибраний адаптер: %1$s</string>

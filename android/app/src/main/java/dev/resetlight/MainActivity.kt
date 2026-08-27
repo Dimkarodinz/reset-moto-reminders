@@ -23,6 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.app.ReleaseConsentStore
+import dev.resetlight.features.consent.ReleaseConsentScreen
 import dev.resetlight.features.connection.AdapterSelectionPolicy
 import dev.resetlight.features.connection.ConnectionScreen
 import dev.resetlight.features.connection.FailureAction
@@ -31,6 +33,7 @@ import dev.resetlight.ui.ResetMotoTheme
 
 class MainActivity : ComponentActivity() {
     private val owner by lazy { (application as ResetLightApplication).container.adapterSession }
+    private val consentStore by lazy { ReleaseConsentStore(this) }
 
     private val permissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -54,10 +57,19 @@ class MainActivity : ComponentActivity() {
                 val devices by owner.devices.collectAsState()
                 var selectedAddress by rememberSaveable { mutableStateOf<String?>(null) }
                 var showDevicePicker by remember { mutableStateOf(false) }
+                var consentAccepted by rememberSaveable { mutableStateOf(consentStore.isAccepted()) }
                 val selected = devices.firstOrNull { it.address == selectedAddress }
                 val adapterDefaultName = stringResource(R.string.adapter_default_name)
 
-                ConnectionScreen(
+                if (!consentAccepted) {
+                    ReleaseConsentScreen(
+                        onAccept = {
+                            consentStore.accept()
+                            consentAccepted = true
+                        },
+                    )
+                } else {
+                    ConnectionScreen(
                     connectionState = connectionState,
                     readOnlyCaptureState = readOnlyCaptureState,
                     dtcReadState = dtcReadState,
@@ -102,21 +114,22 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     },
-                )
-
-                if (showDevicePicker) {
-                    DevicePickerDialog(
-                        devices = devices,
-                        onSelected = { device ->
-                            selectedAddress = device.address
-                            showDevicePicker = false
-                        },
-                        onPairInSettings = {
-                            showDevicePicker = false
-                            openBluetoothSettings()
-                        },
-                        onDismiss = { showDevicePicker = false },
                     )
+
+                    if (showDevicePicker) {
+                        DevicePickerDialog(
+                            devices = devices,
+                            onSelected = { device ->
+                                selectedAddress = device.address
+                                showDevicePicker = false
+                            },
+                            onPairInSettings = {
+                                showDevicePicker = false
+                                openBluetoothSettings()
+                            },
+                            onDismiss = { showDevicePicker = false },
+                        )
+                    }
                 }
 
                 LaunchedEffect(connectionState, devices) {

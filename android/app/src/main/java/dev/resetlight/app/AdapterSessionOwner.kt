@@ -154,7 +154,7 @@ class AdapterSessionOwner(
     private val mutableServiceResetState = MutableStateFlow<ServiceResetUiState>(ServiceResetUiState.Idle)
     val serviceResetState: StateFlow<ServiceResetUiState> = mutableServiceResetState.asStateFlow()
 
-    /** True only when the build packaged the write profiles (research build). */
+    /** True only when this build enables writes and every required profile gate is present. */
     val writeOperationsAvailable: Boolean =
         writesEnabled &&
             dtcClearProfile != null &&
@@ -352,9 +352,8 @@ class AdapterSessionOwner(
     }
 
     /**
-     * Clears confirmed engine DTCs. Available only in the research build: it runs
-     * SecurityAccess and sends a write, so it is gated on [writeOperationsAvailable]
-     * and only ever reached after the caller confirms the exact motorcycle.
+     * Clears confirmed engine DTCs. It runs SecurityAccess and sends a write, so it
+     * is gated on [writeOperationsAvailable] and only reached after user confirmation.
      */
     fun clearDiagnosticTroubleCodes() {
         val clearProfile = dtcClearProfile ?: return

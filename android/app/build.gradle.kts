@@ -29,8 +29,8 @@ android {
         applicationId = "dev.resetlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "0.7.0"
+        versionCode = 12
+        versionName = "0.8.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -51,12 +51,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("boolean", "RESEARCH_BUILD", "true")
+            buildConfigField("boolean", "WRITE_OPERATIONS_ENABLED", "true")
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            buildConfigField("boolean", "RESEARCH_BUILD", "false")
+            buildConfigField("boolean", "WRITE_OPERATIONS_ENABLED", "true")
             if (hasAllReleaseSigningValues) {
                 signingConfig = signingConfigs.getByName("projectRelease")
             }
@@ -87,6 +87,7 @@ android {
 }
 
 val generatedProfiles = layout.buildDirectory.dir("generated/profileAssets")
+val generatedLegalAssets = layout.buildDirectory.dir("generated/legalAssets")
 val adapterMapSource = rootProject.file("../adapter-maps/vlinker-mc-android.adaptermap.yaml")
 val adapterSchemaSource = rootProject.file("../adapter-maps/adaptermap.schema.json")
 val ecuMapSource = rootProject.file("../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml")
@@ -97,6 +98,11 @@ val dtcTranslationSchemaSource = rootProject.file("../dtc-maps/dtctranslation.sc
 val dtcTranslationSources = listOf("es", "uk", "fr", "de").map { locale ->
     rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.$locale.dtctranslation.yaml")
 }
+val legalSources = listOf(
+    rootProject.file("../LICENSE"),
+    rootProject.file("../NOTICE"),
+    rootProject.file("../THIRD_PARTY_NOTICES.md"),
+)
 
 val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     inputs.files(
@@ -146,8 +152,20 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     }
 }
 
+val generateLegalAssets = tasks.register<Sync>("generateLegalAssets") {
+    inputs.files(legalSources)
+    from(legalSources)
+    into(generatedLegalAssets.map { it.dir("legal-notices") })
+    doFirst {
+        require(legalSources.all { it.isFile }) {
+            "LICENSE, NOTICE and THIRD_PARTY_NOTICES.md must exist before packaging"
+        }
+    }
+}
+
 android.sourceSets["main"].assets.srcDir(generatedProfiles)
-tasks.named("preBuild").configure { dependsOn(generateProfileAssets) }
+android.sourceSets["main"].assets.srcDir(generatedLegalAssets)
+tasks.named("preBuild").configure { dependsOn(generateProfileAssets, generateLegalAssets) }
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))

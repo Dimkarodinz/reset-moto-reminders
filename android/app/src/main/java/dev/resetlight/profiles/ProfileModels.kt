@@ -94,7 +94,7 @@ data class EcuProfile(
 /**
  * The observed UDS SecurityAccess handshake for the captured engine ECU. The
  * [seedKeyMultiplier] drives [dev.resetlight.diagnostics.EngineSeedKeyDerivation];
- * it is only executed from the research build for the gated DTC-clear operation.
+ * it is executed only for the exact-profile-gated DTC-clear operation.
  */
 data class EngineSecurityAccessProfile(
     val extendedSessionElmRequest: String,
@@ -119,10 +119,10 @@ data class ReadOnlyIdentifierProfile(
 )
 
 /**
- * Research-only description of the two observed instrument-cluster reads. The
+ * Description of the two observed instrument-cluster reads. The
  * cluster is configured on its own 11-bit route before the reads are sent.
- * `0D01` semantics are still unconfirmed in the map, so this profile is only
- * used only in research-gated paths. The profile itself never authorizes a write.
+ * `0D01` semantics are still unconfirmed in the map. The profile itself never
+ * authorizes a write.
  */
 data class InstrumentReadOnlyCaptureProfile(
     val configurationCommands: List<String>,

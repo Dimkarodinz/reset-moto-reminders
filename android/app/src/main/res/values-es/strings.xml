@@ -16,6 +16,18 @@
     <string name="action_ok">Aceptar</string>
     <string name="action_read_again">Leer de nuevo</string>
 
+    <!-- First-launch safety acknowledgement -->
+    <string name="consent_title">Antes de conectarte</string>
+    <string name="consent_intro">Lee y acepta estas condiciones antes de usar funciones que escriben datos en la motocicleta.</string>
+    <string name="consent_unofficial">Aplicación comunitaria no oficial. No está afiliada ni respaldada por Triumph Motorcycles.</string>
+    <string name="consent_no_warranty">La aplicación se proporciona sin garantía. Detente si la motocicleta, el adaptador o la respuesta no son exactamente los esperados.</string>
+    <string name="consent_reset_not_maintenance">Restablecer el aviso de servicio no realiza el mantenimiento.</string>
+    <string name="consent_clear_not_repair">Borrar un código de avería elimina información de diagnóstico; no repara el fallo.</string>
+    <string name="consent_owner_responsibility">Usa la aplicación solo en una motocicleta propia o que estés autorizado a mantener. Tú eres responsable de comprobar el resultado.</string>
+    <string name="consent_right_to_repair">Este proyecto apoya el mantenimiento realizado por el propietario y los talleres independientes. No modifica mapas de ECU, calibración, emisiones ni ajustes del inmovilizador.</string>
+    <string name="consent_checkbox">Entiendo y acepto estas condiciones.</string>
+    <string name="consent_continue">Aceptar y continuar</string>
+
     <!-- Connection status -->
     <string name="status_disconnected_title">Desconectado</string>
     <string name="status_disconnected_detail_selected">Adaptador seleccionado: %1$s</string>

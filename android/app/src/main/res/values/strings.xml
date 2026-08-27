@@ -17,6 +17,18 @@
     <string name="action_ok">OK</string>
     <string name="action_read_again">Read again</string>
 
+    <!-- First-launch safety acknowledgement -->
+    <string name="consent_title">Before you connect</string>
+    <string name="consent_intro">Please read and accept these conditions before using motorcycle write features.</string>
+    <string name="consent_unofficial">Unofficial community app. Not affiliated with or endorsed by Triumph Motorcycles.</string>
+    <string name="consent_no_warranty">The app is provided without warranty. Stop if the motorcycle, adapter, or response is not exactly as expected.</string>
+    <string name="consent_reset_not_maintenance">Resetting a service reminder does not perform maintenance.</string>
+    <string name="consent_clear_not_repair">Clearing a trouble code erases diagnostic evidence; it does not repair the fault.</string>
+    <string name="consent_owner_responsibility">Use the app only on a motorcycle you own or are authorized to service. You are responsible for checking the result.</string>
+    <string name="consent_right_to_repair">This project supports owner-performed and independent maintenance. It does not modify ECU maps, calibration, emissions, or immobilizer settings.</string>
+    <string name="consent_checkbox">I understand and accept these conditions.</string>
+    <string name="consent_continue">Accept and continue</string>
+
     <!-- Connection status -->
     <string name="status_disconnected_title">Disconnected</string>
     <string name="status_disconnected_detail_selected">Selected adapter: %1$s</string>

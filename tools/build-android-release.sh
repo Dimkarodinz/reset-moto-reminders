@@ -48,7 +48,11 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-(cd "$android_root" && ./gradlew --offline --no-daemon clean testDebugUnitTest lintDebug assembleRelease)
+(cd "$android_root" && ./gradlew --offline --no-daemon \
+  :app:clean \
+  :app:testDebugUnitTest \
+  :app:lintDebug \
+  :app:assembleRelease)
 
 source_apk="$android_root/app/build/outputs/apk/release/app-release.apk"
 if [ ! -f "$source_apk" ]; then

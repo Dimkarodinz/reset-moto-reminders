@@ -1,6 +1,6 @@
 # Legal and publication restrictions
 
-Operational policy for contributors and agents; not legal advice. It assumes a maintainer in Spain and worldwide publication. Obtain qualified Spanish/EU advice before the first public release capable of writing to a motorcycle.
+Operational policy for contributors and agents; not legal advice. It assumes a maintainer in Spain and worldwide publication. Qualified Spanish/EU advice remains recommended for write-capable releases.
 
 Last reviewed: 2026-08-17.
 
@@ -14,7 +14,7 @@ Never commit, release, publish or paste into a public issue:
 - Third party ECU linker APKs, code, icons, screenshots, text, trace files or other assets.
 - Triumph firmware, OEM/calibration maps, dealer software or copied service-manual content.
 - Signing keys, Android keystores, Apple certificates/profiles, tokens or credentials.
-- Decompiled security code, generic security-bypass tooling or immobilizer material. A concise, independently written seed/key transform may be retained only when the maintainer explicitly authorizes interoperability research, it is validated against the maintainer's own captured input/output pairs and third-party code/artifacts are not retained. The maintainer has authorized this transform (`EngineSeedKeyDerivation`) to execute only on an explicitly confirmed engine-ECU DTC-clear path. In the main app that remains behind `BuildConfig.RESEARCH_BUILD` and the exact profile gate. The separate Triumph Research collector may execute it only after the known engine route returns a decodable DTC count, the user selects and acknowledges DTC clear, and the exact write policy accepts every command. It never runs for ordinary reads, instrument operations, immobilizer work or unrelated key discovery.
+- Decompiled security code, generic security-bypass tooling or immobilizer material. A concise, independently written seed/key transform may be retained only when the maintainer explicitly authorizes interoperability research, it is validated against the maintainer's own captured input/output pairs and third-party code/artifacts are not retained. The maintainer has authorized this transform (`EngineSeedKeyDerivation`) to execute only on an explicitly confirmed engine-ECU DTC-clear path, behind the exact profile gate and explicit user confirmation. The separate Triumph Research collector may execute it only after the known engine route returns a decodable DTC count, the user selects and acknowledges DTC clear, and the exact write policy accepts every command. It never runs for ordinary reads, instrument operations, immobilizer work or unrelated key discovery.
 
 The archives under `logs/` are private evidence. Before the first public commit, move them outside the repository or exclude the complete directory. Publish only minimized, manually reviewed transcripts. If private material enters Git history, stop publication and purge the history; deleting the working-tree file is insufficient.
 
