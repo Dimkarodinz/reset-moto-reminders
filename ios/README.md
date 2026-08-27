@@ -4,7 +4,7 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-Version 0.1.4 (`build 5`) is signed and installed on the iPhone 12 after a successful v0.1.3 motorcycle/dashboard read. It adds a **Done** action and interactive dismissal for the numeric keyboard, gives immediate feedback and blocks confirmation unless the interval is an exact 100-unit step from 100 through 25,500, and correctly tells the rider to check the motorcycle date. The dashboard now explains observed value `043` as a compatibility fingerprint rather than an unexplained status or fault code. All 35 protocol/use-case tests plus four presentation-contract tests pass.
+The development branch after version 0.1.4 (`build 5`) adds English-default German, Spanish, French and Ukrainian localization for the complete interface, Bluetooth/diagnostic errors and DTC descriptions. It retains number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint. All 36 protocol/use-case tests plus five presentation-contract tests pass.
 
 The corrected connection and dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta until a controlled nonzero-DTC test is retained, and individual service-write modes keep their existing evidence gates.
 
@@ -52,6 +52,7 @@ After changing the shared adapter, ECU or DTC YAML maps, regenerate the typed iO
 
 ```sh
 ruby ios/tools/sync_profiles.rb
+ruby ios/tools/sync_localizations.rb
 ```
 
-The generated JSON is bundled data, not a second source of truth.
+The generated JSON and `.strings` bundles are bundled data, not separate sources of truth. The localization generator reuses the matching Android wording and adds iPhone-only text for English, German, Spanish, French and Ukrainian.

@@ -31,6 +31,7 @@ The production app has now validated the MC-IOS primary GATT command channel, `A
 | [`ResetMotoCore/`](ResetMotoCore/) | Typed generated profile, ELM/CAN/UDS logic, use cases and deterministic tests |
 | [`ResetMotoReminders/`](ResetMotoReminders/) | SwiftUI application, CoreBluetooth session and Xcode project |
 | [`tools/sync_profiles.rb`](tools/sync_profiles.rb) | Regenerates the bundled iOS JSON profile from shared YAML maps |
+| [`tools/sync_localizations.rb`](tools/sync_localizations.rb) | Generates the five iPhone `Localizable.strings`/`InfoPlist.strings` bundles from shared Android wording plus iOS-only copy |
 | [`tools/build_app_icon.swift`](tools/build_app_icon.swift) | Rebuilds the opaque 1024px iOS icon from the Android launcher foreground and shared teal background; the adaptive foreground is centered at the approved roughly 80% visible diameter |
 
 Do not load [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) as an iOS transport profile. It uses Bluetooth Classic SPP/RFCOMM, which CoreBluetooth does not expose.
@@ -58,7 +59,7 @@ iOS UI and lifecycle
 ## Current feature gates
 
 - The SwiftUI app and all four feature flows are implemented and compile for simulator and physical iOS targets. The core has deterministic transcript tests; none of these results substitutes for a physical iPhone/motorcycle test.
-- Version `0.1.4` (`build 5`) follows a successful v0.1.3 corrected dashboard read on the motorcycle. It fixes number-pad dismissal, blocks service confirmation unless the interval is an exact 100-unit step, refers to the motorcycle date, and explains `043` as a diagnostic compatibility fingerprint rather than a fault code.
+- The development branch after version `0.1.4` (`build 5`) supports English, German, Spanish, French and Ukrainian, with English as the default/fallback. This covers UI copy, Bluetooth/diagnostic failures and known or generic DTC descriptions. Locale selection must never change commands, units or compatibility gates.
 - The critical/high safety review requires both the CoreBluetooth write acknowledgement and the prompt-complete ELM reply, requires the configured CAN response ID for live diagnostic replies, invalidates DTC-clear eligibility as soon as a new read or clear begins, rejects callbacks from obsolete BLE objects, and closes the connection on app backgrounding. A state-changing write interrupted by backgrounding remains explicitly ambiguous and is never replayed.
 - The MC-IOS primary command channel has been exercised by the production app through its `ATI` gate, although its exact response transcript was not retained. A session-local successful `ATI` gate remains mandatory; unexpected layout, missing prompt, timeout or unknown identity disconnects.
 - Dashboard and DTC reads, DTC clear (Beta), and service reset use the same captured Tiger 900 commands and response rules as Android. No other motorcycle profile is selectable.
@@ -75,6 +76,7 @@ iOS UI and lifecycle
 - Do not automatically probe both candidate GATT channels. Test the primary path once, preserve the capture, and test the fallback only in a separate adapter-only attempt.
 - Cancel the connection on unexpected layout, response, timeout or application shutdown. Never silently replay an interrupted write.
 - The production app does not export logs. It may emit bounded Apple system-log events for state, command tags and outcomes, but never raw adapter/ECU replies, peripheral identifiers, serial numbers or VINs. The maintainer probe must apply the same redaction to any shared journal.
+- Keep shared wording synchronized from Android with [`tools/sync_localizations.rb`](tools/sync_localizations.rb). Put iOS-only copy in that generator, require identical key and format-argument sets in every locale, and retain English fallback for an unsupported phone language.
 
 ## UI safety behavior
 
@@ -93,7 +95,7 @@ iOS UI and lifecycle
 - Never make an automated test clear DTCs or reset service state on a motorcycle.
 - Keep captures and real identifiers outside test fixtures and release artifacts.
 - Follow the iOS source/self-build and authorized-distribution limits in [`../LEGAL_RESTRICTIONS.md`](../LEGAL_RESTRICTIONS.md); do not publish a development-signed IPA.
-- Run `swift test --package-path ios/ResetMotoCore` plus unsigned simulator and generic-device Xcode builds before handoff. Run `ruby ios/tools/sync_profiles.rb` after relevant YAML-map changes, review the generated diff, then rerun tests.
+- Run `swift test --package-path ios/ResetMotoCore` plus unsigned simulator and generic-device Xcode builds before handoff. Run `ruby ios/tools/sync_profiles.rb` after relevant YAML-map changes and `ruby ios/tools/sync_localizations.rb` after shared Android or iOS-only wording changes; review generated diffs, then rerun tests.
 
 ### Planned no-fee distribution channels
 

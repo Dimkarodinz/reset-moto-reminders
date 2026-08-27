@@ -19,6 +19,24 @@ identity = adapter.fetch("adapter").fetch("operations").fetch("identify_adapter"
 
 descriptions = dtc.fetch("reference_entries").dup
 dtc.fetch("entries").each { |code, entry| descriptions[code] = entry.fetch("message") }
+dtc.fetch("dictionary").fetch("lookup").fetch("generic_subsystem_messages").each do |prefix, message|
+  descriptions["__generic_#{prefix}"] = message
+end
+descriptions["__unknown"] = dtc.fetch("dictionary").fetch("lookup").fetch("unknown_message")
+
+descriptions_by_language = {"en" => descriptions.sort.to_h}
+%w[de es fr uk].each do |locale|
+  translation = YAML.load_file(
+    File.join(root, "dtc-maps/triumph-tiger-900-gt-pro-2021.#{locale}.dtctranslation.yaml")
+  )
+  localized = descriptions.merge(translation.fetch("reference_messages"))
+  translation.fetch("messages").each { |code, message| localized[code] = message }
+  translation.fetch("translation").fetch("generic_subsystem_messages").each do |prefix, message|
+    localized["__generic_#{prefix}"] = message
+  end
+  localized["__unknown"] = translation.fetch("translation").fetch("unknown_message")
+  descriptions_by_language[locale] = localized.sort.to_h
+end
 
 profile = {
   "schemaVersion" => 1,
@@ -63,6 +81,7 @@ profile = {
     "dateFixedSuffix" => instrument_reset.fetch("date").fetch("fixed_suffix"),
   },
   "dtcDescriptions" => descriptions.sort.to_h,
+  "dtcDescriptionsByLanguage" => descriptions_by_language,
 }
 
 output = File.join(root, "ios/ResetMotoCore/Sources/ResetMotoCore/Resources/tiger-900-profile.json")

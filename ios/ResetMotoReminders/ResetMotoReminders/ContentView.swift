@@ -34,7 +34,7 @@ struct ContentView: View {
           }
 
           Text(
-            "Unofficial tool. Clearing codes does not repair faults. Resetting a reminder does not perform maintenance."
+            L10n.text("ios_disclaimer")
           )
           .font(.footnote)
           .foregroundStyle(.secondary)
@@ -50,7 +50,7 @@ struct ContentView: View {
         Color.black.opacity(0.45).ignoresSafeArea()
         VStack(spacing: 12) {
           ProgressView()
-          Text(session.operationTitle ?? "Working…")
+          Text(session.operationTitle ?? L10n.text("ios_working"))
             .fontWeight(.semibold)
         }
         .padding(24)
@@ -58,29 +58,29 @@ struct ContentView: View {
       }
     }
     .confirmationDialog(
-      "Clear confirmed trouble codes?",
+      L10n.text("ios_clear_confirmation_title"),
       isPresented: $confirmClear,
       titleVisibility: .visible
     ) {
-      Button("Clear trouble codes", role: .destructive) { session.clearDTCs() }
-      Button("Cancel", role: .cancel) {}
+      Button(L10n.text("dtc_clear_button"), role: .destructive) { session.clearDTCs() }
+      Button(L10n.text("action_cancel"), role: .cancel) {}
     } message: {
       Text(clearConfirmationText)
     }
     .confirmationDialog(
-      "Reset service reminder?",
+      L10n.text("ios_reset_confirmation_title"),
       isPresented: $confirmReset,
       titleVisibility: .visible
     ) {
-      Button("Reset reminder") { performReset() }
-      Button("Cancel", role: .cancel) {}
+      Button(L10n.text("service_reset_button")) { performReset() }
+      Button(L10n.text("action_cancel"), role: .cancel) {}
     } message: {
       Text(resetConfirmationText)
     }
     .toolbar {
       ToolbarItemGroup(placement: .keyboard) {
         Spacer()
-        Button("Done") {
+        Button(L10n.text("action_done")) {
           validateDistanceInput(distance)
           distanceFieldFocused = false
         }
@@ -95,14 +95,14 @@ struct ContentView: View {
       if let identity = session.adapterIdentity {
         Text(identity).font(.subheadline.monospaced()).foregroundStyle(.secondary)
       } else if session.state == .disconnected {
-        Text("Power the motorcycle and vLinker MC-IOS, then connect.")
+        Text(L10n.text("ios_connection_hint"))
           .foregroundStyle(.secondary)
       }
       if session.state.isBusy { ProgressView() }
       Button {
         session.state.isReady || session.state.isBusy ? session.disconnect() : session.connect()
       } label: {
-        ActionButtonLabel(connectionButtonTitle)
+        ActionButtonLabel(key: connectionButtonKey)
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
@@ -112,13 +112,15 @@ struct ContentView: View {
 
   private var dashboardCard: some View {
     Card {
-      Text("Motorcycle").font(.headline)
+      Text(L10n.text("ios_motorcycle_title")).font(.headline)
       Text(session.dashboardStatus).foregroundStyle(.secondary)
       if let dashboard = session.dashboard {
-        LabeledContent("Odometer", value: "\(dashboard.odometerKilometres) km")
-        LabeledContent("Dashboard", value: "Supported dashboard recognized")
+        LabeledContent(
+          L10n.text("ios_odometer_label"), value: "\(dashboard.odometerKilometres) km")
+        LabeledContent(
+          L10n.text("ios_dashboard_label"), value: L10n.text("ios_dashboard_supported"))
         Text(
-          "Diagnostic fingerprint \(dashboard.statusASCII) is a compatibility check, not a fault code."
+          L10n.format("ios_fingerprint_format", dashboard.statusASCII)
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -126,7 +128,7 @@ struct ContentView: View {
       Button {
         session.readDashboard()
       } label: {
-        ActionButtonLabel("Read motorcycle")
+        ActionButtonLabel(key: "instrument_read_button")
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
@@ -135,7 +137,7 @@ struct ContentView: View {
 
   private var dtcCard: some View {
     Card {
-      Text("Trouble codes").font(.headline)
+      Text(L10n.text("dtc_read_title")).font(.headline)
       Text(session.dtcStatus).foregroundStyle(.secondary)
       ForEach(session.dtcs) { dtc in
         VStack(alignment: .leading, spacing: 3) {
@@ -147,7 +149,7 @@ struct ContentView: View {
       Button {
         session.readDTCs()
       } label: {
-        ActionButtonLabel("Read trouble codes")
+        ActionButtonLabel(key: "dtc_read_button")
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
@@ -157,8 +159,8 @@ struct ContentView: View {
   private var clearCard: some View {
     Card {
       HStack {
-        Text("Clear trouble codes").font(.headline)
-        Text("BETA")
+        Text(L10n.text("dtc_clear_button")).font(.headline)
+        Text(L10n.text("ios_beta"))
           .font(.caption2.bold())
           .padding(.horizontal, 7)
           .padding(.vertical, 3)
@@ -166,19 +168,19 @@ struct ContentView: View {
           .foregroundStyle(.orange)
       }
       Text(
-        "Clears confirmed DTC memory after security access. It does not repair the underlying fault."
+        L10n.text("ios_clear_detail")
       )
       .font(.subheadline)
       .foregroundStyle(.secondary)
       if !session.hasReadDTCs {
-        Text("Read and review the current trouble codes first.")
+        Text(L10n.text("ios_read_codes_first"))
           .font(.footnote)
           .foregroundStyle(.orange)
       }
       Button(role: .destructive) {
         confirmClear = true
       } label: {
-        ActionButtonLabel("Clear trouble codes")
+        ActionButtonLabel(key: "dtc_clear_button")
       }
       .buttonStyle(.bordered)
       .controlSize(.large)
@@ -189,43 +191,43 @@ struct ContentView: View {
 
   private var serviceCard: some View {
     Card {
-      Text("Service reminder").font(.headline)
+      Text(L10n.text("service_reset_title")).font(.headline)
       Text(session.serviceStatus).foregroundStyle(.secondary)
-      Picker("Dashboard unit", selection: $distanceUnit) {
-        Text("Kilometres").tag(DistanceUnit.kilometres)
-        Text("Miles").tag(DistanceUnit.miles)
+      Picker(L10n.text("ios_dashboard_unit"), selection: $distanceUnit) {
+        Text(L10n.text("ios_unit_kilometres")).tag(DistanceUnit.kilometres)
+        Text(L10n.text("ios_unit_miles")).tag(DistanceUnit.miles)
       }
       .pickerStyle(.segmented)
-      TextField("Interval", text: $distance)
+      TextField(L10n.text("ios_interval"), text: $distance)
         .keyboardType(.numberPad)
         .textFieldStyle(.roundedBorder)
         .focused($distanceFieldFocused)
         .onChange(of: distance) { validateDistanceInput($0) }
       DatePicker(
-        "Next service date",
+        L10n.text("service_reset_date_label"),
         selection: $nextServiceDate,
         in: Date()...(Calendar.current.date(byAdding: .year, value: 2, to: Date()) ?? Date()),
         displayedComponents: .date
       )
-      Text("Use 100-unit steps, from 100 to 25,500. Check that your motorcycle's date is correct.")
+      Text(L10n.text("ios_interval_help"))
         .font(.footnote)
         .foregroundStyle(.secondary)
       if session.dashboard == nil {
-        Text("Read the motorcycle first so the current odometer is visible before confirmation.")
+        Text(L10n.text("ios_read_motorcycle_first"))
           .font(.footnote)
           .foregroundStyle(.orange)
       }
       if let inputMessage { Text(inputMessage).font(.footnote).foregroundStyle(.red) }
       Button {
         guard validDistance != nil else {
-          inputMessage = "Enter a value from 100 to 25,500 in 100-unit steps."
+          inputMessage = L10n.text("ios_interval_error")
           return
         }
         distanceFieldFocused = false
         inputMessage = nil
         confirmReset = true
       } label: {
-        ActionButtonLabel("Reset service reminder")
+        ActionButtonLabel(key: "service_reset_button")
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
@@ -240,22 +242,29 @@ struct ContentView: View {
     return value
   }
 
-  private var unitLabel: String { distanceUnit == .kilometres ? "km" : "miles" }
+  private var unitLabel: String {
+    L10n.text(distanceUnit == .kilometres ? "distance_unit_km" : "distance_unit_miles")
+  }
 
-  private var connectionButtonTitle: String {
-    if session.state.isBusy { return "Cancel" }
-    return session.state.isReady ? "Disconnect" : "Connect"
+  private var connectionButtonKey: String {
+    if session.state.isBusy { return "action_cancel" }
+    return session.state.isReady ? "button_disconnect" : "button_connect"
   }
 
   private var clearConfirmationText: String {
     let codes = session.dtcs.map(\.code).joined(separator: ", ")
-    return "Clear \(codes)? Diagnostic evidence will be erased. Existing faults are not repaired."
+    return L10n.format("ios_clear_confirmation_format", codes)
   }
 
   private var resetConfirmationText: String {
-    let odometer = session.dashboard.map { "Current odometer: \($0.odometerKilometres) km. " } ?? ""
+    let odometer =
+      session.dashboard.map {
+        L10n.format("ios_current_odometer_format", $0.odometerKilometres) + " "
+      } ?? ""
     return odometer
-      + "Set \(distance) \(unitLabel) and \(nextServiceDate.formatted(date: .abbreviated, time: .omitted)). Check that your motorcycle's date is correct."
+      + L10n.format(
+        "ios_reset_confirmation_format", distance, unitLabel,
+        nextServiceDate.formatted(date: .abbreviated, time: .omitted))
   }
 
   private func validateDistanceInput(_ input: String) {
@@ -269,7 +278,7 @@ struct ContentView: View {
       return
     }
     inputMessage =
-      validDistance == nil ? "Enter a value from 100 to 25,500 in 100-unit steps." : nil
+      validDistance == nil ? L10n.text("ios_interval_error") : nil
   }
 
   private func performReset() {
@@ -279,12 +288,10 @@ struct ContentView: View {
 }
 
 private struct ActionButtonLabel: View {
-  let title: String
-
-  init(_ title: String) { self.title = title }
+  let key: String
 
   var body: some View {
-    Text(title)
+    Text(L10n.text(key))
       .font(.headline)
       .frame(maxWidth: .infinity, minHeight: 28, alignment: .center)
   }
