@@ -2,14 +2,10 @@
 
 [![Support on Ko-fi](https://img.shields.io/badge/Support%20on-Ko--fi-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/pippicat)
 
-Reset the service light and clear diagnostic trouble codes (DTCs) on a Triumph Tiger 900 GT Pro (2021–2023) from your phone. Free community build, source available, no dealer visit.
+Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 GT Pro (2021–2023) owners. From your phone, it connects through a Bluetooth OBD adapter to read the dashboard odometer, read or clear diagnostic trouble codes (DTCs), and reset the service reminder. Free community build, source available, no account or subscription, no dealer visit.
 
 Project website and installation guides:
 <https://dimkarodinz.github.io/reset-moto-reminders/>
-
-The website and both main apps support English, German, Spanish, French and Ukrainian. English is the default and fallback.
-
-Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 owners. It connects to the bike through a Bluetooth OBD adapter to read the dashboard odometer, read or clear trouble codes, and reset the service reminder. Nothing else.
 
 ## Why this exists
 
@@ -41,7 +37,7 @@ Safety is built into the design, not bolted on afterward:
 - Writes are **fail-closed and gated**: the app refuses to write unless it recognizes the exact motorcycle profile, and it asks you to confirm each write. An unknown or mismatched bike stays read-only.
 - It **never retries a write** after a disconnect or an unclear result.
 
-Reading trouble codes and the kilometre-mode service reset are validated on a real Tiger 900. The miles-mode reset is implemented from a successful captured reset and deterministic replay tests. DTC clear is available, clearly marked Beta, and still awaits its first controlled project-app motorcycle test.
+Reading trouble codes and the service-reminder reset are validated on a real Tiger 900. DTC clear is available, clearly marked Beta, and still awaits its first controlled project-app motorcycle test.
 
 ## Supported models
 
@@ -49,7 +45,7 @@ Reading trouble codes and the kilometre-mode service reset are validated on a re
 
 | Motorcycle | Adapter | Status |
 | --- | --- | --- |
-| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset (km mode) validated through this app. Miles reset is capture-validated and implemented, pending its first project-app test. DTC clear is implemented, gated and marked Beta, with hardware validation pending. |
+| Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset are validated through this app. DTC clear is implemented, gated and marked Beta, with hardware validation pending. |
 
 ### Potentially supported (not tested)
 

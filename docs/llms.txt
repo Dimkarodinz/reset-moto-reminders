@@ -14,7 +14,7 @@ License: PolyForm Noncommercial License 1.0.0
 - Tested adapter: vLinker MC+.
 - Android transport: Bluetooth Classic to vLinker MC-Android.
 - iPhone transport: Bluetooth Low Energy to vLinker MC-IOS.
-- Dashboard read, engine DTC read and kilometre service-reminder reset are physically validated through the project app.
+- Dashboard read, engine DTC read and service-reminder reset are physically validated through the project app.
 - DTC clear is marked Beta and awaits controlled hardware validation.
 - Android v0.8.0 is the first signed release build.
 
