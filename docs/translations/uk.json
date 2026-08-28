@@ -18,7 +18,7 @@
     "Motorcycle": "Мотоцикл",
     "Status": "Стан",
     "Tested.": "Перевірено.",
-    "Dashboard read, DTC read, and service reset in kilometres have been completed with this app.": "За допомогою цього застосунку виконано зчитування панелі приладів і DTC та скидання обслуговування в кілометрах.",
+    "Dashboard read, DTC read, and service reset have been completed with this app.": "За допомогою цього застосунку виконано зчитування панелі приладів і DTC та скидання нагадування про обслуговування.",
     "Profile included, not physically tested yet.": "Профіль додано, але ще не перевірено на мотоциклі.",
     "Read the motorcycle first; unknown or mismatched responses block writes.": "Спочатку зчитайте дані мотоцикла; невідомі або невідповідні відповіді блокують запис.",
     "Other Tiger 900 models and other Triumph motorcycles": "Інші моделі Tiger 900 та інші мотоцикли Triumph",
