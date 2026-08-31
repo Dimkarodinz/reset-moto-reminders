@@ -93,8 +93,8 @@ class AdapterSessionOwner(
     private val writesEnabled: Boolean = false,
     engineResponseCanId: String? = null,
     instrumentResponseCanId: String? = null,
-    private val transportFactory: (String) -> ByteTransport = { address ->
-        RfcommByteTransport(bluetooth, address, profile.transport.sppServiceUuid)
+    private val transportFactory: (String, AdapterProfile) -> ByteTransport = { address, selectedProfile ->
+        RfcommByteTransport(bluetooth, address, selectedProfile.transport.sppServiceUuid)
     },
 ) {
     private val adapterProfiles = (listOf(profile) + additionalProfiles).associateBy(AdapterProfile::id)
@@ -179,7 +179,12 @@ class AdapterSessionOwner(
                 BondedDeviceSelector.candidates(
                     bluetooth.bondedDevices(),
                     candidate.identity.bluetoothName.value,
-                ).map { it.copy(profileId = candidate.id) }
+                ).map {
+                    it.copy(
+                        profileId = candidate.id,
+                        experimental = candidate.id != profile.id,
+                    )
+                }
             }
         mutableDevices.value = classic
         val scanner = bleAdapter ?: return
@@ -623,7 +628,7 @@ class AdapterSessionOwner(
             "bluetooth_low_energy_gatt" -> checkNotNull(bleAdapter) {
                 "BLE transport is unavailable"
             }.createGattTransport(address, selectedProfile)
-            else -> transportFactory(address)
+            else -> transportFactory(address, selectedProfile)
         }
         activeTransport.set(transport)
         try {

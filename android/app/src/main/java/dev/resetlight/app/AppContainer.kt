@@ -29,6 +29,9 @@ class AppContainer(context: Context) {
     private val obdlinkCxProfile = applicationContext.assets
         .open("profiles/obdlink-cx.adaptermap.yaml")
         .use(AdapterProfileLoader()::load)
+    private val obdlinkMxProfile = applicationContext.assets
+        .open("profiles/obdlink-mx-android.adaptermap.yaml")
+        .use(AdapterProfileLoader()::load)
     private val bluetooth = AndroidBluetoothFacade(applicationContext)
     val ecuProfile = applicationContext.assets
         .open("profiles/tiger-900-gt-pro-2021.ecumap.yaml")
@@ -66,7 +69,7 @@ class AppContainer(context: Context) {
 
     val adapterSession = AdapterSessionOwner(
         profile = profile,
-        additionalProfiles = listOf(obdlinkCxProfile),
+        additionalProfiles = listOf(obdlinkCxProfile, obdlinkMxProfile),
         bluetooth = bluetooth,
         bleAdapter = AndroidBleAdapterFacade(applicationContext),
         journal = journal,

@@ -51,7 +51,7 @@
     <string name="failure_permission_detail">Allow the Bluetooth permission requested by Reset Moto Reminders, then try again.</string>
     <string name="failure_permission_action">Grant permission</string>
     <string name="failure_pairing_title">Pairing required</string>
-    <string name="failure_pairing_detail">Pair vLinker MC-Android in Android Bluetooth settings using PIN 1234, then return and select it.</string>
+    <string name="failure_pairing_detail">Pair the selected Classic adapter in Android Bluetooth settings, then return and select it. vLinker uses PIN 1234; OBDLink MX requires its Connect button.</string>
     <string name="failure_pairing_action">Open Bluetooth settings</string>
     <string name="failure_timeout_title">Connection timed out</string>
     <string name="failure_timeout_detail">The adapter did not respond in time. Check that it is powered and nearby, then try again.</string>
@@ -169,7 +169,7 @@
     <!-- Device picker -->
     <string name="device_picker_title">Select adapter</string>
     <string name="device_picker_empty">Scanning for supported adapters…</string>
-    <string name="device_picker_pair_hint">For vLinker MC-Android, pair in Android settings with PIN 1234. OBDLink CX pairs when connected.</string>
+    <string name="device_picker_pair_hint">For vLinker MC-Android, pair in Android settings with PIN 1234. For OBDLink MX, press Connect on the adapter and pair in Android settings. OBDLink CX pairs when connected.</string>
     <string name="device_picker_settings">Bluetooth settings</string>
     <string name="adapter_default_name">vLinker adapter</string>
     <string name="adapter_experimental_suffix">experimental</string>
