@@ -35,12 +35,30 @@ class AdapterProfileLoader {
         disconnect.child("sequence").requireNonEmptyList()
 
         val discoveryUuid = discovery.child("primary_service_uuid").uuid()
-        val commandEndpointUuid = channel.child("command_endpoint").child("service_uuid").uuid()
-        val responseEndpointUuid = channel.child("response_endpoint").child("service_uuid").uuid()
+        val commandEndpoint = channel.child("command_endpoint")
+        val responseEndpoint = channel.child("response_endpoint")
+        val commandEndpointUuid = commandEndpoint.child("service_uuid").uuid()
+        val responseEndpointUuid = responseEndpoint.child("service_uuid").uuid()
+        val transportKind = transport.child("kind").string()
         if (discoveryUuid != commandEndpointUuid || discoveryUuid != responseEndpointUuid) {
+            val label = if (transportKind == "bluetooth_low_energy_gatt") "GATT service UUID" else "SPP UUID"
             throw ProfileLoadException(
-                "Adapter SPP UUID must match across discovery, command and response endpoints",
+                "Adapter $label must match across discovery, command and response endpoints",
             )
+        }
+        val commandCharacteristicUuid = commandEndpoint.optionalChild("characteristic_uuid")?.uuid()
+        val responseCharacteristicUuid = responseEndpoint.optionalChild("characteristic_uuid")?.uuid()
+        if (transportKind == "bluetooth_low_energy_gatt" &&
+            (commandCharacteristicUuid == null || responseCharacteristicUuid == null)
+        ) {
+            throw ProfileLoadException("BLE GATT endpoints require characteristic UUIDs")
+        }
+        val commandProperties = commandEndpoint.optionalChild("properties")
+            ?.list()
+            ?.map(YamlNode::string)
+            .orEmpty()
+        if (transportKind == "bluetooth_low_energy_gatt" && "write" !in commandProperties) {
+            throw ProfileLoadException("BLE command endpoint must support acknowledged write")
         }
 
         val identificationCommand = identify.child("command")
@@ -68,12 +86,15 @@ class AdapterProfileLoader {
                 stnChipIdentity = protocolIdentity.child("stn_chip_identity").profileValue(),
             ),
             transport = AdapterTransport(
-                kind = transport.child("kind").string(),
+                kind = transportKind,
                 status = transport.child("knowledge_status").status(),
                 discoveryStatus = discovery.child("knowledge_status").status(),
                 channelStatus = channel.child("knowledge_status").status(),
                 framingStatus = framing.child("knowledge_status").status(),
-                sppServiceUuid = discoveryUuid,
+                primaryServiceUuid = discoveryUuid,
+                commandCharacteristicUuid = commandCharacteristicUuid,
+                responseCharacteristicUuid = responseCharacteristicUuid,
+                commandSupportsWriteWithResponse = "write" in commandProperties,
                 framing = AdapterFraming(
                     commandEncoding = framing.child("command_encoding").string(),
                     commandTerminatorHex = framing.child("command_terminator_hex").string(),

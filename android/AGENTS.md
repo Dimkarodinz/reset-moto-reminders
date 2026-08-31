@@ -16,7 +16,7 @@ Android is the first implementation target. Build it natively with Kotlin and Je
 
 The main app uses the fixed `ResetMotoTheme`: near-black background, restrained graphite surfaces, muted teal actions and high-contrast text/system bars. Keep this serious dark presentation independent of the phone theme; safety warnings continue to use the Material error role.
 
-The current v0.8.0 build (`versionCode 12`) is the first public release candidate. It adds the one-time safety acknowledgement, enables the two existing bounded writes in release builds, packages the project legal notices, and keeps broader research capture out of the main app:
+The current v0.9.0 build (`versionCode 13`) adds experimental OBDLink CX BLE support to the v0.8.0 public baseline. It retains the one-time safety acknowledgement, the two bounded writes, packaged legal notices and the separation from broader research capture:
 
 ```text
 launch -> accept safety notice once -> select or pair adapter -> connect -> identify
@@ -50,6 +50,7 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`../adapter-maps/adaptermap.schema.json`](../adapter-maps/adaptermap.schema.json) | Adapter-map version-2 contract |
 | [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) | Primary Android adapter profile: Bluetooth Classic SPP/RFCOMM |
 | [`../adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) | Optional Android BLE profile; command channel is still unverified |
+| [`../adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml) | Experimental Android/iOS BLE UART profile from OBDLink's public developer notes; physical project validation pending |
 | [`../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml`](../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml) | Current motorcycle/module protocol evidence |
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Publishable user-facing DTC code-to-message lookup |
 | [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | Android pairing, RFCOMM, framing, initialization and failure handling |
@@ -57,7 +58,7 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`../research-builds/android/triumph/README.md`](../research-builds/android/triumph/README.md) | Separate Triumph compatibility collector, opt-in write validation, report workflow and build instructions |
 | [`../research-builds/android/general/README.md`](../research-builds/android/general/README.md) | Separate bounded, read-only standard-OBD collector for unmapped motorcycle families |
 
-The MC-Android map is the active Android transport target. Android can technically access the MC-IOS BLE profile, but the application must keep that profile disabled beyond adapter-only characterization until its command channel is observed and validated.
+The MC-Android map remains the hardware-validated Android transport. OBDLink CX is an independent experimental BLE profile, never a vLinker fallback. Android can technically access the MC-IOS BLE profile, but the application must keep that profile disabled beyond adapter-only characterization until its command channel is observed and validated.
 
 ## Application boundaries
 
@@ -88,6 +89,7 @@ Android UI and lifecycle
 - Project-code replay is covered by automated tests. Hardware-validated so far: default-session DTC count, instrument reads and the full km service reset. The successful miles command is capture-validated and implemented. Not yet validated through this app: nonzero DTC detail, DTC clear and a miles reset.
 - DTC clear stays labelled Beta until its engine identity/prerequisite assumptions are hardware-validated. The miles path is release-enabled from captured successful traffic and deterministic replay, with its first project-app motorcycle run still pending.
 - The MC-IOS BLE path must not send ECU commands until the pending `ATI` proof establishes its command/response endpoint and framing.
+- The CX path must match `OBDLink CX` plus `FFF0`/`FFF1`/`FFF2`, enable OS-managed bonding, negotiate MTU, serialize acknowledged chunks and pass `ATI` before motorcycle operations. Keep it labelled experimental until a powered CX/Tiger test succeeds.
 - Unknown maps, schema versions, adapter identities or module identities fail closed.
 
 ## UX starting point

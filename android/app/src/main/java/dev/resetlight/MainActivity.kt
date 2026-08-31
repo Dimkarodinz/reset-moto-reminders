@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 var consentAccepted by rememberSaveable { mutableStateOf(consentStore.isAccepted()) }
                 val selected = devices.firstOrNull { it.address == selectedAddress }
                 val adapterDefaultName = stringResource(R.string.adapter_default_name)
+                val experimentalSuffix = stringResource(R.string.adapter_experimental_suffix)
 
                 if (!consentAccepted) {
                     ReleaseConsentScreen(
@@ -83,11 +84,11 @@ class MainActivity : ComponentActivity() {
                     // The main app exposes only bounded rider-facing features.
                     researchCaptureEnabled = false,
                     writeOperationsEnabled = owner.writeOperationsAvailable,
-                    selectedAdapterName = selected?.displayName(devices, adapterDefaultName),
+                    selectedAdapterName = selected?.displayName(devices, adapterDefaultName, experimentalSuffix),
                     onPairOrSelect = {
                         if (hasBluetoothPermission()) {
                             owner.refreshBondedDevices()
-                            if (owner.devices.value.isEmpty()) openBluetoothSettings() else showDevicePicker = true
+                            showDevicePicker = true
                         } else {
                             requestBluetoothPermission()
                         }
@@ -119,6 +120,7 @@ class MainActivity : ComponentActivity() {
                     if (showDevicePicker) {
                         DevicePickerDialog(
                             devices = devices,
+                            experimentalSuffix = experimentalSuffix,
                             onSelected = { device ->
                                 selectedAddress = device.address
                                 showDevicePicker = false
@@ -147,16 +149,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun hasBluetoothPermission(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        requiredBluetoothPermissions().all { permission ->
+            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        }
 
     private fun requestBluetoothPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissionRequest.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
-        } else {
-            refreshDevicesIfPermitted()
+        val missing = requiredBluetoothPermissions().filter { permission ->
+            ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED
         }
+        if (missing.isEmpty()) refreshDevicesIfPermitted() else permissionRequest.launch(missing.toTypedArray())
     }
+
+    private fun requiredBluetoothPermissions(): Set<String> =
+        dev.resetlight.transport.bluetooth.BluetoothPermissionPolicy.runtimePermissions(Build.VERSION.SDK_INT)
 
     private fun refreshDevicesIfPermitted() {
         if (hasBluetoothPermission()) {
@@ -176,6 +181,7 @@ class MainActivity : ComponentActivity() {
 @androidx.compose.runtime.Composable
 private fun DevicePickerDialog(
     devices: List<BondedDevice>,
+    experimentalSuffix: String,
     onSelected: (BondedDevice) -> Unit,
     onPairInSettings: () -> Unit,
     onDismiss: () -> Unit,
@@ -189,7 +195,7 @@ private fun DevicePickerDialog(
                 if (devices.isEmpty()) Text(stringResource(R.string.device_picker_empty))
                 devices.forEach { device ->
                     TextButton(onClick = { onSelected(device) }) {
-                        Text(device.displayName(devices, defaultName))
+                        Text(device.displayName(devices, defaultName, experimentalSuffix))
                     }
                 }
                 Text(stringResource(R.string.device_picker_pair_hint))
@@ -204,7 +210,7 @@ private fun DevicePickerDialog(
     )
 }
 
-private fun BondedDevice.displayName(all: List<BondedDevice>, defaultName: String): String {
-    val base = name ?: defaultName
+private fun BondedDevice.displayName(all: List<BondedDevice>, defaultName: String, experimentalSuffix: String): String {
+    val base = (name ?: defaultName) + if (experimental) " • $experimentalSuffix" else ""
     return if (all.count { it.name == name } > 1) "$base • …${address.takeLast(5)}" else base
 }

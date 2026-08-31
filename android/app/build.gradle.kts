@@ -29,8 +29,8 @@ android {
         applicationId = "dev.resetlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 12
-        versionName = "0.8.0"
+        versionCode = 13
+        versionName = "0.9.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -89,6 +89,7 @@ android {
 val generatedProfiles = layout.buildDirectory.dir("generated/profileAssets")
 val generatedLegalAssets = layout.buildDirectory.dir("generated/legalAssets")
 val adapterMapSource = rootProject.file("../adapter-maps/vlinker-mc-android.adaptermap.yaml")
+val obdlinkCxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-cx.adaptermap.yaml")
 val adapterSchemaSource = rootProject.file("../adapter-maps/adaptermap.schema.json")
 val ecuMapSource = rootProject.file("../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml")
 val ecuSchemaSource = rootProject.file("../ecu-maps/ecumap.schema.json")
@@ -107,6 +108,7 @@ val legalSources = listOf(
 val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     inputs.files(
         adapterMapSource,
+        obdlinkCxAdapterMapSource,
         adapterSchemaSource,
         ecuMapSource,
         ecuSchemaSource,
@@ -117,6 +119,7 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
     )
     from(
         adapterMapSource,
+        obdlinkCxAdapterMapSource,
         adapterSchemaSource,
         ecuMapSource,
         ecuSchemaSource,

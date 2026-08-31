@@ -4,7 +4,7 @@ Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mi
 
 ## Current status
 
-Version 0.1.5 (`build 6`) adds English-default German, Spanish, French and Ukrainian localization for the complete interface, Bluetooth/diagnostic errors and DTC descriptions. It retains number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint. All 36 protocol/use-case tests plus five presentation-contract tests pass.
+Version 0.2.0 (`build 7`) adds experimental OBDLink CX support alongside the validated vLinker MC-IOS transport. It retains English-default German, Spanish, French and Ukrainian localization, number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint.
 
 The corrected connection and dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta until a controlled nonzero-DTC test is retained, and individual service-write modes keep their existing evidence gates.
 
@@ -25,7 +25,7 @@ connected and unlocked; pressing Xcode's Run button is not required each time.
 
 Use ignition on and engine off unless the motorcycle procedure requires otherwise.
 
-1. Power the motorcycle and `vLinker MC-IOS`, open the app and tap **Connect**.
+1. Power the motorcycle and either `vLinker MC-IOS` or `OBDLink CX`, open the app and tap **Connect**.
 2. Confirm the app reaches **Motorcycle connected** and shows an adapter identity. If it stops earlier, preserve the exact on-screen error; do not keep retrying write features.
 3. Tap **Read motorcycle**. Confirm the odometer is plausible.
 4. Tap **Read trouble codes**. Confirm the count/list is plausible.

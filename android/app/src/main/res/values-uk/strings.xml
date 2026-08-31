@@ -166,9 +166,10 @@
     <string name="gate_reason_authorized">Підключена панель приладів відповідає перевіреному відбитку.</string>
 
     <!-- Device picker -->
-    <string name="device_picker_title">Виберіть сполучений адаптер</string>
-    <string name="device_picker_empty">Сполученого адаптера vLinker MC-Android не знайдено.</string>
-    <string name="device_picker_pair_hint">Сполучіть у налаштуваннях Android за допомогою PIN 1234, якщо адаптера немає в списку.</string>
+    <string name="device_picker_title">Виберіть адаптер</string>
+    <string name="device_picker_empty">Пошук підтримуваних адаптерів…</string>
+    <string name="device_picker_pair_hint">Сполучіть vLinker MC-Android у налаштуваннях із PIN 1234. OBDLink CX сполучається під час підключення.</string>
     <string name="device_picker_settings">Налаштування Bluetooth</string>
     <string name="adapter_default_name">Адаптер vLinker</string>
+    <string name="adapter_experimental_suffix">експериментальний</string>
 </resources>

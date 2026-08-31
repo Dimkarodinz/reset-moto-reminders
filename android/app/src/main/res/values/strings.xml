@@ -167,9 +167,10 @@
     <string name="gate_reason_authorized">Connected cluster matches the validated fingerprint.</string>
 
     <!-- Device picker -->
-    <string name="device_picker_title">Select paired adapter</string>
-    <string name="device_picker_empty">No paired vLinker MC-Android adapter was found.</string>
-    <string name="device_picker_pair_hint">Pair in Android settings with PIN 1234 if the adapter is not listed.</string>
+    <string name="device_picker_title">Select adapter</string>
+    <string name="device_picker_empty">Scanning for supported adapters…</string>
+    <string name="device_picker_pair_hint">For vLinker MC-Android, pair in Android settings with PIN 1234. OBDLink CX pairs when connected.</string>
     <string name="device_picker_settings">Bluetooth settings</string>
     <string name="adapter_default_name">vLinker adapter</string>
+    <string name="adapter_experimental_suffix">experimental</string>
 </resources>

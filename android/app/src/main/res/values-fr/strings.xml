@@ -166,9 +166,10 @@
     <string name="gate_reason_authorized">Le tableau de bord connecté correspond à l\'empreinte validée.</string>
 
     <!-- Device picker -->
-    <string name="device_picker_title">Sélectionner l\'adaptateur associé</string>
-    <string name="device_picker_empty">Aucun adaptateur vLinker MC-Android associé n\'a été trouvé.</string>
-    <string name="device_picker_pair_hint">Associez-le dans les paramètres d\'Android avec le PIN 1234 si l\'adaptateur n\'est pas répertorié.</string>
+    <string name="device_picker_title">Sélectionner l\'adaptateur</string>
+    <string name="device_picker_empty">Recherche des adaptateurs compatibles…</string>
+    <string name="device_picker_pair_hint">Associez vLinker MC-Android dans les paramètres avec le PIN 1234. OBDLink CX s\'associe à la connexion.</string>
     <string name="device_picker_settings">Paramètres Bluetooth</string>
     <string name="adapter_default_name">Adaptateur vLinker</string>
+    <string name="adapter_experimental_suffix">expérimental</string>
 </resources>

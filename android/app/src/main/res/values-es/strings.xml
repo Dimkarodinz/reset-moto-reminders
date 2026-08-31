@@ -166,9 +166,10 @@
     <string name="gate_reason_authorized">El cuadro de instrumentos conectado coincide con la huella validada.</string>
 
     <!-- Device picker -->
-    <string name="device_picker_title">Selecciona el adaptador emparejado</string>
-    <string name="device_picker_empty">No se encontró ningún adaptador vLinker MC-Android emparejado.</string>
-    <string name="device_picker_pair_hint">Empareja en los ajustes de Android con el PIN 1234 si el adaptador no aparece en la lista.</string>
+    <string name="device_picker_title">Selecciona el adaptador</string>
+    <string name="device_picker_empty">Buscando adaptadores compatibles…</string>
+    <string name="device_picker_pair_hint">Empareja vLinker MC-Android en los ajustes con el PIN 1234. OBDLink CX se empareja al conectar.</string>
     <string name="device_picker_settings">Ajustes de Bluetooth</string>
     <string name="adapter_default_name">Adaptador vLinker</string>
+    <string name="adapter_experimental_suffix">experimental</string>
 </resources>

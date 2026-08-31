@@ -1,10 +1,18 @@
-# vLinker MC-IOS connection on iOS
+# Supported adapter connections on iOS
 
 ## Current status
 
 The 2026-08-08 nRF Connect screenshots and Bluetooth HCI capture establish discovery, the complete GATT layout and notification setup. That capture did not include an `ATI` exchange. The 2026-08-23 production-app run subsequently reached **Motorcycle connected**, which requires an acknowledged, prompt-complete and accepted `ATI` exchange on the primary split channel. This establishes `0x2AF1` for commands and `0x2AF0` for responses, although the exact identity text and fragment transcript were not retained.
 
 Use [`adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) as the machine-readable source of truth. Treat handles as evidence only; resolve services and characteristics by UUID at runtime because handles can change with firmware.
+
+OBDLink CX support is also present as an experimental profile. Its machine-readable source is [`adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml). The app selects it only when both the advertised name and service match, then validates the returned `ATI` or `STI` identity before sending motorcycle traffic.
+
+## OBDLink CX experimental BLE profile
+
+The CX uses service `FFF0`, notifications on `FFF1`, and writes on `FFF2`. The app sizes chunks from CoreBluetooth's reported maximum write length, caps them at the documented 244-byte payload, sends each chunk with response and waits for acknowledgement. Characteristic `FEF5` is internal and must not be used.
+
+CX support remains labelled experimental until a powered-adapter and motorcycle run proves discovery, identity validation, initialization, dashboard read, DTC read, DTC clear and service reset. No other OBDLink model inherits this profile. OBDLink MX+ requires a separate manufacturer-supported iOS transport integration; OBDLink LX does not support iOS. Neither is enabled by the CX work.
 
 ## Adapter fingerprint
 

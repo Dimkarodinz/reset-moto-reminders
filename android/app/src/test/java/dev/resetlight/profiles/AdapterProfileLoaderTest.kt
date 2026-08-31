@@ -40,6 +40,24 @@ class AdapterProfileLoaderTest {
     }
 
     @Test
+    fun `loads the documented OBDLink CX BLE profile`() {
+        val bytes = generatedProfile("obdlink-cx.adaptermap.yaml")
+
+        val profile = loader.load(bytes)
+
+        assertEquals("obdlink-cx", profile.id)
+        assertEquals("OBDLink CX", profile.identity.bluetoothName.value)
+        assertEquals("bluetooth_low_energy_gatt", profile.transport.kind)
+        assertEquals(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"), profile.transport.primaryServiceUuid)
+        assertEquals(UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb"), profile.transport.commandCharacteristicUuid)
+        assertEquals(UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb"), profile.transport.responseCharacteristicUuid)
+        assertEquals(true, profile.transport.commandSupportsWriteWithResponse)
+        assertEquals("123456", profile.pairingPin)
+        assertEquals("ATI", profile.operations.identify.command)
+        assertEquals("OBDLink CX*", profile.operations.identify.expectedIdentity)
+    }
+
+    @Test
     fun `hash represents the exact source bytes`() {
         val original = generatedProfile("vlinker-mc-android.adaptermap.yaml")
         val edited = original + byteArrayOf('\n'.code.toByte())
@@ -104,6 +122,22 @@ class AdapterProfileLoaderTest {
         }
 
         assertTrue(error.message.orEmpty().contains("SPP UUID"))
+    }
+
+    @Test
+    fun `rejects BLE command and response endpoints outside the discovery service`() {
+        val yaml = generatedProfile("obdlink-cx.adaptermap.yaml")
+            .decodeToString()
+            .replaceFirst(
+                "service_uuid: 0000FFF0-0000-1000-8000-00805F9B34FB\n        characteristic_uuid: 0000FFF2",
+                "service_uuid: 0000FFE0-0000-1000-8000-00805F9B34FB\n        characteristic_uuid: 0000FFF2",
+            )
+
+        val error = assertThrows(ProfileLoadException::class.java) {
+            loader.load(yaml.encodeToByteArray())
+        }
+
+        assertTrue(error.message.orEmpty().contains("GATT service UUID"))
     }
 
     @Test
