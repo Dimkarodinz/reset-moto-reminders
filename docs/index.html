@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reset Moto Reminders — Triumph Tiger 900 service reset app</title>
-  <meta name="description" content="Reset the service reminder and read or clear diagnostic trouble codes on a supported Triumph Tiger 900 using a vLinker MC+ adapter. No account or subscription.">
+  <meta name="description" content="Reset the service reminder and read or clear diagnostic trouble codes on a supported Triumph Tiger 900 using vLinker MC+ or OBDLink CX. No account or subscription.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="https://dimkarodinz.github.io/reset-moto-reminders/">
   <link rel="alternate" hreflang="en" href="https://dimkarodinz.github.io/reset-moto-reminders/">
@@ -45,7 +45,7 @@
         "operatingSystem": "Android 8 or later; iOS 16 or later",
         "description": "An unofficial motorcycle utility for a supported Triumph Tiger 900. It reads dashboard information and DTCs, clears DTCs after confirmation, and resets the service reminder.",
         "image": "https://dimkarodinz.github.io/reset-moto-reminders/assets/app-icon.png",
-        "softwareVersion": "0.8.0",
+        "softwareVersion": "0.9.0",
         "isAccessibleForFree": true,
         "offers": {
           "@type": "Offer",
@@ -57,7 +57,7 @@
         "installUrl": "https://dimkarodinz.github.io/reset-moto-reminders/install-android.html",
         "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
         "codeRepository": "https://github.com/Dimkarodinz/reset-moto-reminders",
-        "keywords": ["Triumph Tiger 900", "service reminder reset", "service light reset", "DTC reader", "motorcycle diagnostics", "vLinker MC+"]
+        "keywords": ["Triumph Tiger 900", "service reminder reset", "service light reset", "DTC reader", "motorcycle diagnostics", "vLinker MC+", "OBDLink CX"]
       }
     ]
   }
@@ -84,7 +84,7 @@
         <img class="hero-mark" src="assets/app-icon.png" alt="Reset Moto Reminders app icon" width="96" height="96">
         <div>
           <h1>Reset the service reminder on your Triumph Tiger 900</h1>
-          <p class="lede">The app connects your phone to the motorcycle through a vLinker MC+ adapter to reset the service date and distance, read fault codes, and clear them when you choose</p>
+          <p class="lede">The app connects your phone to the motorcycle through a supported Bluetooth OBD adapter to reset the service date and distance, read fault codes, and clear them when you choose</p>
           <p class="lede"><strong>No account, subscription, advertising, dealer visit, or ECU tuning</strong></p>
           <div class="actions">
             <a class="button" href="install-android.html">Android installation</a>
@@ -124,17 +124,18 @@
         <h2>What you need</h2>
         <ul class="check-list">
           <li>An Android phone or iPhone.</li>
-          <li>A vLinker MC+ Bluetooth OBD adapter. Other adapters are not supported yet.</li>
+          <li>Supported adapters: vLinker MC+ and OBDLink CX (experimental).</li>
         </ul>
 
         <h2>How to use it</h2>
         <ol class="steps compact">
-          <li><h3>Connect the adapter</h3><p>Plug the vLinker MC+ into the motorcycle diagnostic port. Turn the ignition on and leave the engine off.</p></li>
-          <li><h3>Connect the phone</h3><p>On Android, pair <code>vLinker MC-Android</code> in Bluetooth settings with PIN <code>1234</code>. On iPhone, connect to <code>vLinker MC-IOS</code> from inside the app.</p></li>
+          <li><h3>Connect the adapter</h3><p>Plug the Bluetooth OBD adapter into the motorcycle diagnostic port. Turn the ignition on and leave the engine off.</p></li>
+          <li><h3>Connect the phone</h3><p>For vLinker on Android, pair <code>vLinker MC-Android</code> in Bluetooth settings with PIN <code>1234</code>. vLinker MC-IOS and OBDLink CX connect from inside the app.</p></li>
           <li><h3>Read the motorcycle first</h3><p>Tap <strong>Connect</strong>, then <strong>Read motorcycle</strong>. Check that the displayed odometer is plausible before doing anything else.</p></li>
           <li><h3>Choose one job</h3><p>Read fault codes, clear the displayed codes, or set the next service distance and date. The app asks for confirmation before a change.</p></li>
           <li><h3>Verify on the dashboard</h3><p>After a reset, check the service date and distance on the motorcycle. After clearing codes, read them again.</p></li>
         </ol>
+        <p class="warning">OBDLink CX support follows the manufacturer-documented BLE interface and is experimental until it is physically tested with the Tiger 900.</p>
       </div>
     </section>
 

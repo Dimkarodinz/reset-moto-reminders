@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reset Moto Reminders — restablecer el aviso de mantenimiento de la Triumph Tiger 900</title>
-  <meta name="description" content="Restablece el aviso de mantenimiento y lee o borra códigos de avería en una Triumph Tiger 900 compatible mediante un adaptador vLinker MC+. Sin cuenta ni suscripción.">
+  <meta name="description" content="Restablece el aviso de mantenimiento y lee o borra códigos de avería en una Triumph Tiger 900 compatible mediante vLinker MC+ u OBDLink CX. Sin cuenta ni suscripción.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="https://dimkarodinz.github.io/reset-moto-reminders/es/">
 <link rel="alternate" hreflang="en" href="https://dimkarodinz.github.io/reset-moto-reminders/">
@@ -52,7 +52,7 @@
         "operatingSystem": "Android 8 or later; iOS 16 or later",
         "description": "Una utilidad no oficial para una Triumph Tiger 900 compatible. Lee información del tablero y DTC, borra DTC tras confirmación y restablece el aviso de mantenimiento.",
         "image": "https://dimkarodinz.github.io/reset-moto-reminders/assets/app-icon.png",
-        "softwareVersion": "0.8.0",
+        "softwareVersion": "0.9.0",
         "isAccessibleForFree": true,
         "offers": {
           "@type": "Offer",
@@ -70,7 +70,8 @@
           "restablecer testigo de mantenimiento",
           "lector de DTC",
           "diagnóstico de motos",
-          "vLinker MC+"
+          "vLinker MC+",
+          "OBDLink CX"
         ]
       }
     ]
@@ -100,7 +101,7 @@
         <img class="hero-mark" src="../assets/app-icon.png" alt="Icono de la aplicación Reset Moto Reminders" width="96" height="96">
         <div>
           <h1>Restablece el aviso de mantenimiento de tu Triumph Tiger 900</h1>
-          <p class="lede">La aplicación conecta el teléfono con la moto mediante un adaptador vLinker MC+ para restablecer la fecha y la distancia de mantenimiento, leer códigos de avería y borrarlos cuando tú lo decidas</p>
+          <p class="lede">La aplicación conecta el teléfono con la moto mediante un adaptador OBD Bluetooth compatible para restablecer la fecha y distancia de mantenimiento, leer códigos de avería y borrarlos cuando tú decidas</p>
           <p class="lede"><strong>Sin cuenta, suscripción, publicidad, visita al concesionario ni ajustes de la ECU</strong></p>
           <div class="actions">
             <a class="button" href="install-android.html">Instalación en Android</a>
@@ -155,18 +156,18 @@
         <h2>Qué necesitas</h2>
         <ul class="check-list">
           <li>Un teléfono Android o un iPhone.</li>
-          <li>Un adaptador OBD Bluetooth vLinker MC+. Todavía no se admiten otros adaptadores.</li>
+          <li>Adaptadores compatibles: vLinker MC+ y OBDLink CX (experimental).</li>
         </ul>
 
         <h2>Cómo usarla</h2>
         <ol class="steps compact">
           <li>
 <h3>Conecta el adaptador</h3>
-<p>Conecta el vLinker MC+ al puerto de diagnóstico de la moto. Enciende el contacto y deja el motor apagado.</p>
+<p>Conecta el adaptador OBD Bluetooth al puerto de diagnóstico de la moto. Enciende el contacto y deja el motor apagado.</p>
 </li>
           <li>
 <h3>Conecta el teléfono</h3>
-<p>En Android, empareja <code>vLinker MC-Android</code> en los ajustes de Bluetooth con el PIN <code>1234</code>. En iPhone, conecta con <code>vLinker MC-IOS</code> desde la aplicación.</p>
+<p>Para vLinker en Android, empareja <code>vLinker MC-Android</code> en los ajustes de Bluetooth con el PIN <code>1234</code>. vLinker MC-IOS y OBDLink CX se conectan desde la aplicación.</p>
 </li>
           <li>
 <h3>Lee primero la moto</h3>
@@ -181,6 +182,7 @@
 <p>Después de restablecer, comprueba en la moto la fecha y la distancia de mantenimiento. Después de borrar códigos, vuelve a leerlos.</p>
 </li>
         </ol>
+        <p class="warning">La compatibilidad con OBDLink CX usa la interfaz BLE documentada por el fabricante y es experimental hasta probarla físicamente con la Tiger 900.</p>
       </div>
     </section>
 
