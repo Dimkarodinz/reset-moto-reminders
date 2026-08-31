@@ -37,6 +37,78 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdapterSessionOwnerTest {
     @Test
+    fun `classic registry keeps vLinker and original MX profiles separate`() = runTest {
+        val vlinker = adapterProfile("vlinker-mc-android.adaptermap.yaml")
+        val mx = adapterProfile("obdlink-mx-android.adaptermap.yaml")
+        val bluetooth = FakeBluetooth(
+            listOf(
+                BondedDevice("V", "vLinker MC-Android"),
+                BondedDevice("M", "OBDLink MX"),
+                BondedDevice("P", "OBDLink MX+"),
+                BondedDevice("X", "OBDLink CX"),
+            ),
+        )
+        val owner = AdapterSessionOwner(
+            vlinker,
+            bluetooth,
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            additionalProfiles = listOf(mx),
+        )
+
+        owner.refreshBondedDevices()
+
+        assertEquals(
+            mapOf("M" to "obdlink-mx-android", "V" to "vlinker-mc-android"),
+            owner.devices.value.associate { it.address to it.profileId },
+        )
+        assertEquals(
+            mapOf("M" to true, "V" to false),
+            owner.devices.value.associate { it.address to it.experimental },
+        )
+    }
+
+    @Test
+    fun `original MX reaches ready through its own identity profile`() = runTest {
+        val vlinker = adapterProfile("vlinker-mc-android.adaptermap.yaml")
+        val mx = adapterProfile("obdlink-mx-android.adaptermap.yaml")
+        val replay = ReplayByteTransport(
+            listOf(
+                exchange("STDI", "OBDLink MX BT r1.0\r>"),
+                exchange("ATE0", "OK\r>"),
+                exchange("ATL0", "OK\r>"),
+                exchange("ATS0", "OK\r>"),
+                exchange("STI", "STN1151 v5.6.19\r>"),
+                exchange("ATH1", "OK\r>"),
+            ),
+        )
+        var openedProfileId: String? = null
+        var openedServiceUuid: UUID? = null
+        val owner = AdapterSessionOwner(
+            vlinker,
+            FakeBluetooth(listOf(BondedDevice("M", "OBDLink MX"))),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            additionalProfiles = listOf(mx),
+            transportFactory = { _, selectedProfile ->
+                openedProfileId = selectedProfile.id
+                openedServiceUuid = selectedProfile.transport.sppServiceUuid
+                replay
+            },
+        )
+
+        owner.refreshBondedDevices()
+        owner.connect("M")
+        advanceUntilIdle()
+
+        val ready = owner.state.value as ConnectionState.AdapterReady
+        assertEquals("obdlink-mx-android", ready.mapId)
+        assertEquals("obdlink-mx-android", openedProfileId)
+        assertEquals(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"), openedServiceUuid)
+        replay.assertConsumed()
+    }
+
+    @Test
     fun `documented CX profile reaches ready through the shared ELM session`() = runTest {
         val vlinker = AdapterProfileLoader().load(
             File("build/generated/profileAssets/profiles/vlinker-mc-android.adaptermap.yaml").readBytes(),
@@ -92,7 +164,7 @@ class AdapterSessionOwnerTest {
             ),
         )
         val sink = MemorySink()
-        val owner = AdapterSessionOwner(profile, FakeBluetooth(), EventJournal(backgroundScope, sink, FixedClock()), this) { replay }
+        val owner = AdapterSessionOwner(profile, FakeBluetooth(), EventJournal(backgroundScope, sink, FixedClock()), this) { _, _ -> replay }
 
         owner.connect("synthetic-address")
         advanceUntilIdle()
@@ -169,7 +241,7 @@ class AdapterSessionOwnerTest {
             EventJournal(backgroundScope, MemorySink(), FixedClock()),
             this,
             engineReadOnlyCaptureProfile = ecuProfile.engineReadOnlyCapture,
-        ) { replay }
+        ) { _, _ -> replay }
 
         owner.connect("synthetic-address")
         advanceUntilIdle()
@@ -283,7 +355,7 @@ class AdapterSessionOwnerTest {
             instrumentReadOnlyCaptureProfile = ecuProfile.instrumentReadOnlyCapture,
             dtcReadProfile = ecuProfile.diagnosticTroubleCodes.read,
             dtcDescriptions = descriptions,
-        ) { blocking }
+        ) { _, _ -> blocking }
         owner.connect("synthetic-address")
         advanceUntilIdle()
 
@@ -338,7 +410,7 @@ class AdapterSessionOwnerTest {
             dtcReadProfile = ecuProfile.diagnosticTroubleCodes.read,
             dtcDescriptions = descriptions,
             engineResponseCanId = engineResponseCanId,
-        ) { replay }
+        ) { _, _ -> replay }
         owner.connect("synthetic-address")
         advanceUntilIdle()
         return owner
@@ -347,6 +419,10 @@ class AdapterSessionOwnerTest {
     private fun exchange(command: String, response: String) = ReplayExchange(
         ElmCodec.encode(command),
         listOf(ReplayInbound.Bytes(response.encodeToByteArray())),
+    )
+
+    private fun adapterProfile(name: String) = AdapterProfileLoader().load(
+        File("build/generated/profileAssets/profiles/$name").readBytes(),
     )
 
     private fun adapterReadyExchanges(): List<ReplayExchange> = listOf(

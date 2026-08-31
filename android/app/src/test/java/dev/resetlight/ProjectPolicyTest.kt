@@ -101,4 +101,17 @@ class ProjectPolicyTest {
         assertTrue(build.contains("../THIRD_PARTY_NOTICES.md"))
         assertTrue(build.contains("legal-notices"))
     }
+
+    @Test
+    fun `original OBDLink MX is packaged with localized physical pairing guidance`() {
+        val build = File("build.gradle.kts").readText()
+        val container = File("src/main/java/dev/resetlight/app/AppContainer.kt").readText()
+
+        assertTrue(build.contains("obdlink-mx-android.adaptermap.yaml"))
+        assertTrue(container.contains("obdlinkMxProfile"))
+        listOf("values", "values-de", "values-es", "values-fr", "values-uk").forEach { valuesDir ->
+            val strings = File("src/main/res/$valuesDir/strings.xml").readText()
+            assertTrue("$valuesDir must name OBDLink MX", strings.contains("OBDLink MX"))
+        }
+    }
 }

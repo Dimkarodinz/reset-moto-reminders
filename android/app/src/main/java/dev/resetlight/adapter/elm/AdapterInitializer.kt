@@ -36,7 +36,18 @@ class AdapterInitializer(
         val prefixMatch = expected.endsWith("*")
         val value = expected.removeSuffix("*")
         if (!actual.lineSequence().map(String::trim).any {
-                if (prefixMatch) it.startsWith(value, ignoreCase = true) else it.equals(value, ignoreCase = true)
+                when {
+                    !prefixMatch -> it.equals(value, ignoreCase = true)
+                    // Product names contain spaces. Treat their wildcard as a
+                    // version suffix boundary, so `OBDLink MX*` accepts
+                    // `OBDLink MX v5.6.19` but never the different `MX+`
+                    // product. Chip-family prefixes such as `STN*` retain the
+                    // compact `STN1170` form.
+                    value.contains(' ') ->
+                        it.equals(value, ignoreCase = true) ||
+                            it.startsWith("$value ", ignoreCase = true)
+                    else -> it.startsWith(value, ignoreCase = true)
+                }
             }
         ) {
             throw AdapterIdentityMismatch("$kind identity mismatch: expected '$expected', received '$actual'")
