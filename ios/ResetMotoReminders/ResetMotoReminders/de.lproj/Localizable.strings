@@ -3,6 +3,7 @@
 "action_ok" = "OK";
 "action_read_again" = "Erneut auslesen";
 "adapter_default_name" = "vLinker-Adapter";
+"adapter_experimental_suffix" = "experimentell";
 "app_name" = "Reset Moto Reminders";
 "button_connect" = "Verbinden";
 "button_disconnect" = "Trennen";
@@ -31,10 +32,10 @@
 "consent_right_to_repair" = "Dieses Projekt unterstützt Wartung durch Eigentümer und unabhängige Werkstätten. Es ändert keine ECU-Kennfelder, Kalibrierungs-, Emissions- oder Wegfahrsperren-Einstellungen.";
 "consent_title" = "Vor dem Verbinden";
 "consent_unofficial" = "Inoffizielle Community-App. Nicht mit Triumph Motorcycles verbunden oder von Triumph unterstützt.";
-"device_picker_empty" = "Es wurde kein gekoppelter vLinker MC-Android-Adapter gefunden.";
-"device_picker_pair_hint" = "Koppeln Sie ihn in den Android-Einstellungen mit PIN 1234, falls der Adapter nicht aufgeführt ist.";
+"device_picker_empty" = "Unterstützte Adapter werden gesucht…";
+"device_picker_pair_hint" = "vLinker MC-Android in den Android-Einstellungen mit PIN 1234 koppeln. OBDLink CX wird beim Verbinden gekoppelt.";
 "device_picker_settings" = "Bluetooth-Einstellungen";
-"device_picker_title" = "Gekoppelten Adapter wählen";
+"device_picker_title" = "Adapter auswählen";
 "diagnostics_section_title" = "Motorraddiagnose";
 "distance_unit_km" = "km";
 "distance_unit_miles" = "mi";
@@ -97,12 +98,13 @@
 "instrument_read_title" = "Dashboard-Informationen";
 "instrument_reason_transport_rejected" = "Adapter hat den Instrumenten-Transportbefehl %1$@ abgelehnt";
 "instrument_reason_unrecognized_response" = "Das Instrument gab eine nicht erkannte Antwort zurück; es wurde nichts geschrieben.";
+"ios_adapter_experimental" = "EXPERIMENTELLER ADAPTER";
 "ios_background_closed" = "Verbindung beim Wechsel in den Hintergrund geschlossen. Vor dem Fortfahren erneut verbinden.";
 "ios_beta" = "BETA";
 "ios_clear_confirmation_format" = "%1$@ löschen? Diagnosedaten werden entfernt. Bestehende Fehler werden nicht repariert.";
 "ios_clear_confirmation_title" = "Bestätigte Fehlercodes löschen?";
 "ios_clear_detail" = "Löscht bestätigte DTCs nach Sicherheitszugriff. Der zugrunde liegende Fehler wird nicht repariert.";
-"ios_connection_hint" = "Motorrad und vLinker MC-IOS einschalten, dann verbinden.";
+"ios_connection_hint" = "Motorrad und Bluetooth-OBD-Adapter einschalten, dann verbinden.";
 "ios_current_odometer_format" = "Aktueller Kilometerstand: %1$d km.";
 "ios_dashboard_label" = "Instrument";
 "ios_dashboard_responded" = "Motorrad hat geantwortet.";
@@ -125,7 +127,7 @@
 "ios_error_setup_rejected" = "Der Adapter lehnte den Einrichtungsbefehl %1$@ ab. Trennen und erneut versuchen.";
 "ios_error_timeout" = "Das Motorrad hat nicht rechtzeitig geantwortet.";
 "ios_error_unrecognized_response" = "Das Motorrad gab eine unbekannte Antwort zurück. Es wurde nichts geschrieben.";
-"ios_error_unsupported_layout" = "Dieser Adapter stellt nicht die erwartete MC-IOS-Verbindung bereit.";
+"ios_error_unsupported_layout" = "Dieser Adapter stellt keine unterstützte Bluetooth-Verbindung bereit.";
 "ios_fingerprint_format" = "Diagnosekennung %1$@ ist eine Kompatibilitätsprüfung, kein Fehlercode.";
 "ios_interval" = "Intervall";
 "ios_interval_error" = "Wert von 100 bis 25.500 in 100er-Schritten eingeben.";
@@ -146,7 +148,7 @@
 "ios_service_partial" = "Die Distanz kann geändert sein, das Datum wurde nicht bestätigt. Vor einem neuen Versuch das Instrument prüfen.";
 "ios_status_discovering" = "Adapter wird geprüft…";
 "ios_status_motorcycle_connected" = "Motorrad verbunden";
-"ios_status_scanning" = "vLinker MC-IOS wird gesucht…";
+"ios_status_scanning" = "Unterstützter Adapter wird gesucht…";
 "ios_status_waiting_bluetooth" = "Bluetooth wird geprüft…";
 "ios_unit_kilometres" = "Kilometer";
 "ios_unit_miles" = "Meilen";

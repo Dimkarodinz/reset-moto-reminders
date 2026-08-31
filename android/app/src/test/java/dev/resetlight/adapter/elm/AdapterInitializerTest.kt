@@ -12,6 +12,30 @@ import org.junit.Test
 
 class AdapterInitializerTest {
     @Test
+    fun `accepts versioned identities declared with a product prefix`() = runTest {
+        val profile = AdapterProfileLoader().load(
+            File("build/generated/profileAssets/profiles/obdlink-cx.adaptermap.yaml").readBytes(),
+        )
+        val transport = ReplayByteTransport(
+            listOf(
+                exchange("ATI", "OBDLink CX v6.2.0\r>"),
+                exchange("ATE0", "OK\r>"),
+                exchange("ATL0", "OK\r>"),
+                exchange("ATS0", "OK\r>"),
+                exchange("STI", "STN2230 v5.9.0\r>"),
+                exchange("ATH1", "OK\r>"),
+            ),
+        )
+        transport.connect()
+
+        val identity = AdapterInitializer(ElmCommandSession(transport)).initialize(profile)
+
+        assertEquals("OBDLink CX v6.2.0", identity.elm)
+        assertEquals("STN2230 v5.9.0", identity.stn)
+        transport.assertConsumed()
+    }
+
+    @Test
     fun `replays map driven captured initialization across arbitrary fragments`() = runTest {
         val profile = AdapterProfileLoader().load(generatedProfile())
         val transport = ReplayByteTransport(

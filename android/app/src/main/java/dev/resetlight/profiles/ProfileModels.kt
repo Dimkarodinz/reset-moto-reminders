@@ -36,9 +36,15 @@ data class AdapterTransport(
     val discoveryStatus: KnowledgeStatus,
     val channelStatus: KnowledgeStatus,
     val framingStatus: KnowledgeStatus,
-    val sppServiceUuid: UUID,
+    val primaryServiceUuid: UUID,
+    val commandCharacteristicUuid: UUID?,
+    val responseCharacteristicUuid: UUID?,
+    val commandSupportsWriteWithResponse: Boolean,
     val framing: AdapterFraming,
-)
+) {
+    /** Compatibility name retained for the RFCOMM transport and research apps. */
+    val sppServiceUuid: UUID get() = primaryServiceUuid
+}
 
 data class AdapterFraming(
     val commandEncoding: String,

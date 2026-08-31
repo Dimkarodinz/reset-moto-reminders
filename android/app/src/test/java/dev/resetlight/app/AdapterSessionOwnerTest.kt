@@ -16,6 +16,9 @@ import dev.resetlight.transport.ReplayByteTransport
 import dev.resetlight.transport.ReplayExchange
 import dev.resetlight.transport.ReplayInbound
 import dev.resetlight.transport.bluetooth.BluetoothFacade
+import dev.resetlight.transport.bluetooth.BleAdapterFacade
+import dev.resetlight.transport.bluetooth.BleDiscoveryProfile
+import dev.resetlight.transport.bluetooth.BleScanResult
 import dev.resetlight.transport.bluetooth.BondedDevice
 import dev.resetlight.transport.bluetooth.RfcommSocketConnection
 import java.io.File
@@ -33,6 +36,46 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdapterSessionOwnerTest {
+    @Test
+    fun `documented CX profile reaches ready through the shared ELM session`() = runTest {
+        val vlinker = AdapterProfileLoader().load(
+            File("build/generated/profileAssets/profiles/vlinker-mc-android.adaptermap.yaml").readBytes(),
+        )
+        val cx = AdapterProfileLoader().load(
+            File("build/generated/profileAssets/profiles/obdlink-cx.adaptermap.yaml").readBytes(),
+        )
+        val replay = ReplayByteTransport(
+            listOf(
+                exchange("ATI", "OBDLink CX\r>"),
+                exchange("ATE0", "OK\r>"),
+                exchange("ATL0", "OK\r>"),
+                exchange("ATS0", "OK\r>"),
+                exchange("STI", "STN2230 v5.6.19\r>"),
+                exchange("ATH1", "OK\r>"),
+            ),
+        )
+        val ble = FakeBleAdapter(replay)
+        val owner = AdapterSessionOwner(
+            vlinker,
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            additionalProfiles = listOf(cx),
+            bleAdapter = ble,
+        )
+
+        owner.refreshBondedDevices()
+        advanceUntilIdle()
+        val device = owner.devices.value.single()
+        owner.connect(device.address)
+        advanceUntilIdle()
+
+        val ready = owner.state.value as ConnectionState.AdapterReady
+        assertEquals("obdlink-cx", ready.mapId)
+        assertEquals("synthetic-cx", ble.connectedAddress)
+        replay.assertConsumed()
+    }
+
     @Test
     fun `captured replay reaches adapter ready without vehicle commands`() = runTest {
         val profile = AdapterProfileLoader().load(
@@ -348,6 +391,22 @@ class AdapterSessionOwnerTest {
         override fun bondedDevices(): Collection<BondedDevice> = devices
         override fun cancelDiscovery() = Unit
         override fun createRfcommSocket(address: String, serviceUuid: UUID): RfcommSocketConnection = error("unused")
+    }
+
+    private class FakeBleAdapter(private val transport: ByteTransport) : BleAdapterFacade {
+        var connectedAddress: String? = null
+
+        override suspend fun scan(profiles: Collection<BleDiscoveryProfile>): List<BleScanResult> = listOf(
+            BleScanResult("synthetic-cx", "OBDLink CX", profiles.single().profileId),
+        )
+
+        override fun createGattTransport(
+            address: String,
+            profile: dev.resetlight.profiles.AdapterProfile,
+        ): ByteTransport {
+            connectedAddress = address
+            return transport
+        }
     }
 
     private class MemorySink : JournalSink {

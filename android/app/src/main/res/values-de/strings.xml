@@ -166,9 +166,10 @@
     <string name="gate_reason_authorized">Das verbundene Kombiinstrument stimmt mit dem validierten Fingerabdruck überein.</string>
 
     <!-- Device picker -->
-    <string name="device_picker_title">Gekoppelten Adapter wählen</string>
-    <string name="device_picker_empty">Es wurde kein gekoppelter vLinker MC-Android-Adapter gefunden.</string>
-    <string name="device_picker_pair_hint">Koppeln Sie ihn in den Android-Einstellungen mit PIN 1234, falls der Adapter nicht aufgeführt ist.</string>
+    <string name="device_picker_title">Adapter auswählen</string>
+    <string name="device_picker_empty">Unterstützte Adapter werden gesucht…</string>
+    <string name="device_picker_pair_hint">vLinker MC-Android in den Android-Einstellungen mit PIN 1234 koppeln. OBDLink CX wird beim Verbinden gekoppelt.</string>
     <string name="device_picker_settings">Bluetooth-Einstellungen</string>
     <string name="adapter_default_name">vLinker-Adapter</string>
+    <string name="adapter_experimental_suffix">experimentell</string>
 </resources>
