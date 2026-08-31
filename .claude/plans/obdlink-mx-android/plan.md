@@ -31,10 +31,10 @@ Critical/high review corrections incorporated before implementation:
 2. **Classic adapter registry and selection**
    - Red: test that vLinker and original MX both appear with their own profile IDs while MX+ and unrelated devices do not.
    - Green: package and load MX as an additional Android profile.
-   - Refactor: make the experimental flag a profile property rather than a BLE-only side effect.
+   - Refactor: mark every non-primary registered adapter consistently as experimental instead of making the flag a BLE-only side effect.
 
 3. **Profile-specific RFCOMM connection**
-   - Red: replay MX `ATI`/initialization and assert the transport factory receives the selected MX profile and standard SPP UUID.
+   - Red: replay MX `STDI`/initialization and assert the transport factory receives the selected MX profile and standard SPP UUID.
    - Green: pass the selected profile into RFCOMM transport construction.
    - Refactor: retain a small, transport-neutral owner boundary and the existing serialized ELM session.
 
