@@ -3,6 +3,7 @@
 "action_ok" = "OK";
 "action_read_again" = "Прочитати знову";
 "adapter_default_name" = "Адаптер vLinker";
+"adapter_experimental_suffix" = "експериментальний";
 "app_name" = "Reset Moto Reminders";
 "button_connect" = "Підключити";
 "button_disconnect" = "Роз'єднати";
@@ -31,10 +32,10 @@
 "consent_right_to_repair" = "Проєкт підтримує самостійне та незалежне обслуговування. Він не змінює карти ECU, калібрування, викиди чи налаштування іммобілайзера.";
 "consent_title" = "Перед підключенням";
 "consent_unofficial" = "Неофіційний застосунок спільноти. Не пов'язаний із Triumph Motorcycles і не схвалений нею.";
-"device_picker_empty" = "Сполученого адаптера vLinker MC-Android не знайдено.";
-"device_picker_pair_hint" = "Сполучіть у налаштуваннях Android за допомогою PIN 1234, якщо адаптера немає в списку.";
+"device_picker_empty" = "Пошук підтримуваних адаптерів…";
+"device_picker_pair_hint" = "Сполучіть vLinker MC-Android у налаштуваннях із PIN 1234. OBDLink CX сполучається під час підключення.";
 "device_picker_settings" = "Налаштування Bluetooth";
-"device_picker_title" = "Виберіть сполучений адаптер";
+"device_picker_title" = "Виберіть адаптер";
 "diagnostics_section_title" = "Діагностика мотоцикла";
 "distance_unit_km" = "км";
 "distance_unit_miles" = "миль";
@@ -97,12 +98,13 @@
 "instrument_read_title" = "Інформація панелі приладів";
 "instrument_reason_transport_rejected" = "Адаптер відхилив команду транспорту панелі приладів %1$@";
 "instrument_reason_unrecognized_response" = "Панель приладів повернула нерозпізнану відповідь; нічого не було записано.";
+"ios_adapter_experimental" = "ЕКСПЕРИМЕНТАЛЬНИЙ АДАПТЕР";
 "ios_background_closed" = "З’єднання закрито після переходу застосунку у фоновий режим. Підключіться знову.";
 "ios_beta" = "БЕТА";
 "ios_clear_confirmation_format" = "Стерти %1$@? Діагностичні дані буде видалено. Наявні несправності не буде усунуто.";
 "ios_clear_confirmation_title" = "Стерти підтверджені коди несправностей?";
 "ios_clear_detail" = "Стирає підтверджену пам’ять DTC після доступу безпеки. Це не усуває основну несправність.";
-"ios_connection_hint" = "Увімкніть мотоцикл і vLinker MC-IOS, потім підключіться.";
+"ios_connection_hint" = "Увімкніть мотоцикл і Bluetooth OBD-адаптер, потім підключіться.";
 "ios_current_odometer_format" = "Поточний одометр: %1$d км.";
 "ios_dashboard_label" = "Панель приладів";
 "ios_dashboard_responded" = "Мотоцикл відповів.";
@@ -125,7 +127,7 @@
 "ios_error_setup_rejected" = "Адаптер відхилив команду налаштування %1$@. Від’єднайтесь і спробуйте знову.";
 "ios_error_timeout" = "Мотоцикл не відповів вчасно.";
 "ios_error_unrecognized_response" = "Мотоцикл повернув нерозпізнану відповідь. Нічого не записано.";
-"ios_error_unsupported_layout" = "Цей адаптер не надає очікуване з’єднання MC-IOS.";
+"ios_error_unsupported_layout" = "Цей адаптер не надає підтримуваного Bluetooth-з’єднання.";
 "ios_fingerprint_format" = "Діагностичний відбиток %1$@ перевіряє сумісність і не є кодом несправності.";
 "ios_interval" = "Інтервал";
 "ios_interval_error" = "Введіть значення від 100 до 25 500 із кроком 100.";
@@ -146,7 +148,7 @@
 "ios_service_partial" = "Відстань могла оновитися, але дату не підтверджено. Перевірте панель перед повторною спробою.";
 "ios_status_discovering" = "Перевірка адаптера…";
 "ios_status_motorcycle_connected" = "Мотоцикл підключено";
-"ios_status_scanning" = "Пошук vLinker MC-IOS…";
+"ios_status_scanning" = "Пошук підтримуваного адаптера…";
 "ios_status_waiting_bluetooth" = "Перевірка Bluetooth…";
 "ios_unit_kilometres" = "Кілометри";
 "ios_unit_miles" = "Милі";

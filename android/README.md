@@ -2,7 +2,7 @@
 
 Android app for reading motorcycle information, reading and clearing DTCs, and resetting the service reminder.
 
-Currently supported: Triumph Tiger 900 GT Pro (2021) with vLinker MC+.
+Currently supported: Triumph Tiger 900 GT Pro (2021) with vLinker MC+. OBDLink CX support is included as experimental until a physical adapter/motorcycle test is completed.
 
 ## Build from source
 
@@ -38,7 +38,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ## Use the app
 
-1. Pair `vLinker MC-Android` in Android settings. The default PIN is `1234`.
+1. For vLinker, pair `vLinker MC-Android` in Android settings with PIN `1234`. OBDLink CX pairs from the app when connected; its fallback PIN is `123456`.
 2. Connect the adapter to the motorcycle.
 3. Turn the ignition on and keep the engine off.
 4. Open the app, select the adapter, and tap **Connect**.

@@ -64,6 +64,7 @@ enum BLECommandError: LocalizedError, Equatable {
 final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var state: AdapterConnectionState = .disconnected
   @Published private(set) var adapterIdentity: String?
+  @Published private(set) var adapterExperimental = false
   @Published private(set) var dashboard: DashboardResult?
   @Published private(set) var dashboardStatus = L10n.text("instrument_read_body_idle")
   @Published private var dtcReadState = DTCReadState()
@@ -78,6 +79,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   private var peripheral: CBPeripheral?
   private var commandCharacteristic: CBCharacteristic?
   private var responseCharacteristic: CBCharacteristic?
+  private var selectedAdapter: ResetMotoCore.AdapterProfile?
   private var assembler: ElmResponseAssembler
   private var pending: PendingCommand?
   private var timeoutTask: Task<Void, Never>?
@@ -95,7 +97,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     } catch {
       fatalError("Bundled motorcycle profile is invalid: \(error)")
     }
-    assembler = ElmResponseAssembler(promptByte: profile.adapter.promptByte)
+    assembler = ElmResponseAssembler(promptByte: profile.adapters[0].promptByte)
     super.init()
   }
 
@@ -219,6 +221,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
 
   private func resetFeatureState() {
     adapterIdentity = nil
+    adapterExperimental = false
     dashboard = nil
     dashboardStatus = L10n.text("instrument_read_body_idle")
     dtcReadState = DTCReadState()
@@ -279,20 +282,22 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
       let peripheral,
       let characteristic = commandCharacteristic
     else { throw BLECommandError.notReady }
+    guard let adapter = selectedAdapter else { throw BLECommandError.notReady }
     let payload = Data((command + "\r").utf8)
-    guard payload.count <= peripheral.maximumWriteValueLength(for: .withResponse) else {
-      throw BLECommandError.unsupportedLayout
-    }
-    assembler = ElmResponseAssembler(promptByte: profile.adapter.promptByte)
+    let reportedMaximum = peripheral.maximumWriteValueLength(for: .withoutResponse)
+    let maximum = BLEPacketSizer.safePayloadBytes(reportedMaximum: reportedMaximum)
+    let chunks = BLEPacketSizer.chunks(payload, maximum: maximum)
+    guard let firstChunk = chunks.first else { throw BLECommandError.unsupportedLayout }
+    assembler = ElmResponseAssembler(promptByte: adapter.promptByte)
     let commandTag = logTag(for: command)
     logger.debug(
       "Sending command \(commandTag, privacy: .public); write=\(intent == .write)")
     return try await withCheckedThrowingContinuation { continuation in
       pending = PendingCommand(
         command: command, intent: intent, continuation: continuation, sent: true,
-        completion: CommandCompletionGate())
+        completion: CommandCompletionGate(), chunks: chunks, nextChunkIndex: 1)
       if intent == .write { operationSentStateChangingWrite = true }
-      peripheral.writeValue(payload, for: characteristic, type: .withResponse)
+      peripheral.writeValue(firstChunk, for: characteristic, type: .withResponse)
       startTimeout(command: command, intent: intent)
     }
   }
@@ -333,12 +338,14 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     state = .identifying
     Task { @MainActor in
       do {
+        guard let adapter = selectedAdapter else { throw BLECommandError.unsupportedLayout }
         let identity = try await executeRaw(
-          profile.adapter.identifyCommand, intent: .read, allowBeforeReady: true)
+          adapter.identifyCommand, intent: .read, allowBeforeReady: true)
         guard AdapterValidation.acceptsIdentity(identity) else {
           throw BLECommandError.invalidIdentity
         }
         adapterIdentity = identity
+        adapterExperimental = adapter.experimental
         state = .ready
         logger.info("Adapter identity accepted; diagnostic session ready")
       } catch {
@@ -366,6 +373,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
     central?.stopScan()
     if let activePeripheral { central?.cancelPeripheralConnection(activePeripheral) }
     self.peripheral = nil
+    selectedAdapter = nil
     commandCharacteristic = nil
     responseCharacteristic = nil
     central = nil
@@ -373,6 +381,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
 
   private func finishDisconnected() {
     peripheral = nil
+    selectedAdapter = nil
     commandCharacteristic = nil
     responseCharacteristic = nil
     central = nil
@@ -402,6 +411,8 @@ private struct PendingCommand {
   let continuation: CheckedContinuation<String, Error>
   let sent: Bool
   var completion: CommandCompletionGate
+  let chunks: [Data]
+  var nextChunkIndex: Int
 }
 
 private final class SessionCommandChannel: DiagnosticCommanding, @unchecked Sendable {
@@ -422,7 +433,8 @@ extension AdapterSession: CBCentralManagerDelegate {
       switch central.state {
       case .poweredOn:
         self.state = .scanning
-        central.scanForPeripherals(withServices: [CBUUID(string: self.profile.adapter.serviceUUID)])
+        central.scanForPeripherals(
+          withServices: self.profile.adapters.map { CBUUID(string: $0.serviceUUID) })
       case .unauthorized:
         self.failAndDisconnect(L10n.text("ios_error_bluetooth_permission"))
       case .poweredOff:
@@ -443,10 +455,15 @@ extension AdapterSession: CBCentralManagerDelegate {
   ) {
     Task { @MainActor in
       let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name
+      let advertisedServices = Set(
+        (advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] ?? []).map(
+          \.uuidString))
       guard self.central === central, self.state == .scanning,
-        name == self.profile.adapter.advertisedName
+        let adapter = AdapterSelection.match(
+          name: name, serviceUUIDs: advertisedServices, adapters: self.profile.adapters)
       else { return }
       central.stopScan()
+      self.selectedAdapter = adapter
       self.peripheral = peripheral
       peripheral.delegate = self
       self.state = .connecting
@@ -458,8 +475,11 @@ extension AdapterSession: CBCentralManagerDelegate {
   {
     Task { @MainActor in
       guard self.central === central, self.peripheral === peripheral else { return }
+      guard let adapter = self.selectedAdapter else {
+        return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
+      }
       self.state = .discovering
-      peripheral.discoverServices([CBUUID(string: self.profile.adapter.serviceUUID)])
+      peripheral.discoverServices([CBUUID(string: adapter.serviceUUID)])
     }
   }
 
@@ -492,17 +512,20 @@ extension AdapterSession: CBPeripheralDelegate {
   nonisolated func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
     Task { @MainActor in
       guard self.peripheral === peripheral else { return }
+      guard let adapter = self.selectedAdapter else {
+        return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
+      }
       guard error == nil,
         let service = peripheral.services?.first(where: {
-          $0.uuid == CBUUID(string: self.profile.adapter.serviceUUID)
+          $0.uuid == CBUUID(string: adapter.serviceUUID)
         })
       else {
         return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
       }
       peripheral.discoverCharacteristics(
         [
-          CBUUID(string: self.profile.adapter.commandCharacteristicUUID),
-          CBUUID(string: self.profile.adapter.responseCharacteristicUUID),
+          CBUUID(string: adapter.commandCharacteristicUUID),
+          CBUUID(string: adapter.responseCharacteristicUUID),
         ],
         for: service
       )
@@ -516,14 +539,17 @@ extension AdapterSession: CBPeripheralDelegate {
   ) {
     Task { @MainActor in
       guard self.peripheral === peripheral else { return }
+      guard let adapter = self.selectedAdapter else {
+        return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
+      }
       guard error == nil else {
         return self.failAndDisconnect(BLECommandError.unsupportedLayout.localizedDescription)
       }
       self.commandCharacteristic = service.characteristics?.first {
-        $0.uuid == CBUUID(string: self.profile.adapter.commandCharacteristicUUID)
+        $0.uuid == CBUUID(string: adapter.commandCharacteristicUUID)
       }
       self.responseCharacteristic = service.characteristics?.first {
-        $0.uuid == CBUUID(string: self.profile.adapter.responseCharacteristicUUID)
+        $0.uuid == CBUUID(string: adapter.responseCharacteristicUUID)
       }
       guard let command = self.commandCharacteristic,
         let response = self.responseCharacteristic,
@@ -569,6 +595,13 @@ extension AdapterSession: CBPeripheralDelegate {
           ? .ambiguousWrite(pending.command)
           : .bluetooth(error.localizedDescription)
         return self.finishPending(.failure(failure))
+      }
+      if pending.nextChunkIndex < pending.chunks.count {
+        let chunk = pending.chunks[pending.nextChunkIndex]
+        pending.nextChunkIndex += 1
+        self.pending = pending
+        peripheral.writeValue(chunk, for: characteristic, type: .withResponse)
+        return
       }
       pending.completion.acknowledgeWrite()
       self.pending = pending

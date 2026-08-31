@@ -33,7 +33,12 @@ class AdapterInitializer(
     }
 
     private fun requireIdentity(kind: String, expected: String, actual: String) {
-        if (!actual.lineSequence().map(String::trim).any { it.equals(expected, ignoreCase = true) }) {
+        val prefixMatch = expected.endsWith("*")
+        val value = expected.removeSuffix("*")
+        if (!actual.lineSequence().map(String::trim).any {
+                if (prefixMatch) it.startsWith(value, ignoreCase = true) else it.equals(value, ignoreCase = true)
+            }
+        ) {
             throw AdapterIdentityMismatch("$kind identity mismatch: expected '$expected', received '$actual'")
         }
     }

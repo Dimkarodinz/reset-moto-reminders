@@ -52,6 +52,8 @@ import dev.resetlight.adapter.elm.CommandIntent
 import dev.resetlight.transport.ByteTransport
 import java.time.LocalDate
 import dev.resetlight.transport.bluetooth.BluetoothFacade
+import dev.resetlight.transport.bluetooth.BleAdapterFacade
+import dev.resetlight.transport.bluetooth.BleDiscoveryProfile
 import dev.resetlight.transport.bluetooth.BondedDevice
 import dev.resetlight.transport.bluetooth.BondedDeviceSelector
 import dev.resetlight.transport.bluetooth.DevicePairingRequiredException
@@ -73,6 +75,8 @@ class AdapterSessionOwner(
     private val bluetooth: BluetoothFacade,
     private val journal: EventJournal,
     private val scope: CoroutineScope,
+    private val additionalProfiles: List<AdapterProfile> = emptyList(),
+    private val bleAdapter: BleAdapterFacade? = null,
     val distanceUnits: MotorcycleDistanceUnits = MotorcycleDistanceUnits(
         DistanceUnit.KILOMETERS,
         DistanceUnit.KILOMETERS,
@@ -93,12 +97,16 @@ class AdapterSessionOwner(
         RfcommByteTransport(bluetooth, address, profile.transport.sppServiceUuid)
     },
 ) {
+    private val adapterProfiles = (listOf(profile) + additionalProfiles).associateBy(AdapterProfile::id)
+
     init {
-        journal.record(
-            layer = "profile",
-            name = "adapter_profile_loaded",
-            text = "id=${profile.id} schema=${profile.schemaVersion} sha256=${profile.sourceSha256}",
-        )
+        adapterProfiles.values.forEach { loaded ->
+            journal.record(
+                layer = "profile",
+                name = "adapter_profile_loaded",
+                text = "id=${loaded.id} schema=${loaded.schemaVersion} sha256=${loaded.sourceSha256}",
+            )
+        }
     }
 
     /**
@@ -133,6 +141,7 @@ class AdapterSessionOwner(
     private val operationGate = AdapterOperationGate()
     val operationInProgress: StateFlow<Boolean> = operationGate.inProgress
     private var connectionJob: Job? = null
+    private var discoveryJob: Job? = null
     private var readOnlyCaptureJob: Job? = null
     private var instrumentReadJob: Job? = null
     private var dtcReadJob: Job? = null
@@ -164,10 +173,40 @@ class AdapterSessionOwner(
             motorcycleId != null
 
     fun refreshBondedDevices() {
-        mutableDevices.value = BondedDeviceSelector.candidates(
-            bluetooth.bondedDevices(),
-            profile.identity.bluetoothName.value,
-        )
+        val classic = adapterProfiles.values
+            .filter { it.transport.kind == "bluetooth_classic_rfcomm" }
+            .flatMap { candidate ->
+                BondedDeviceSelector.candidates(
+                    bluetooth.bondedDevices(),
+                    candidate.identity.bluetoothName.value,
+                ).map { it.copy(profileId = candidate.id) }
+            }
+        mutableDevices.value = classic
+        val scanner = bleAdapter ?: return
+        val bleProfiles = adapterProfiles.values
+            .filter { it.transport.kind == "bluetooth_low_energy_gatt" }
+            .map { candidate ->
+                BleDiscoveryProfile(
+                    profileId = candidate.id,
+                    expectedName = candidate.identity.bluetoothName.value,
+                    serviceUuid = candidate.transport.primaryServiceUuid,
+                )
+            }
+        if (bleProfiles.isEmpty()) return
+        discoveryJob?.cancel()
+        discoveryJob = scope.launch {
+            val discovered = scanner.scan(bleProfiles).map { result ->
+                BondedDevice(
+                    address = result.address,
+                    name = result.name,
+                    profileId = result.profileId,
+                    experimental = true,
+                )
+            }
+            mutableDevices.value = (classic + discovered)
+                .distinctBy { it.address to it.profileId }
+                .sortedWith(compareBy({ it.name.orEmpty() }, BondedDevice::address))
+        }
     }
 
     fun connect(address: String) {
@@ -179,7 +218,12 @@ class AdapterSessionOwner(
         mutableDtcReadState.value = DtcReadState.Idle
         mutableDtcClearState.value = DtcClearUiState.Idle
         mutableServiceResetState.value = ServiceResetUiState.Idle
-        connectionJob = scope.launch { runConnection(address) }
+        val selectedProfile = mutableDevices.value
+            .firstOrNull { it.address == address }
+            ?.profileId
+            ?.let(adapterProfiles::get)
+            ?: profile
+        connectionJob = scope.launch { runConnection(address, selectedProfile) }
     }
 
     fun disconnect() {
@@ -574,8 +618,13 @@ class AdapterSessionOwner(
             session.execute(request, commandIntent).normalizedText
         }
 
-    private suspend fun runConnection(address: String) {
-        val transport = transportFactory(address)
+    private suspend fun runConnection(address: String, selectedProfile: AdapterProfile) {
+        val transport = when (selectedProfile.transport.kind) {
+            "bluetooth_low_energy_gatt" -> checkNotNull(bleAdapter) {
+                "BLE transport is unavailable"
+            }.createGattTransport(address, selectedProfile)
+            else -> transportFactory(address)
+        }
         activeTransport.set(transport)
         try {
             transition(ConnectionState.Connecting)
@@ -589,7 +638,7 @@ class AdapterSessionOwner(
                     outcome = if (event.complete) "prompt_complete" else "partial",
                 )
             }
-            val identity = AdapterInitializer(session).initialize(profile) { stage ->
+            val identity = AdapterInitializer(session).initialize(selectedProfile) { stage ->
                 transition(
                     when (stage) {
                         InitializationStage.IDENTIFYING -> ConnectionState.Identifying
@@ -598,7 +647,7 @@ class AdapterSessionOwner(
                 )
             }
             activeSession.set(session)
-            transition(ConnectionState.AdapterReady(identity.elm, identity.stn, profile.id))
+            transition(ConnectionState.AdapterReady(identity.elm, identity.stn, selectedProfile.id))
         } catch (cancelled: CancellationException) {
             transport.close()
             throw cancelled

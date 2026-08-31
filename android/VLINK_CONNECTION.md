@@ -1,10 +1,12 @@
-# vLinker MC-Android connection on Android
+# Supported adapter connections on Android
 
 ## Current status
 
 The retained 2026-08-08 Bluetooth HCI capture establishes the adapter's Bluetooth Classic service, RFCOMM channel, serial framing and common initialization sequence. These details were observed while third party ECU linker connected to a vLinker MC+ advertising as `vLinker MC-Android`.
 
 Use [`adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) as the machine-readable source of truth. This document explains how application code should use that data. Motorcycle-specific protocol selection, CAN headers, filters and diagnostic requests belong in an ECU map, not here.
+
+OBDLink CX support is also present as an experimental profile. Its machine-readable source is [`adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml). The app selects it only when both the advertised name and service match, then validates the returned `ATI` or `STI` identity before sending motorcycle traffic.
 
 The captured transport is covered by deterministic project-code replay tests. The v0.1 phone report also showed that pairing succeeded but the app did not refresh/select the bonded device after returning from Settings; v0.3.1 added a regression-tested refresh and selects the sole matching vLinker. Version 0.4.0 adds a debug-only, single-attempt read-only engine capture after adapter readiness and is installed on the Android 11 test phone. Every current app journal contains only `adapter_profile_loaded`, so project-app initialization and the read capture against the physical, powered adapter are still pending. Bonded-list visibility alone is not connection evidence.
 
@@ -33,6 +35,14 @@ Run the single consolidated test from [`README.md`](README.md). Its journal must
 | Link encryption | Enabled after authentication |
 
 The captured Bluetooth address is private evidence and is intentionally omitted. Do not identify or authorize an adapter by MAC address alone. Use the SPP UUID, advertised name as an additional check, and the returned ELM/STN identity.
+
+## OBDLink CX experimental BLE profile
+
+The CX uses BLE rather than RFCOMM: service `FFF0`, notifications on `FFF1`, and writes on `FFF2`. The app requests MTU 512, uses the negotiated value with three bytes reserved for ATT overhead, and caps command chunks at the documented 244-byte payload. Every chunk is sent with response and the next chunk waits for acknowledgement. Characteristic `FEF5` is internal and must not be used.
+
+Android performs first-time bonding in the app when the operating system requests it. CX support remains labelled experimental until a powered-adapter and motorcycle run proves discovery, identity validation, initialization, dashboard read, DTC read, DTC clear and service reset. No other OBDLink model inherits this profile.
+
+OBDLink MX+ and LX are possible future Android profiles because they expose Bluetooth Classic, but they remain disabled until their name, RFCOMM service, pairing, `ATI`/`STI` identities and initialization are captured and tested. Do not assume that their transport is identical to the vLinker profile.
 
 ## Android permissions and pairing
 

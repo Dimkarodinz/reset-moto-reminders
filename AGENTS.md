@@ -9,7 +9,7 @@ Build a source-available Android/iOS application with four motorcycle-facing fea
 3. Clear DTCs only after displaying them and receiving explicit confirmation.
 4. Reset the service reminder by setting the next-service date and distance.
 
-The first target is a 2021 Triumph Tiger 900 GT Pro connected through a vLinker MC+. Do not expand the product into ECU coding or calibration, firmware flashing, actuator tests, arbitrary diagnostic scanning, emissions changes, immobilizer work or security-access brute forcing.
+The first target is a 2021 Triumph Tiger 900 GT Pro connected through a vLinker MC+. OBDLink CX support is implemented from the manufacturer's public BLE interface on Android and iPhone but remains explicitly experimental until a physical CX/motorcycle test is retained. Do not expand the product into ECU coding or calibration, firmware flashing, actuator tests, arbitrary diagnostic scanning, emissions changes, immobilizer work or security-access brute forcing.
 
 The application exposes only the bounded operations above. ECU-map files are an internal command/profile database used to implement those operations across supported motorcycles; importing, editing, configuring or executing maps is not a user-facing feature. Never describe adapter CAN-header/filter setup as “configuring the ECU”: it only routes an allowed diagnostic operation to its known target module and does not alter ECU configuration.
 
@@ -33,6 +33,7 @@ Share contracts rather than Bluetooth implementation code: adapter/ECU maps, sch
 | Adapter-map contract | [`adapter-maps/adaptermap.schema.json`](adapter-maps/adaptermap.schema.json) | Required schema-version-2 interface for every adapter map |
 | Android adapter | [`adapter-maps/vlinker-mc-android.adaptermap.yaml`](adapter-maps/vlinker-mc-android.adaptermap.yaml) | Captured Bluetooth Classic/RFCOMM transport and adapter initialization |
 | iOS adapter | [`adapter-maps/vlinker-mc-ios.adaptermap.yaml`](adapter-maps/vlinker-mc-ios.adaptermap.yaml) | Captured BLE/GATT profile, project-app-observed primary channel and remaining validation state |
+| Experimental cross-platform adapter | [`adapter-maps/obdlink-cx.adaptermap.yaml`](adapter-maps/obdlink-cx.adaptermap.yaml) | Manufacturer-documented CX BLE UART, identity, bonding and MTU rules; implementation complete, physical project validation pending |
 | Android application | [`android/README.md`](android/README.md), [`android/AGENTS.md`](android/AGENTS.md), [`android/.claude/plans/initial-version.md`](android/.claude/plans/initial-version.md), [`android/VLINK_CONNECTION.md`](android/VLINK_CONNECTION.md) | Build/test instructions, Android ownership, reviewed plan and RFCOMM guidance |
 | Triumph research application | [`research-builds/android/triumph/README.md`](research-builds/android/triumph/README.md), [`research-builds/android/triumph/AGENTS.md`](research-builds/android/triumph/AGENTS.md), [`research-builds/android/triumph/PLAN.md`](research-builds/android/triumph/PLAN.md) | Separate one-session Triumph compatibility collector, privacy boundary, test procedure and reviewed implementation plan |
 | General research application | [`research-builds/android/general/README.md`](research-builds/android/general/README.md), [`research-builds/android/general/AGENTS.md`](research-builds/android/general/AGENTS.md), [`research-builds/android/general/PLAN.md`](research-builds/android/general/PLAN.md) | Separate bounded standard-OBD read collector for unmapped motorcycle families; never authorizes writes |
@@ -47,6 +48,8 @@ The entire `logs/` tree is private evidence. Never publish or commit bugreports,
 Keep this file as the project index, safety policy and current research status. Put protocol values in maps and platform implementation details in the Android/iOS connection guides. Split research history into `docs/research/` only after multiple motorcycles make this file difficult to navigate, and retain links here.
 
 ## Current cross-platform checkpoint — 2026-08-27
+
+- **OBDLink CX release update (2026-08-31):** Android v0.9.0 (`versionCode 13`) and iOS v0.2.0 (`build 7`) add a separate CX BLE profile using only service `FFF0`, notify characteristic `FFF1` and acknowledged writes to `FFF2`. Both platforms require exact advertised name/service/layout plus a recognizable `ATI` identity before motorcycle commands. Writes are serialized in negotiated-size chunks, notifications still complete only at the ELM prompt, and interrupted writes preserve the existing ambiguous/no-retry behavior. CX is labelled experimental in the apps and public pages because no physical CX session has been run by this project. The existing vLinker paths and exact Tiger motorcycle gates are unchanged.
 
 - **Android v0.8.0 public release candidate (2026-08-27):** a dedicated RSA-4096 project key
   signs maintainer release builds through environment variables populated by
