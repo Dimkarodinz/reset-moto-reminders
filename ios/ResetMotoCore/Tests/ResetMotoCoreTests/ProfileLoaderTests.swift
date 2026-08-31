@@ -3,16 +3,24 @@ import XCTest
 @testable import ResetMotoCore
 
 final class ProfileLoaderTests: XCTestCase {
-  func testBundledProfilePinsSupportedMotorcycleAndPrimaryGattChannel() throws {
+  func testBundledProfilePinsSupportedMotorcycleAndSupportedGattChannels() throws {
     let profile = try ResetMotoProfile.bundledTiger900()
 
     XCTAssertEqual(1, profile.schemaVersion)
     XCTAssertEqual("triumph-tiger-900-gt-pro-2021", profile.motorcycle.id)
-    XCTAssertEqual("vLinker MC-IOS", profile.adapter.advertisedName)
-    XCTAssertEqual("18F0", profile.adapter.serviceUUID)
-    XCTAssertEqual("2AF1", profile.adapter.commandCharacteristicUUID)
-    XCTAssertEqual("2AF0", profile.adapter.responseCharacteristicUUID)
-    XCTAssertEqual("ATI", profile.adapter.identifyCommand)
+    XCTAssertEqual(["obdlink-cx", "vlinker-mc-ios"], profile.adapters.map(\.id).sorted())
+    let vlinker = try XCTUnwrap(profile.adapters.first { $0.id == "vlinker-mc-ios" })
+    XCTAssertEqual("vLinker MC-IOS", vlinker.advertisedName)
+    XCTAssertEqual("18F0", vlinker.serviceUUID)
+    XCTAssertEqual("2AF1", vlinker.commandCharacteristicUUID)
+    XCTAssertEqual("2AF0", vlinker.responseCharacteristicUUID)
+    XCTAssertEqual("ATI", vlinker.identifyCommand)
+    let cx = try XCTUnwrap(profile.adapters.first { $0.id == "obdlink-cx" })
+    XCTAssertEqual("OBDLink CX", cx.advertisedName)
+    XCTAssertEqual("FFF0", cx.serviceUUID)
+    XCTAssertEqual("FFF2", cx.commandCharacteristicUUID)
+    XCTAssertEqual("FFF1", cx.responseCharacteristicUUID)
+    XCTAssertTrue(cx.experimental)
     XCTAssertEqual("043", profile.instrument.expectedStatusASCII)
     XCTAssertEqual("03190108", profile.engine.dtcCountCommand)
     XCTAssertEqual("03190208", profile.engine.dtcDetailCommand)

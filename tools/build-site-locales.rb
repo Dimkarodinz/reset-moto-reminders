@@ -20,7 +20,7 @@ LOCALES = {
 PRESERVED_TEXT = [
   "Reset Moto Reminders", "Android", "iPhone", "Triumph Tiger 900 GT Pro, 2021",
   "Triumph Tiger 900 GT Pro, 2022–2023", "vLinker MC-Android", "vLinker MC-IOS",
-  "android-v0.8.0", "2fdf4e70…1eb50ad6", "1234", ".", "Option", "Shift",
+  "android-v0.9.0", "2fdf4e70…1eb50ad6", "1234", ".", "Option", "Shift",
   "AltServer", "Xcode", "Signing & Capabilities", "Run", "Ko-fi",
 ].freeze
 

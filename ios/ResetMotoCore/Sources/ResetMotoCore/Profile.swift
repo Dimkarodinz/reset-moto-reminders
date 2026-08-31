@@ -9,7 +9,7 @@ public enum ProfileError: Error, Equatable {
 public struct ResetMotoProfile: Codable, Equatable, Sendable {
   public let schemaVersion: Int
   public let motorcycle: MotorcycleProfile
-  public let adapter: AdapterProfile
+  public let adapters: [AdapterProfile]
   public let engine: EngineProfile
   public let instrument: InstrumentProfile
   public let dtcDescriptions: [String: String]
@@ -58,11 +58,15 @@ public struct ResetMotoProfile: Codable, Equatable, Sendable {
     guard motorcycle.id == "triumph-tiger-900-gt-pro-2021" else {
       throw ProfileError.invalid("Unsupported motorcycle profile")
     }
-    guard !adapter.advertisedName.isEmpty,
-      !adapter.serviceUUID.isEmpty,
-      !adapter.commandCharacteristicUUID.isEmpty,
-      !adapter.responseCharacteristicUUID.isEmpty,
-      adapter.identifyCommand == "ATI"
+    guard adapters.count >= 1,
+      Set(adapters.map(\.id)).count == adapters.count,
+      adapters.allSatisfy({ adapter in
+        !adapter.id.isEmpty && !adapter.advertisedName.isEmpty
+          && !adapter.serviceUUID.isEmpty
+          && !adapter.commandCharacteristicUUID.isEmpty
+          && !adapter.responseCharacteristicUUID.isEmpty
+          && adapter.identifyCommand == "ATI"
+      })
     else {
       throw ProfileError.invalid("Incomplete adapter profile")
     }
@@ -85,12 +89,14 @@ public struct MotorcycleProfile: Codable, Equatable, Sendable {
 }
 
 public struct AdapterProfile: Codable, Equatable, Sendable {
+  public let id: String
   public let advertisedName: String
   public let serviceUUID: String
   public let commandCharacteristicUUID: String
   public let responseCharacteristicUUID: String
   public let identifyCommand: String
   public let promptByte: UInt8
+  public let experimental: Bool
 }
 
 public struct EngineProfile: Codable, Equatable, Sendable {

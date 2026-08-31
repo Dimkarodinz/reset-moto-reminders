@@ -1,2 +1,2 @@
 "CFBundleDisplayName" = "Reset Moto Reminders";
-"NSBluetoothAlwaysUsageDescription" = "Connects to a vLinker MC-IOS adapter to read motorcycle diagnostics and reset the service reminder.";
+"NSBluetoothAlwaysUsageDescription" = "Connects to a supported Bluetooth OBD adapter to read motorcycle diagnostics and reset the service reminder.";

@@ -13,6 +13,7 @@ import dev.resetlight.profiles.EcuProfileLoader
 import dev.resetlight.profiles.LocalizedDtcDescriptions
 import java.util.Locale
 import dev.resetlight.transport.bluetooth.AndroidBluetoothFacade
+import dev.resetlight.transport.bluetooth.AndroidBleAdapterFacade
 import java.io.File
 import java.time.Instant
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,10 @@ class AppContainer(context: Context) {
     private val profile = applicationContext.assets
         .open("profiles/vlinker-mc-android.adaptermap.yaml")
         .use(AdapterProfileLoader()::load)
+    private val obdlinkCxProfile = applicationContext.assets
+        .open("profiles/obdlink-cx.adaptermap.yaml")
+        .use(AdapterProfileLoader()::load)
+    private val bluetooth = AndroidBluetoothFacade(applicationContext)
     val ecuProfile = applicationContext.assets
         .open("profiles/tiger-900-gt-pro-2021.ecumap.yaml")
         .use(EcuProfileLoader()::load)
@@ -61,7 +66,9 @@ class AppContainer(context: Context) {
 
     val adapterSession = AdapterSessionOwner(
         profile = profile,
-        bluetooth = AndroidBluetoothFacade(applicationContext),
+        additionalProfiles = listOf(obdlinkCxProfile),
+        bluetooth = bluetooth,
+        bleAdapter = AndroidBleAdapterFacade(applicationContext),
         journal = journal,
         scope = scope,
         distanceUnits = ecuProfile.distanceUnits,

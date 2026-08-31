@@ -94,6 +94,14 @@ struct ContentView: View {
         .font(.title3.weight(.semibold))
       if let identity = session.adapterIdentity {
         Text(identity).font(.subheadline.monospaced()).foregroundStyle(.secondary)
+        if session.adapterExperimental {
+          Text(L10n.text("ios_adapter_experimental"))
+            .font(.caption2.bold())
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(Color.orange.opacity(0.2), in: Capsule())
+            .foregroundStyle(.orange)
+        }
       } else if session.state == .disconnected {
         Text(L10n.text("ios_connection_hint"))
           .foregroundStyle(.secondary)

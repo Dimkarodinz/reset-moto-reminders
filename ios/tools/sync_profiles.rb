@@ -8,14 +8,30 @@ require "yaml"
 root = File.expand_path("../..", __dir__)
 ecu = YAML.load_file(File.join(root, "ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml"))
 dtc = YAML.load_file(File.join(root, "dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml"))
-adapter = YAML.load_file(File.join(root, "adapter-maps/vlinker-mc-ios.adaptermap.yaml"))
+adapter_maps = [
+  YAML.load_file(File.join(root, "adapter-maps/vlinker-mc-ios.adaptermap.yaml")),
+  YAML.load_file(File.join(root, "adapter-maps/obdlink-cx.adaptermap.yaml")),
+]
 
 engine = ecu.fetch("motorcycle").fetch("modules").fetch("engine_ecu")
 instrument = ecu.fetch("motorcycle").fetch("modules").fetch("instrument_cluster")
 engine_commands = engine.fetch("commands")
 instrument_reset = instrument.fetch("commands").fetch("reset_service_reminder").fetch("replay_template")
-primary = adapter.fetch("adapter").fetch("transport").fetch("channel")
-identity = adapter.fetch("adapter").fetch("operations").fetch("identify_adapter").fetch("command")
+adapters = adapter_maps.map do |adapter_map|
+  adapter = adapter_map.fetch("adapter")
+  primary = adapter.fetch("transport").fetch("channel")
+  identity = adapter.fetch("operations").fetch("identify_adapter").fetch("command")
+  {
+    "id" => adapter.fetch("id"),
+    "advertisedName" => adapter.fetch("identity").fetch("bluetooth_name").fetch("value"),
+    "serviceUUID" => primary.fetch("command_endpoint").fetch("service_uuid").sub(/^0x/, "").sub(/^0000([0-9A-F]{4})-0000-1000-8000-00805F9B34FB$/i, '\\1'),
+    "commandCharacteristicUUID" => primary.fetch("command_endpoint").fetch("characteristic_uuid").sub(/^0x/, "").sub(/^0000([0-9A-F]{4})-0000-1000-8000-00805F9B34FB$/i, '\\1'),
+    "responseCharacteristicUUID" => primary.fetch("response_endpoint").fetch("characteristic_uuid").sub(/^0x/, "").sub(/^0000([0-9A-F]{4})-0000-1000-8000-00805F9B34FB$/i, '\\1'),
+    "identifyCommand" => identity.fetch("text"),
+    "promptByte" => adapter.fetch("transport").fetch("framing").fetch("response_completion_prompt").fetch("hex").to_i(16),
+    "experimental" => adapter.fetch("id") == "obdlink-cx",
+  }
+end
 
 descriptions = dtc.fetch("reference_entries").dup
 dtc.fetch("entries").each { |code, entry| descriptions[code] = entry.fetch("message") }
@@ -46,14 +62,7 @@ profile = {
     "model" => ecu.fetch("motorcycle").fetch("model"),
     "modelYear" => ecu.fetch("motorcycle").fetch("model_year"),
   },
-  "adapter" => {
-    "advertisedName" => adapter.fetch("adapter").fetch("identity").fetch("bluetooth_name").fetch("value"),
-    "serviceUUID" => primary.fetch("command_endpoint").fetch("service_uuid").sub(/^0x/, ""),
-    "commandCharacteristicUUID" => primary.fetch("command_endpoint").fetch("characteristic_uuid").sub(/^0x/, ""),
-    "responseCharacteristicUUID" => primary.fetch("response_endpoint").fetch("characteristic_uuid").sub(/^0x/, ""),
-    "identifyCommand" => identity.fetch("text"),
-    "promptByte" => adapter.fetch("adapter").fetch("transport").fetch("framing").fetch("response_completion_prompt").fetch("hex").to_i(16),
-  },
+  "adapters" => adapters,
   "engine" => {
     "configurationCommands" => engine.fetch("transport").fetch("observed_elm_adapter_configuration"),
     "responseCANID" => engine.fetch("transport").fetch("response_can_id").sub(/^0x/, ""),

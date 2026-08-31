@@ -6,14 +6,28 @@
     "model": "Tiger 900 GT Pro",
     "modelYear": 2021
   },
-  "adapter": {
-    "advertisedName": "vLinker MC-IOS",
-    "serviceUUID": "18F0",
-    "commandCharacteristicUUID": "2AF1",
-    "responseCharacteristicUUID": "2AF0",
-    "identifyCommand": "ATI",
-    "promptByte": 62
-  },
+  "adapters": [
+    {
+      "id": "vlinker-mc-ios",
+      "advertisedName": "vLinker MC-IOS",
+      "serviceUUID": "18F0",
+      "commandCharacteristicUUID": "2AF1",
+      "responseCharacteristicUUID": "2AF0",
+      "identifyCommand": "ATI",
+      "promptByte": 62,
+      "experimental": false
+    },
+    {
+      "id": "obdlink-cx",
+      "advertisedName": "OBDLink CX",
+      "serviceUUID": "FFF0",
+      "commandCharacteristicUUID": "FFF2",
+      "responseCharacteristicUUID": "FFF1",
+      "identifyCommand": "ATI",
+      "promptByte": 62,
+      "experimental": true
+    }
+  ],
   "engine": {
     "configurationCommands": [
       "ATWS",
