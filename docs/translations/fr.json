@@ -168,6 +168,20 @@
     "service reminder reset": "réinitialisation du rappel d’entretien",
     "service light reset": "réinitialisation du voyant d’entretien",
     "DTC reader": "lecteur de DTC",
-    "motorcycle diagnostics": "diagnostic moto"
+    "motorcycle diagnostics": "diagnostic moto",
+    "The app connects your phone to the motorcycle through a supported Bluetooth OBD adapter to reset the service date and distance, read fault codes, and clear them when you choose": "L’application relie votre téléphone à la moto avec un adaptateur OBD Bluetooth compatible pour réinitialiser la date et la distance d’entretien, lire les codes de défaut et les effacer à votre demande",
+    "Supported adapters: vLinker MC+ and OBDLink CX (experimental).": "Adaptateurs compatibles : vLinker MC+ et OBDLink CX (expérimental).",
+    "Plug the Bluetooth OBD adapter into the motorcycle diagnostic port. Turn the ignition on and leave the engine off.": "Branchez l’adaptateur OBD Bluetooth au port de diagnostic de la moto. Mettez le contact en laissant le moteur arrêté.",
+    "For vLinker on Android, pair": "Pour vLinker sur Android, associez",
+    "in Bluetooth settings with PIN": "dans les paramètres Bluetooth avec le PIN",
+    ". vLinker MC-IOS and OBDLink CX connect from inside the app.": ". vLinker MC-IOS et OBDLink CX se connectent depuis l’application.",
+    "OBDLink CX support follows the manufacturer-documented BLE interface and is experimental until it is physically tested with the Tiger 900.": "La prise en charge d’OBDLink CX suit l’interface BLE documentée par le fabricant et reste expérimentale jusqu’à un essai physique avec la Tiger 900.",
+    "Version 0.9.0 reads motorcycle information and DTCs, resets the service reminder, and includes DTC clear as a Beta feature": "La version 0.9.0 lit les informations de la moto et les DTC, réinitialise le rappel d’entretien et propose l’effacement des DTC en Bêta",
+    "For vLinker, pair": "Pour vLinker, associez",
+    "in Android Bluetooth settings with PIN": "dans les paramètres Bluetooth Android avec le PIN",
+    ". OBDLink CX is found and paired from inside the app.": ". OBDLink CX est détecté et associé depuis l’application.",
+    "OBDLink CX support is experimental until a physical CX and Tiger 900 test is completed.": "La prise en charge d’OBDLink CX est expérimentale jusqu’à un essai physique avec CX et Tiger 900.",
+    "Power the vLinker MC+ or OBDLink CX from the motorcycle, keep the ignition on and engine off, open the app, allow Bluetooth access, and tap": "Alimentez le vLinker MC+ ou OBDLink CX depuis la moto, laissez le contact mis et le moteur arrêté, ouvrez l’application, autorisez le Bluetooth puis touchez",
+    "Reset the service reminder and read or clear diagnostic trouble codes on a supported Triumph Tiger 900 using vLinker MC+ or OBDLink CX. No account or subscription.": "Réinitialisez le rappel d’entretien et lisez ou effacez les codes de défaut d’une Triumph Tiger 900 compatible avec vLinker MC+ ou OBDLink CX. Sans compte ni abonnement."
   }
 }

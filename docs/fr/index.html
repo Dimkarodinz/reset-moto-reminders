@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reset Moto Reminders — réinitialisation de l’entretien Triumph Tiger 900</title>
-  <meta name="description" content="Réinitialisez le rappel d’entretien et lisez ou effacez les codes de défaut d’une Triumph Tiger 900 compatible avec un adaptateur vLinker MC+. Sans compte ni abonnement.">
+  <meta name="description" content="Réinitialisez le rappel d’entretien et lisez ou effacez les codes de défaut d’une Triumph Tiger 900 compatible avec vLinker MC+ ou OBDLink CX. Sans compte ni abonnement.">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="https://dimkarodinz.github.io/reset-moto-reminders/fr/">
 <link rel="alternate" hreflang="en" href="https://dimkarodinz.github.io/reset-moto-reminders/">
@@ -52,7 +52,7 @@
         "operatingSystem": "Android 8 or later; iOS 16 or later",
         "description": "Un utilitaire moto non officiel pour une Triumph Tiger 900 compatible. Il lit le tableau de bord et les DTC, efface les DTC après confirmation et réinitialise le rappel d’entretien.",
         "image": "https://dimkarodinz.github.io/reset-moto-reminders/assets/app-icon.png",
-        "softwareVersion": "0.8.0",
+        "softwareVersion": "0.9.0",
         "isAccessibleForFree": true,
         "offers": {
           "@type": "Offer",
@@ -70,7 +70,8 @@
           "réinitialisation du voyant d’entretien",
           "lecteur de DTC",
           "diagnostic moto",
-          "vLinker MC+"
+          "vLinker MC+",
+          "OBDLink CX"
         ]
       }
     ]
@@ -100,7 +101,7 @@
         <img class="hero-mark" src="../assets/app-icon.png" alt="Icône de l’application Reset Moto Reminders" width="96" height="96">
         <div>
           <h1>Réinitialisez le rappel d’entretien de votre Triumph Tiger 900</h1>
-          <p class="lede">L’application relie votre téléphone à la moto avec un adaptateur vLinker MC+ pour réinitialiser la date et la distance d’entretien, lire les codes de défaut et les effacer à votre demande</p>
+          <p class="lede">L’application relie votre téléphone à la moto avec un adaptateur OBD Bluetooth compatible pour réinitialiser la date et la distance d’entretien, lire les codes de défaut et les effacer à votre demande</p>
           <p class="lede"><strong>Sans compte, abonnement, publicité, passage en concession ni réglage de l’ECU</strong></p>
           <div class="actions">
             <a class="button" href="install-android.html">Installation Android</a>
@@ -155,18 +156,18 @@
         <h2>Matériel nécessaire</h2>
         <ul class="check-list">
           <li>Un téléphone Android ou un iPhone.</li>
-          <li>Un adaptateur OBD Bluetooth vLinker MC+. Les autres adaptateurs ne sont pas encore pris en charge.</li>
+          <li>Adaptateurs compatibles : vLinker MC+ et OBDLink CX (expérimental).</li>
         </ul>
 
         <h2>Comment l’utiliser</h2>
         <ol class="steps compact">
           <li>
 <h3>Branchez l’adaptateur</h3>
-<p>Branchez le vLinker MC+ au port de diagnostic de la moto. Mettez le contact en laissant le moteur arrêté.</p>
+<p>Branchez l’adaptateur OBD Bluetooth au port de diagnostic de la moto. Mettez le contact en laissant le moteur arrêté.</p>
 </li>
           <li>
 <h3>Connectez le téléphone</h3>
-<p>Sur Android, associez <code>vLinker MC-Android</code> dans les réglages Bluetooth avec le code PIN <code>1234</code>. Sur iPhone, connectez-vous à <code>vLinker MC-IOS</code> depuis l’application.</p>
+<p>Pour vLinker sur Android, associez <code>vLinker MC-Android</code> dans les paramètres Bluetooth avec le PIN <code>1234</code>. vLinker MC-IOS et OBDLink CX se connectent depuis l’application.</p>
 </li>
           <li>
 <h3>Lisez d’abord la moto</h3>
@@ -181,6 +182,7 @@
 <p>Après une réinitialisation, vérifiez la date et la distance d’entretien sur la moto. Après un effacement, relisez les codes.</p>
 </li>
         </ol>
+        <p class="warning">La prise en charge d’OBDLink CX suit l’interface BLE documentée par le fabricant et reste expérimentale jusqu’à un essai physique avec la Tiger 900.</p>
       </div>
     </section>
 
