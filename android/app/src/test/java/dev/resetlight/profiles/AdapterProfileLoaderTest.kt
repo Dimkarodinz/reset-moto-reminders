@@ -58,6 +58,25 @@ class AdapterProfileLoaderTest {
     }
 
     @Test
+    fun `loads the documented original OBDLink MX Android profile`() {
+        val bytes = generatedProfile("obdlink-mx-android.adaptermap.yaml")
+
+        val profile = loader.load(bytes)
+
+        assertEquals("obdlink-mx-android", profile.id)
+        assertEquals("OBDLink MX", profile.identity.bluetoothName.value)
+        assertEquals("bluetooth_classic_rfcomm", profile.transport.kind)
+        assertEquals(
+            UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"),
+            profile.transport.sppServiceUuid,
+        )
+        assertEquals("not_applicable", profile.pairingPin)
+        assertEquals("STDI", profile.operations.identify.command)
+        assertEquals("OBDLink MX*", profile.operations.identify.expectedIdentity)
+        assertEquals("STN115*", profile.identity.stnChipIdentity.value)
+    }
+
+    @Test
     fun `hash represents the exact source bytes`() {
         val original = generatedProfile("vlinker-mc-android.adaptermap.yaml")
         val edited = original + byteArrayOf('\n'.code.toByte())

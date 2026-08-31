@@ -47,6 +47,7 @@ Reading trouble codes and the service-reminder reset are validated on a real Tig
 | --- | --- | --- |
 | Triumph Tiger 900 GT Pro (2021–2023) | vLinker MC+ | Read operations and the service-reminder reset are validated through this app. DTC clear is implemented, gated and marked Beta, with hardware validation pending. |
 | Triumph Tiger 900 GT Pro (2021–2023) | OBDLink CX | Experimental BLE support is included on Android and iPhone from the manufacturer-documented interface. A physical CX + motorcycle test is still required. |
+| Triumph Tiger 900 GT Pro (2021–2023) | Original OBDLink MX Bluetooth | Experimental Android-only support is included from the manufacturer-documented pairing and ELM327-compatible interface. A physical MX + motorcycle test is still required. |
 
 ### Potentially supported (not tested)
 
@@ -64,6 +65,7 @@ A shared ECU supplier or the name "Keihin" does not by itself prove compatible c
 - **A Bluetooth OBD-II adapter** based on the ELM327 / STN command set (an "ECU linker" / OBD tool). It must expose the bike's diagnostic CAN bus.
 - Tested with the **vLinker MC+** OBD adapter (it pairs as `vLinker MC-Android` over Bluetooth Classic on Android, and advertises as `vLinker MC-IOS` over BLE on iPhone).
 - **OBDLink CX** support is included on Android and iPhone using OBDLink's published BLE interface. It is marked experimental until a powered CX and Tiger 900 test is completed.
+- The discontinued original **OBDLink MX Bluetooth** adapter is supported experimentally on Android only. Press its physical Connect button and pair `OBDLink MX` in Android settings; it does not use a fixed PIN.
 - An Android 8+ phone, or an iPhone running iOS 16+ for the source/self-build version.
 
 *Personal note: the vLinker MC+ costs about €40, has no subscription, and does not wear out. It works with almost any car or motorcycle OBD-II port. Worth buying well beyond this app — a general diagnostic tool you keep for years.*

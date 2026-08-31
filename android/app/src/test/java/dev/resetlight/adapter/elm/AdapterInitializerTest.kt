@@ -12,6 +12,22 @@ import org.junit.Test
 
 class AdapterInitializerTest {
     @Test
+    fun `original MX product prefix does not accept MX plus identity`() = runTest {
+        val profile = AdapterProfileLoader().load(
+            File("build/generated/profileAssets/profiles/obdlink-mx-android.adaptermap.yaml").readBytes(),
+        )
+        val transport = ReplayByteTransport(listOf(exchange("STDI", "OBDLink MX+ r3.2.1\r>")))
+        transport.connect()
+
+        assertThrows(AdapterIdentityMismatch::class.java) {
+            kotlinx.coroutines.runBlocking {
+                AdapterInitializer(ElmCommandSession(transport)).initialize(profile)
+            }
+        }
+        transport.assertConsumed()
+    }
+
+    @Test
     fun `accepts versioned identities declared with a product prefix`() = runTest {
         val profile = AdapterProfileLoader().load(
             File("build/generated/profileAssets/profiles/obdlink-cx.adaptermap.yaml").readBytes(),
