@@ -29,3 +29,8 @@ ios/**/xcuserdata/
 ios/**/DerivedData/
 ios/**/*.xcresult
 ios/**/.swiftpm/
+
+# Local Claude Code workspace (plans, scratch, personal settings) - never shared.
+.claude/plans/
+**/.claude/plans/
+**/.claude/settings.local.json
