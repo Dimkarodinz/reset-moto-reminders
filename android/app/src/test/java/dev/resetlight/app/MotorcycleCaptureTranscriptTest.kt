@@ -60,7 +60,7 @@ class MotorcycleCaptureTranscriptTest {
             EventJournal(backgroundScope, MemorySink(), FixedClock()),
             this,
             engineReadOnlyCaptureProfile = ecuProfile.engineReadOnlyCapture,
-        ) { replay }
+        ) { _, _ -> replay }
 
         owner.connect("synthetic-address")
         advanceUntilIdle()

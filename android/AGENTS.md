@@ -16,7 +16,7 @@ Android is the first implementation target. Build it natively with Kotlin and Je
 
 The main app uses the fixed `ResetMotoTheme`: near-black background, restrained graphite surfaces, muted teal actions and high-contrast text/system bars. Keep this serious dark presentation independent of the phone theme; safety warnings continue to use the Material error role.
 
-The current v0.9.0 build (`versionCode 13`) adds experimental OBDLink CX BLE support to the v0.8.0 public baseline. It retains the one-time safety acknowledgement, the two bounded writes, packaged legal notices and the separation from broader research capture:
+The current v0.10.0 build (`versionCode 14`) adds experimental Android-only support for the original OBDLink MX Bluetooth adapter to the v0.9.0 public baseline. It retains experimental OBDLink CX BLE support, the one-time safety acknowledgement, the two bounded writes, packaged legal notices and the separation from broader research capture:
 
 ```text
 launch -> accept safety notice once -> select or pair adapter -> connect -> identify
@@ -51,6 +51,7 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) | Primary Android adapter profile: Bluetooth Classic SPP/RFCOMM |
 | [`../adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) | Optional Android BLE profile; command channel is still unverified |
 | [`../adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml) | Experimental Android/iOS BLE UART profile from OBDLink's public developer notes; physical project validation pending |
+| [`../adapter-maps/obdlink-mx-android.adaptermap.yaml`](../adapter-maps/obdlink-mx-android.adaptermap.yaml) | Experimental Android-only original MX Bluetooth Classic profile; exact-name, physical-button pairing and identity gates; physical project validation pending |
 | [`../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml`](../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml) | Current motorcycle/module protocol evidence |
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Publishable user-facing DTC code-to-message lookup |
 | [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) | Android pairing, RFCOMM, framing, initialization and failure handling |
@@ -90,6 +91,7 @@ Android UI and lifecycle
 - DTC clear stays labelled Beta until its engine identity/prerequisite assumptions are hardware-validated. The miles path is release-enabled from captured successful traffic and deterministic replay, with its first project-app motorcycle run still pending.
 - The MC-IOS BLE path must not send ECU commands until the pending `ATI` proof establishes its command/response endpoint and framing.
 - The CX path must match `OBDLink CX` plus `FFF0`/`FFF1`/`FFF2`, enable OS-managed bonding, negotiate MTU, serialize acknowledged chunks and pass `ATI` before motorcycle operations. Keep it labelled experimental until a powered CX/Tiger test succeeds.
+- The original MX path must match the exact bonded name `OBDLink MX`, never `OBDLink MX+`, use only the selected profile's standard SPP UUID, then pass the manufacturer-defined `STDI` hardware identity and original-MX `STN115` firmware-family gates. Pairing requires the physical Connect button and Android settings, not a guessed PIN. Keep it labelled experimental until a powered original-MX/Tiger test succeeds.
 - Unknown maps, schema versions, adapter identities or module identities fail closed.
 
 ## UX starting point
@@ -100,6 +102,7 @@ Polished UI mockups are not required before the first build. Begin with a lightw
 
 - Follow [`VLINK_CONNECTION.md`](VLINK_CONNECTION.md) for version-dependent Bluetooth permissions and socket behavior.
 - Prefer bonded-device selection for the MC-Android adapter. When no bond exists, instruct the user to pair `vLinker MC-Android` in Android Settings with the confirmed PIN `1234`; do not implement hidden or reflection-based automatic pairing.
+- The original OBDLink MX is also selected from Android's bonded list. Instruct the user to press its physical Connect button and pair `OBDLink MX` in Android Settings within the documented window; do not request or guess a PIN.
 - Cancel discovery before opening RFCOMM.
 - Perform connection and stream I/O away from the main thread with explicit cancellation and bounded timeouts.
 - Keep one reader active for the socket lifetime and reassemble ELM responses until the prompt.

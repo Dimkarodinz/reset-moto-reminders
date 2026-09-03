@@ -50,7 +50,7 @@
     <string name="failure_permission_detail">Accordez l\'autorisation Bluetooth demandée par Reset Moto Reminders, puis réessayez.</string>
     <string name="failure_permission_action">Accorder l\'autorisation</string>
     <string name="failure_pairing_title">Association requise</string>
-    <string name="failure_pairing_detail">Associez vLinker MC-Android dans les paramètres Bluetooth d\'Android à l\'aide du PIN 1234, puis revenez et sélectionnez-le.</string>
+    <string name="failure_pairing_detail">Associez l\'adaptateur Classic sélectionné dans les paramètres Bluetooth d\'Android, puis revenez le sélectionner. vLinker utilise le PIN 1234 ; OBDLink MX nécessite son bouton Connect.</string>
     <string name="failure_pairing_action">Ouvrir les paramètres Bluetooth</string>
     <string name="failure_timeout_title">Délai de connexion dépassé</string>
     <string name="failure_timeout_detail">L\'adaptateur n\'a pas répondu à temps. Vérifiez qu\'il est alimenté et à proximité, puis réessayez.</string>
@@ -168,7 +168,7 @@
     <!-- Device picker -->
     <string name="device_picker_title">Sélectionner l\'adaptateur</string>
     <string name="device_picker_empty">Recherche des adaptateurs compatibles…</string>
-    <string name="device_picker_pair_hint">Associez vLinker MC-Android dans les paramètres avec le PIN 1234. OBDLink CX s\'associe à la connexion.</string>
+    <string name="device_picker_pair_hint">Associez vLinker MC-Android dans les paramètres avec le PIN 1234. Pour OBDLink MX, appuyez sur le bouton Connect de l\'adaptateur et associez-le dans les paramètres Android. OBDLink CX s\'associe à la connexion.</string>
     <string name="device_picker_settings">Paramètres Bluetooth</string>
     <string name="adapter_default_name">Adaptateur vLinker</string>
     <string name="adapter_experimental_suffix">expérimental</string>

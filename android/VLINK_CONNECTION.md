@@ -8,6 +8,8 @@ Use [`adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-
 
 OBDLink CX support is also present as an experimental profile. Its machine-readable source is [`adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml). The app selects it only when both the advertised name and service match, then validates the returned `ATI` or `STI` identity before sending motorcycle traffic.
 
+The original OBDLink MX Bluetooth adapter has a separate experimental Android-only profile in [`adapter-maps/obdlink-mx-android.adaptermap.yaml`](../adapter-maps/obdlink-mx-android.adaptermap.yaml). Press the adapter's physical **Connect** button, pair the exact `OBDLink MX` device in Android settings within two minutes, then select it in the app. It uses Bluetooth Classic SPP and no fixed PIN. The app rejects nearby names such as `OBDLink MX+`, requires the manufacturer-defined `STDI` hardware identity `OBDLink MX…` and then requires the original-MX `STN115…` firmware family before any motorcycle command.
+
 The captured transport is covered by deterministic project-code replay tests. The v0.1 phone report also showed that pairing succeeded but the app did not refresh/select the bonded device after returning from Settings; v0.3.1 added a regression-tested refresh and selects the sole matching vLinker. Version 0.4.0 adds a debug-only, single-attempt read-only engine capture after adapter readiness and is installed on the Android 11 test phone. Every current app journal contains only `adapter_profile_loaded`, so project-app initialization and the read capture against the physical, powered adapter are still pending. Bonded-list visibility alone is not connection evidence.
 
 ## Next project-app evidence

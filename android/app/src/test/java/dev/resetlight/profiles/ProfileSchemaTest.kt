@@ -18,6 +18,7 @@ class ProfileSchemaTest {
     fun `canonical adapter map satisfies schema`() {
         assertValid("adaptermap.schema.json", "vlinker-mc-android.adaptermap.yaml")
         assertValid("adaptermap.schema.json", "obdlink-cx.adaptermap.yaml")
+        assertValid("adaptermap.schema.json", "obdlink-mx-android.adaptermap.yaml")
     }
 
     @Test
