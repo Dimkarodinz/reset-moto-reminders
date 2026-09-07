@@ -220,7 +220,7 @@ Private captures were minimized into action-specific BTSnoop files; full bugrepo
 
 - Treat every unknown request as unsafe. Never fuzz writes, routines, identifiers or security keys.
 - Send read-only requests only to a known physical module address at a conservative rate.
-- Do not expose write operations in the main/release app until module identity, part number and software version match an explicitly validated profile. Where a module returns no readable part number/software version (the Tiger instrument cluster), a write may be gated instead on an equivalent fail-closed fingerprint — the exact captured motorcycle profile, observed transport route and live constant status — as `ClusterFingerprintGate` does. The separate Triumph collector has one narrower research exception: after matching the known precursor reads and explicit acknowledgement, it may replay only the two exact mapped write sequences to gather per-bike evidence. This never authorizes speculative bytes or release support.
+- A main/release build may expose DTC clear or service reset for either a validated profile or a declared experimental community-test profile. Experimental writes require the exact user-selected catalogue entry, an explicitly available/experimental capability, a recognized adapter, the mapped module route, every mapped live prerequisite and a second visible experimental warning at confirmation. Unknown response shapes stop before the write. Send only the single mapped sequence, never probe or substitute another format, and verify afterward. Physical evidence is required before changing the profile status to validated, but not before publishing it as experimental.
 - Stop on identity mismatch, unexpected response, timeout, disconnect, low voltage or unstable vehicle state. Do not blindly retry.
 - Record original values and verify changes immediately and after an ignition cycle.
 - Never automatically retry a write after a disconnect or ambiguous result; the write may have succeeded even if its response was lost.
@@ -230,13 +230,13 @@ Private captures were minimized into action-specific BTSnoop files; full bugrepo
 
 - Read and show the current codes before enabling Clear.
 - Explain that clearing removes diagnostic evidence but does not repair the fault, then require a separate confirmation action.
-- Allow clearing only for a validated ECU profile with ignition on and engine off.
+- Allow clearing only for a validated or explicitly experimental ECU profile whose mapped identity/prerequisite gate succeeds, with ignition on and engine off.
 - Treat UDS response pending (`7F1478` in the captured transaction) as an instruction to wait for the final response within a bounded timeout; never resend the clear request because of response pending.
 - After a positive response, read the DTC count again and report remaining codes. Say “DTC memory cleared,” not “fault repaired.”
 
 ### Service reminder
 
-- Never replay the observed reset against an unidentified instrument.
+- Never replay a reset against an unidentified or undeclared instrument. An experimental instrument must pass its mapped static prerequisites or one exact supported live response shape before the write.
 - Show the current value and requested date/distance before confirmation.
 - Read back the new values immediately and after an ignition cycle.
 - Do not repeat a known reset merely to obtain another identical trace. If a controlled research write is justified, change one field only and record before/requested/after values.
@@ -250,7 +250,7 @@ Private captures were minimized into action-specific BTSnoop files; full bugrepo
 - Build sanitized transcript-replay tests before application code connects to a motorcycle.
 - Preserve raw frames beside decoded results in private development logs so interpretations can be corrected later.
 - Serialize commands per adapter connection; do not interleave requests or bypass the transport queue with keepalives.
-- Unknown or mismatched profiles remain read-only in the main/release app. The separate Triumph collector may expose its two explicit experimental write validations only under the exception above; all mismatched precursor reads remain read-only.
+- Unknown or mismatched profiles remain read-only in the main/release app. A declared experimental profile may expose only its mapped DTC-clear and service-reset capabilities under the community-validation gates above; every mismatched or unknown precursor response remains read-only.
 - Never treat an observed response as a universal fixed response or an observed sequence as a proven minimum sequence.
 - Keep the Android and iOS connection implementations behind the same adapter interface even though their transports differ.
 

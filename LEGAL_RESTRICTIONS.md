@@ -2,7 +2,7 @@
 
 Operational policy for contributors and agents; not legal advice. It assumes a maintainer in Spain and worldwide publication. Qualified Spanish/EU advice remains recommended for write-capable releases.
 
-Last reviewed: 2026-08-17.
+Last reviewed: 2026-09-07.
 
 ## Non-public material
 
@@ -72,12 +72,14 @@ or commercial release.
 
 ## Safety, liability and monetization
 
-Licence disclaimers and warnings do not eliminate liability. Keep service writes disabled in public/release builds unless the instrument matches an explicitly validated profile and follow the safety rules in `AGENTS.md`. A separately labelled research collector may run only the bounded, explicitly acknowledged compatibility experiment documented there. State that resetting a reminder does not perform maintenance.
+Licence disclaimers and warnings do not eliminate liability. Public/release builds may include an explicitly experimental motorcycle profile so community members can validate hardware that the maintainer cannot physically access, but only for the existing bounded DTC-clear and service-reminder operations. The selected profile and capability must be declared in the versioned maps; the adapter identity, module route and required live precursor responses must pass their exact gates; the UI must label the motorcycle as experimental both before connection and at write confirmation; and unknown response shapes must stop before the state-changing request. Send one mapped write sequence, never probe or try another format, read the result back, and report interrupted or unconfirmed outcomes as requiring inspection. State that resetting a reminder does not perform maintenance and clearing DTCs does not repair a fault.
 
-Require legal review before releasing:
+Physical validation promotes a profile from experimental to validated; it is not a prerequisite for publishing a profile that satisfies the bounded community-validation contract above. Never describe an experimental profile as tested, safe for every year/market, or confirmed compatible.
 
-- Support for an unvalidated module identity or software version.
-- ECU/security unlocking, seed/key, immobilizer, emissions, calibration, coding or firmware functionality.
+Require legal review before releasing functionality outside that bounded contract, including:
+
+- Generic or user-supplied diagnostic writes, probing, fuzzing, or automatic write-format fallback.
+- Security unlocking or seed/key functionality beyond a fixed profile-scoped prerequisite for the two allowed operations; any immobilizer, emissions, calibration, coding or firmware functionality.
 - Paid features/support, commercial warranties, nonessential personal-data collection or professional-workshop positioning.
 
 EU product-liability treatment distinguishes some genuinely noncommercial
@@ -97,8 +99,9 @@ liability, consumer-law, and store-policy review before launch.
 - [ ] Ownership and contributor agreements cover all project-authored material offered under both public and commercial terms.
 - [ ] Employment or contractor agreements do not give an employer/client rights in the project; no employer-owned code, time, equipment, confidential information, or branding is included.
 - [ ] Any prior GPLv3 distribution or recipient is recorded; no claim is made that earlier GPL rights were revoked.
-- [ ] Compatibility claims match evidence and do not generalize from `Keihin` alone.
-- [ ] Unknown or mismatched profiles cannot execute writes.
+- [ ] Compatibility claims distinguish physically validated profiles from experimental community-test profiles and do not generalize from `Keihin` alone.
+- [ ] Every experimental write is declared in a versioned profile, visibly labelled before connection and confirmation, and limited to the two bounded operations.
+- [ ] Unknown/mismatched profiles and unknown precursor response shapes cannot execute writes; no write format is probed, retried or substituted.
 - [ ] Unofficial-project and safety warnings are visible.
 - [ ] Each binary matches a public source tag and checksum.
 - [ ] iOS distribution is authorized or source-only.

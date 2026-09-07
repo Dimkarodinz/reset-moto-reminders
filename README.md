@@ -65,7 +65,7 @@ The current experimental branch lets you select the motorcycles below on Android
 | Speed Triple 1200 RS and RR | P01, P02, P11 | DTC read/clear and live-detected service reset |
 | Tiger 1200 GT and Rally family | P20, P21, P22, P23, P24 | DTC read/clear and live-detected service reset |
 
-Every row in this table is **experimental and not yet tested**. A listed model may still use a different ECU, instrument cluster or diagnostic-port wiring depending on its year and market. For live-detected resets, the app reads the service data first and writes only when its exact shape matches one of the two supported formats.
+Every row in this table is **experimental and not yet tested**. These profiles are published so owners can help validate motorcycles the maintainer cannot physically access. A listed model may still use a different ECU, instrument cluster or diagnostic-port wiring depending on its year and market. Select only the exact listed motorcycle. Before a live-detected reset, the app reads the service data and writes only when its exact shape matches one of the two supported formats; every other shape stops before the write.
 
 See [`ecu-maps/README.md`](ecu-maps/README.md) for the exact profile and capability matrix. A shared ECU supplier or model name alone never proves compatibility.
 
