@@ -19,11 +19,24 @@ class ProfileSchemaTest {
         assertValid("adaptermap.schema.json", "vlinker-mc-android.adaptermap.yaml")
         assertValid("adaptermap.schema.json", "obdlink-cx.adaptermap.yaml")
         assertValid("adaptermap.schema.json", "obdlink-mx-android.adaptermap.yaml")
+        assertValid("adaptermap.schema.json", "obdlink-lx-android.adaptermap.yaml")
+        assertValid("adaptermap.schema.json", "obdlink-mx-plus-android.adaptermap.yaml")
     }
 
     @Test
     fun `canonical ecu map satisfies schema`() {
         assertValid("ecumap.schema.json", "tiger-900-gt-pro-2021.ecumap.yaml")
+    }
+
+    @Test
+    fun `Triumph family and motorcycle maps satisfy their schemas`() {
+        assertValid("enginefamily.schema.json", "triumph-modern-can.enginefamily.yaml")
+        listOf(
+            "triumph-original-tft.instrumentfamily.yaml",
+            "triumph-updated-tft.instrumentfamily.yaml",
+            "triumph-hybrid-display.instrumentfamily.yaml",
+        ).forEach { assertValid("instrumentfamily.schema.json", it) }
+        assertValid("motorcycleprofiles.schema.json", "triumph.motorcycleprofiles.yaml")
     }
 
     @Test

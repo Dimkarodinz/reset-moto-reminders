@@ -1,0 +1,48 @@
+schema_version: 1
+
+instrument_family:
+  id: triumph-updated-tft
+  display_name: Triumph updated TFT instrument
+  strategy: updated_combined
+  module:
+    role: service_reminder_storage_and_reset
+    family: Triumph updated TFT instrument
+    supplier: unknown
+    hardware_family: unknown
+    part_number: unknown
+    software_version: unknown
+    transport:
+      knowledge_status: independent_interoperability_evidence_not_hardware_validated
+      minimal_configuration_confirmed: false
+      protocol: ISO 15765-4 CAN
+      can_id_format: 29-bit
+      bitrate_kbit_s: 500
+      request_can_id: "0x18DAC1F1"
+      response_can_id: "0x18DAF1C1"
+      elm_protocol_command: ATTP7
+      configuration_commands:
+        - ATWS
+        - ATE0
+        - ATL0
+        - ATS0
+        - ATH1
+        - ATTP7
+        - ATV0
+        - ATCAF0
+        - ATCFC1
+        - ATCP18
+        - ATSHDAC1F1
+
+  service_reminder:
+    knowledge_status: experimental_not_hardware_validated
+    session_request: "021003"
+    seed_request: "022701"
+    read_requests:
+      - "0322A500"
+      - "0322A000"
+      - "0322A010"
+    request_prefix: "2EA000"
+    distance_step_km: 1
+    minimum_distance_km: 1
+    maximum_distance_km: 16000
+    year_base: 2000

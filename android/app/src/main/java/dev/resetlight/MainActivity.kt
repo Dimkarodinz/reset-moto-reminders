@@ -20,6 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import dev.resetlight.domain.ConnectionState
@@ -28,6 +31,8 @@ import dev.resetlight.features.consent.ReleaseConsentScreen
 import dev.resetlight.features.connection.AdapterSelectionPolicy
 import dev.resetlight.features.connection.ConnectionScreen
 import dev.resetlight.features.connection.FailureAction
+import dev.resetlight.profiles.MotorcycleCompatibilityProfile
+import dev.resetlight.profiles.ProfileValidationStatus
 import dev.resetlight.transport.bluetooth.BondedDevice
 import dev.resetlight.ui.ResetMotoTheme
 
@@ -55,8 +60,10 @@ class MainActivity : ComponentActivity() {
                 val serviceResetState by owner.serviceResetState.collectAsState()
                 val operationInProgress by owner.operationInProgress.collectAsState()
                 val devices by owner.devices.collectAsState()
+                val selectedMotorcycle by owner.selectedMotorcycle.collectAsState()
                 var selectedAddress by rememberSaveable { mutableStateOf<String?>(null) }
                 var showDevicePicker by remember { mutableStateOf(false) }
+                var showMotorcyclePicker by remember { mutableStateOf(false) }
                 var consentAccepted by rememberSaveable { mutableStateOf(consentStore.isAccepted()) }
                 val selected = devices.firstOrNull { it.address == selectedAddress }
                 val adapterDefaultName = stringResource(R.string.adapter_default_name)
@@ -84,7 +91,18 @@ class MainActivity : ComponentActivity() {
                     // The main app exposes only bounded rider-facing features.
                     researchCaptureEnabled = false,
                     writeOperationsEnabled = owner.writeOperationsAvailable,
+                    dtcReadEnabled = owner.dtcReadAvailable,
+                    dashboardReadEnabled = owner.dashboardReadAvailable,
+                    dtcClearEnabled = owner.dtcClearAvailable,
+                    serviceResetEnabled = owner.serviceResetAvailable,
+                    selectedMotorcycleName = selectedMotorcycle?.displayName
+                        ?: stringResource(R.string.motorcycle_profile_default),
+                    motorcycleExperimental =
+                        selectedMotorcycle?.validationStatus == ProfileValidationStatus.EXPERIMENTAL,
+                    motorcycleSelectionEnabled = connectionState is ConnectionState.Disconnected &&
+                        !operationInProgress,
                     selectedAdapterName = selected?.displayName(devices, adapterDefaultName, experimentalSuffix),
+                    onSelectMotorcycle = { showMotorcyclePicker = true },
                     onPairOrSelect = {
                         if (hasBluetoothPermission()) {
                             owner.refreshBondedDevices()
@@ -132,6 +150,18 @@ class MainActivity : ComponentActivity() {
                             onDismiss = { showDevicePicker = false },
                         )
                     }
+
+                    if (showMotorcyclePicker) {
+                        MotorcyclePickerDialog(
+                            profiles = owner.availableMotorcycles,
+                            selectedId = selectedMotorcycle?.id,
+                            onSelected = { profile ->
+                                owner.selectMotorcycle(profile.id)
+                                showMotorcyclePicker = false
+                            },
+                            onDismiss = { showMotorcyclePicker = false },
+                        )
+                    }
                 }
 
                 LaunchedEffect(connectionState, devices) {
@@ -176,6 +206,38 @@ class MainActivity : ComponentActivity() {
     private fun openBluetoothSettings() {
         startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
     }
+}
+
+@androidx.compose.runtime.Composable
+private fun MotorcyclePickerDialog(
+    profiles: List<MotorcycleCompatibilityProfile>,
+    selectedId: String?,
+    onSelected: (MotorcycleCompatibilityProfile) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val experimental = stringResource(R.string.motorcycle_profile_experimental_short)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.motorcycle_profile_picker_title)) },
+        text = {
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
+                profiles.forEach { profile ->
+                    TextButton(onClick = { onSelected(profile) }) {
+                        val status = if (profile.validationStatus == ProfileValidationStatus.EXPERIMENTAL) {
+                            " • $experimental"
+                        } else ""
+                        val selected = if (profile.id == selectedId) " ✓" else ""
+                        Text(profile.displayName + status + selected)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        },
+    )
 }
 
 @androidx.compose.runtime.Composable

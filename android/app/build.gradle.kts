@@ -91,9 +91,23 @@ val generatedLegalAssets = layout.buildDirectory.dir("generated/legalAssets")
 val adapterMapSource = rootProject.file("../adapter-maps/vlinker-mc-android.adaptermap.yaml")
 val obdlinkCxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-cx.adaptermap.yaml")
 val obdlinkMxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-mx-android.adaptermap.yaml")
+val obdlinkLxAdapterMapSource = rootProject.file("../adapter-maps/obdlink-lx-android.adaptermap.yaml")
+val obdlinkMxPlusAdapterMapSource = rootProject.file("../adapter-maps/obdlink-mx-plus-android.adaptermap.yaml")
 val adapterSchemaSource = rootProject.file("../adapter-maps/adaptermap.schema.json")
 val ecuMapSource = rootProject.file("../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml")
+val triumphFamilyProfileSources = listOf(
+    "triumph-modern-can.enginefamily.yaml",
+    "triumph-original-tft.instrumentfamily.yaml",
+    "triumph-updated-tft.instrumentfamily.yaml",
+    "triumph-hybrid-display.instrumentfamily.yaml",
+    "triumph.motorcycleprofiles.yaml",
+).map { rootProject.file("../ecu-maps/$it") }
 val ecuSchemaSource = rootProject.file("../ecu-maps/ecumap.schema.json")
+val triumphFamilySchemaSources = listOf(
+    "enginefamily.schema.json",
+    "instrumentfamily.schema.json",
+    "motorcycleprofiles.schema.json",
+).map { rootProject.file("../ecu-maps/$it") }
 val dtcMapSource = rootProject.file("../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
 val dtcSchemaSource = rootProject.file("../dtc-maps/dtcmap.schema.json")
 val dtcTranslationSchemaSource = rootProject.file("../dtc-maps/dtctranslation.schema.json")
@@ -111,9 +125,13 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         adapterMapSource,
         obdlinkCxAdapterMapSource,
         obdlinkMxAdapterMapSource,
+        obdlinkLxAdapterMapSource,
+        obdlinkMxPlusAdapterMapSource,
         adapterSchemaSource,
         ecuMapSource,
+        *triumphFamilyProfileSources.toTypedArray(),
         ecuSchemaSource,
+        *triumphFamilySchemaSources.toTypedArray(),
         dtcMapSource,
         dtcSchemaSource,
         dtcTranslationSchemaSource,
@@ -123,9 +141,13 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         adapterMapSource,
         obdlinkCxAdapterMapSource,
         obdlinkMxAdapterMapSource,
+        obdlinkLxAdapterMapSource,
+        obdlinkMxPlusAdapterMapSource,
         adapterSchemaSource,
         ecuMapSource,
+        *triumphFamilyProfileSources.toTypedArray(),
         ecuSchemaSource,
+        *triumphFamilySchemaSources.toTypedArray(),
         dtcMapSource,
         dtcSchemaSource,
         dtcTranslationSchemaSource,
@@ -139,6 +161,11 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         require(Regex("(?m)^schema_version:\\s*3\\s*$").containsMatchIn(ecuMapSource.readText())) {
             "Unsupported or missing ECU-map schema_version"
         }
+        triumphFamilyProfileSources.forEach { source ->
+            require(Regex("(?m)^schema_version:\\s*1\\s*$").containsMatchIn(source.readText())) {
+                "Unsupported or missing family-profile schema_version in ${source.name}"
+            }
+        }
         require(Regex("(?m)^schema_version:\\s*3\\s*$").containsMatchIn(dtcMapSource.readText())) {
             "Unsupported or missing DTC-map schema_version"
         }
@@ -150,6 +177,7 @@ val generateProfileAssets = tasks.register<Sync>("generateProfileAssets") {
         require(
             adapterSchemaSource.isFile &&
                 ecuSchemaSource.isFile &&
+                triumphFamilySchemaSources.all { it.isFile } &&
                 dtcSchemaSource.isFile &&
                 dtcTranslationSchemaSource.isFile
         ) {

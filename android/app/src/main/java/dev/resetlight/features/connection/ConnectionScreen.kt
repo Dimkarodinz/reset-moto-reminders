@@ -76,7 +76,15 @@ fun ConnectionScreen(
     intervalConstraints: ServiceIntervalConstraints?,
     researchCaptureEnabled: Boolean,
     writeOperationsEnabled: Boolean,
+    dtcReadEnabled: Boolean = true,
+    dashboardReadEnabled: Boolean = true,
+    dtcClearEnabled: Boolean = writeOperationsEnabled,
+    serviceResetEnabled: Boolean = writeOperationsEnabled,
+    selectedMotorcycleName: String,
+    motorcycleExperimental: Boolean,
+    motorcycleSelectionEnabled: Boolean,
     selectedAdapterName: String?,
+    onSelectMotorcycle: () -> Unit,
     onPairOrSelect: () -> Unit,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
@@ -95,6 +103,10 @@ fun ConnectionScreen(
             selectedAdapterName,
             researchCaptureEnabled,
             writeOperationsEnabled,
+            dtcReadEnabled,
+            dashboardReadEnabled,
+            dtcClearEnabled,
+            serviceResetEnabled,
         ),
         readOnlyCaptureState = readOnlyCaptureState,
         dtcReadState = dtcReadState,
@@ -104,6 +116,10 @@ fun ConnectionScreen(
         operationInProgress = operationInProgress,
         distanceUnits = distanceUnits,
         intervalConstraints = intervalConstraints,
+        selectedMotorcycleName = selectedMotorcycleName,
+        motorcycleExperimental = motorcycleExperimental,
+        motorcycleSelectionEnabled = motorcycleSelectionEnabled,
+        onSelectMotorcycle = onSelectMotorcycle,
         onPairOrSelect = onPairOrSelect,
         onConnect = onConnect,
         onDisconnect = onDisconnect,
@@ -128,6 +144,10 @@ fun ConnectionScreen(
     operationInProgress: Boolean,
     distanceUnits: MotorcycleDistanceUnits,
     intervalConstraints: ServiceIntervalConstraints?,
+    selectedMotorcycleName: String,
+    motorcycleExperimental: Boolean,
+    motorcycleSelectionEnabled: Boolean,
+    onSelectMotorcycle: () -> Unit,
     onPairOrSelect: () -> Unit,
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
@@ -153,6 +173,12 @@ fun ConnectionScreen(
             Text(
                 text = stringResource(R.string.app_name),
                 style = ActionTitleStyle,
+            )
+            MotorcycleProfileCard(
+                name = selectedMotorcycleName,
+                experimental = motorcycleExperimental,
+                selectionEnabled = motorcycleSelectionEnabled,
+                onSelect = onSelectMotorcycle,
             )
             ConnectionCard(
                 state = state,
@@ -195,6 +221,7 @@ fun ConnectionScreen(
                     dtcClearState = dtcClearState,
                     onClearDtc = onClearDtc,
                     actionsEnabled = actionsEnabled,
+                    experimental = motorcycleExperimental,
                 )
             }
             if (state.showServiceReset) {
@@ -204,6 +231,7 @@ fun ConnectionScreen(
                     intervalConstraints = intervalConstraints,
                     onResetServiceReminder = onResetServiceReminder,
                     actionsEnabled = actionsEnabled,
+                    experimental = motorcycleExperimental,
                 )
             } else if (state.showUnavailableServiceCard) {
                 UnavailableFeatureCard(state.serviceCard)
@@ -213,6 +241,43 @@ fun ConnectionScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun MotorcycleProfileCard(
+    name: String,
+    experimental: Boolean,
+    selectionEnabled: Boolean,
+    onSelect: () -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.motorcycle_profile_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(name, style = MaterialTheme.typography.bodyLarge)
+            if (experimental) {
+                Text(
+                    text = stringResource(R.string.motorcycle_profile_experimental),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            OutlinedButton(
+                onClick = onSelect,
+                enabled = selectionEnabled,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.motorcycle_profile_select))
+            }
         }
     }
 }
@@ -403,6 +468,7 @@ private fun DtcClearCard(
     dtcClearState: DtcClearUiState,
     onClearDtc: () -> Unit,
     actionsEnabled: Boolean,
+    experimental: Boolean,
 ) {
     var confirmArmed by remember { mutableStateOf(false) }
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -455,8 +521,11 @@ private fun DtcClearCard(
                     )
                 }
             } else {
+                val baseWarning = stringResource(R.string.dtc_clear_warning)
                 ArmedConfirmation(
-                    warning = stringResource(R.string.dtc_clear_warning),
+                    warning = baseWarning + if (experimental) {
+                        "\n\n" + stringResource(R.string.experimental_write_warning)
+                    } else "",
                     confirmLabel = stringResource(R.string.dtc_clear_confirm),
                     onCancel = { confirmArmed = false },
                     onConfirm = {
@@ -478,6 +547,7 @@ private fun ServiceResetCard(
     intervalConstraints: ServiceIntervalConstraints?,
     onResetServiceReminder: (Int, DistanceUnit, LocalDate) -> Unit,
     actionsEnabled: Boolean,
+    experimental: Boolean,
 ) {
     val today = remember { LocalDate.now() }
     var distanceText by remember { mutableStateOf("10000") }
@@ -629,13 +699,16 @@ private fun ServiceResetCard(
                     }
                 } else if (inputsValid) {
                     val confirmedDistance = requireNotNull(distanceDisplay)
-                    ArmedConfirmation(
-                        warning = stringResource(
+                    val baseWarning = stringResource(
                             R.string.service_reset_warning,
                             confirmedDistance,
                             unitLabel,
                             dateFormatter.format(selectedDate),
-                        ),
+                        )
+                    ArmedConfirmation(
+                        warning = baseWarning + if (experimental) {
+                            "\n\n" + stringResource(R.string.experimental_write_warning)
+                        } else "",
                         confirmLabel = stringResource(R.string.service_reset_confirm),
                         onCancel = { confirmArmed = false },
                         onConfirm = {

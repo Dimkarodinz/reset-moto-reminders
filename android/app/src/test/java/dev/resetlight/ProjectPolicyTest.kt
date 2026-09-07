@@ -114,4 +114,24 @@ class ProjectPolicyTest {
             assertTrue("$valuesDir must name OBDLink MX", strings.contains("OBDLink MX"))
         }
     }
+
+    @Test
+    fun `public project files do not name private interoperability applications`() {
+        val projectRoot = File("../").canonicalFile
+        val forbidden = listOf("Tiger" + "Tool", "Tune" + "ECU")
+        val excludedDirectories = setOf(".git", ".gradle", "build", "tmp")
+        val offenders = projectRoot.walkTopDown()
+            .onEnter { directory -> directory.name !in excludedDirectories }
+            .filter(File::isFile)
+            .filterNot { it.extension in setOf("apk", "ipa", "jar", "class", "png", "zip", "pdf") }
+            .filter { file ->
+                runCatching { file.readText() }.getOrDefault("").let { text ->
+                    forbidden.any { name -> text.contains(name, ignoreCase = true) }
+                }
+            }
+            .map { it.relativeTo(projectRoot).path }
+            .toList()
+
+        assertTrue("Private source names found in public files: $offenders", offenders.isEmpty())
+    }
 }

@@ -58,3 +58,30 @@ class ClusterFingerprintGate(ecu: EcuProfile) : ServiceWriteGate {
         return GateDecision(true, UiText(UiMessage.GATE_REASON_AUTHORIZED))
     }
 }
+
+/**
+ * Experimental family gate. It still requires the explicitly selected profile
+ * and the family-specific live status response, but it does not claim that the
+ * motorcycle has been physically validated by this project.
+ */
+class SelectedInstrumentStatusGate(
+    private val selectedMotorcycleId: String,
+    private val expectedStatusAscii: String,
+) : ServiceWriteGate {
+    override fun evaluate(motorcycleId: String, instrumentStatusAscii: String): GateDecision {
+        if (motorcycleId != selectedMotorcycleId) {
+            return GateDecision(false, UiText(UiMessage.GATE_REASON_PROFILE_MISMATCH))
+        }
+        if (instrumentStatusAscii != expectedStatusAscii) {
+            return GateDecision(
+                false,
+                UiText(
+                    UiMessage.GATE_REASON_STATUS_MISMATCH,
+                    instrumentStatusAscii,
+                    expectedStatusAscii,
+                ),
+            )
+        }
+        return GateDecision(true, UiText(UiMessage.GATE_REASON_AUTHORIZED))
+    }
+}

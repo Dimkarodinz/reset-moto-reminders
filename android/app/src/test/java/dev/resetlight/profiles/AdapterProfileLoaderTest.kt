@@ -77,6 +77,21 @@ class AdapterProfileLoaderTest {
     }
 
     @Test
+    fun `loads OBDLink LX and MX plus as distinct classic profiles`() {
+        val lx = loader.load(generatedProfile("obdlink-lx-android.adaptermap.yaml"))
+        val mxPlus = loader.load(generatedProfile("obdlink-mx-plus-android.adaptermap.yaml"))
+
+        assertEquals("obdlink-lx-android", lx.id)
+        assertEquals("OBDLink LX", lx.identity.bluetoothName.value)
+        assertEquals("OBDLink LX*", lx.operations.identify.expectedIdentity)
+        assertEquals("obdlink-mx-plus-android", mxPlus.id)
+        assertEquals("OBDLink MX+", mxPlus.identity.bluetoothName.value)
+        assertEquals("OBDLink MX+*", mxPlus.operations.identify.expectedIdentity)
+        assertEquals("bluetooth_classic_rfcomm", lx.transport.kind)
+        assertEquals("bluetooth_classic_rfcomm", mxPlus.transport.kind)
+    }
+
+    @Test
     fun `hash represents the exact source bytes`() {
         val original = generatedProfile("vlinker-mc-android.adaptermap.yaml")
         val edited = original + byteArrayOf('\n'.code.toByte())

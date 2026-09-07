@@ -1,0 +1,133 @@
+schema_version: 1
+default_profile: triumph-tiger-900-gt-pro-2021
+
+motorcycles:
+  - id: triumph-tiger-900-gt-pro-2021
+    display_name: Tiger 900 GT Pro (2021, validated)
+    model_codes: [E64]
+    validation_status: validated
+    engine_family: triumph-modern-can-engine
+    instrument_family: triumph-original-tft
+    dtc_clear_strategy: security_access
+    capabilities:
+      dtc_read: validated
+      dtc_clear: validated
+      service_reset: validated
+      dashboard_read: validated
+
+  - id: triumph-tiger-900-gen1-other
+    display_name: Tiger 900 / 850 Sport (first generation)
+    model_codes: [E60, E62, E63, E65, E67, E68]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: triumph-original-tft
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: experimental
+      dashboard_read: experimental
+
+  - id: triumph-tiger-900-gen2
+    display_name: Tiger 900 (updated generation)
+    model_codes: [C81, C82, C83]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: triumph-updated-tft
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-tiger-sport-660
+    display_name: Tiger Sport 660
+    model_codes: [L20, L22]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: triumph-hybrid-display
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-street-triple-765-modern
+    display_name: Street Triple 765 (modern ECU)
+    model_codes: [A55, A60, A61, A62, D31]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-modern-classics
+    display_name: Bonneville / Bobber / Speed Twin / Thruxton (modern ECU)
+    model_codes: [D40, D46, D53, D54, D56, DD0, DP0, DX0]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-scrambler-modern
+    display_name: Scrambler 900 / 1200 (modern ECU)
+    model_codes: [D44, DR0, DS0]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-660-800-modern
+    display_name: Trident 660 / Daytona 660 / Tiger Sport 800
+    model_codes: [L10, L21, L23, L25]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-speed-triple-1200-modern
+    display_name: Speed Triple 1200 RS / RR
+    model_codes: [P01, P02, P11]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable
+
+  - id: triumph-tiger-1200-modern
+    display_name: Tiger 1200 GT / Rally (modern ECU)
+    model_codes: [P20, P21, P22, P23, P24]
+    validation_status: experimental
+    engine_family: triumph-modern-can-engine
+    instrument_family: none
+    dtc_clear_strategy: direct
+    capabilities:
+      dtc_read: experimental
+      dtc_clear: experimental
+      service_reset: unavailable
+      dashboard_read: unavailable

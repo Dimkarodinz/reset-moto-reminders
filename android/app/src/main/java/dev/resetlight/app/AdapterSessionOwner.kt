@@ -40,6 +40,8 @@ import dev.resetlight.features.service.ServiceReminderResetFailure
 import dev.resetlight.features.service.ServiceReminderResetResult
 import dev.resetlight.features.service.ServiceReminderResetService
 import dev.resetlight.features.service.ServiceResetUiState
+import dev.resetlight.features.service.ServiceWriteGate
+import dev.resetlight.features.service.SelectedInstrumentStatusGate
 import dev.resetlight.profiles.DiagnosticTroubleCodeClearProfile
 import dev.resetlight.profiles.DiagnosticTroubleCodeReadProfile
 import dev.resetlight.profiles.DtcDescriptionLookup
@@ -48,6 +50,12 @@ import dev.resetlight.profiles.EngineSecurityAccessProfile
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
 import dev.resetlight.profiles.ServiceReminderOperationProfile
 import dev.resetlight.profiles.AdapterProfile
+import dev.resetlight.profiles.CapabilityStatus
+import dev.resetlight.profiles.DtcClearStrategy
+import dev.resetlight.profiles.MotorcycleCompatibilityProfile
+import dev.resetlight.profiles.MotorcycleProfileCatalog
+import dev.resetlight.profiles.ProfileValidationStatus
+import dev.resetlight.profiles.ServiceReminderStrategy
 import dev.resetlight.adapter.elm.CommandIntent
 import dev.resetlight.transport.ByteTransport
 import java.time.LocalDate
@@ -91,6 +99,7 @@ class AdapterSessionOwner(
     private val clusterFingerprintGate: ClusterFingerprintGate? = null,
     private val motorcycleId: String? = null,
     private val writesEnabled: Boolean = false,
+    private val motorcycleCatalog: MotorcycleProfileCatalog? = null,
     engineResponseCanId: String? = null,
     instrumentResponseCanId: String? = null,
     private val transportFactory: (String, AdapterProfile) -> ByteTransport = { address, selectedProfile ->
@@ -98,6 +107,9 @@ class AdapterSessionOwner(
     },
 ) {
     private val adapterProfiles = (listOf(profile) + additionalProfiles).associateBy(AdapterProfile::id)
+    val availableMotorcycles: List<MotorcycleCompatibilityProfile> = motorcycleCatalog?.profiles.orEmpty()
+    private val mutableSelectedMotorcycle = MutableStateFlow(motorcycleCatalog?.defaultProfile)
+    val selectedMotorcycle: StateFlow<MotorcycleCompatibilityProfile?> = mutableSelectedMotorcycle.asStateFlow()
 
     init {
         adapterProfiles.values.forEach { loaded ->
@@ -114,7 +126,8 @@ class AdapterSessionOwner(
      * validation before a reset is ever armed. Null when no write profile is
      * packaged (release builds).
      */
-    val serviceIntervalConstraints: ServiceIntervalConstraints? = serviceReminderProfile?.let {
+    val serviceIntervalConstraints: ServiceIntervalConstraints?
+        get() = currentServiceReminderProfile()?.let {
         ServiceIntervalConstraints(
             stepKm = it.distanceRawUnitKm,
             minKm = it.distanceMinimumRaw * it.distanceRawUnitKm,
@@ -127,8 +140,8 @@ class AdapterSessionOwner(
      * payloads the decoders expect. The engine speaks ISO-TP on a 29-bit route;
      * the instrument answers raw 8-byte frames on its 11-bit route.
      */
-    private val engineExtractor = engineResponseCanId?.let { CanResponseExtractor(it, isoTp = true) }
-    private val instrumentExtractor = instrumentResponseCanId?.let { CanResponseExtractor(it, isoTp = false) }
+    private val legacyEngineResponseCanId = engineResponseCanId
+    private val legacyInstrumentResponseCanId = instrumentResponseCanId
 
     private val mutableState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val state: StateFlow<ConnectionState> = mutableState.asStateFlow()
@@ -163,14 +176,44 @@ class AdapterSessionOwner(
     private val mutableServiceResetState = MutableStateFlow<ServiceResetUiState>(ServiceResetUiState.Idle)
     val serviceResetState: StateFlow<ServiceResetUiState> = mutableServiceResetState.asStateFlow()
 
-    /** True only when this build enables writes and every required profile gate is present. */
-    val writeOperationsAvailable: Boolean =
-        writesEnabled &&
-            dtcClearProfile != null &&
-            engineSecurityAccessProfile != null &&
-            serviceReminderProfile != null &&
-            clusterFingerprintGate != null &&
-            motorcycleId != null
+    val dtcReadAvailable: Boolean
+        get() = currentMotorcycle()?.capabilities?.dtcRead != CapabilityStatus.UNAVAILABLE ||
+            (currentMotorcycle() == null && dtcReadProfile != null)
+
+    val dashboardReadAvailable: Boolean
+        get() = currentMotorcycle()?.capabilities?.dashboardRead != CapabilityStatus.UNAVAILABLE ||
+            (currentMotorcycle() == null && instrumentReadOnlyCaptureProfile != null)
+
+    val dtcClearAvailable: Boolean
+        get() = writesEnabled &&
+            currentDtcClearProfile() != null &&
+            currentSecurityAccessProfile() != null &&
+            (currentMotorcycle()?.capabilities?.dtcClear != CapabilityStatus.UNAVAILABLE)
+
+    val serviceResetAvailable: Boolean
+        get() = writesEnabled &&
+            currentInstrumentReadOnlyCaptureProfile() != null &&
+            currentServiceReminderProfile() != null &&
+            currentServiceGate() != null &&
+            currentMotorcycleId() != null &&
+            (currentMotorcycle()?.capabilities?.serviceReset != CapabilityStatus.UNAVAILABLE)
+
+    /** Compatibility aggregate retained for callers that only need to know whether any write exists. */
+    val writeOperationsAvailable: Boolean
+        get() = dtcClearAvailable || serviceResetAvailable
+
+    fun selectMotorcycle(id: String): Boolean {
+        if (state.value !is ConnectionState.Disconnected || operationInProgress.value) return false
+        val selected = availableMotorcycles.singleOrNull { it.id == id } ?: return false
+        mutableSelectedMotorcycle.value = selected
+        resetOperationStates()
+        journal.record(
+            layer = "profile",
+            name = "motorcycle_profile_selected",
+            text = "id=${selected.id} status=${selected.validationStatus.serializedValue}",
+        )
+        return true
+    }
 
     fun refreshBondedDevices() {
         val classic = adapterProfiles.values
@@ -218,11 +261,7 @@ class AdapterSessionOwner(
         if (connectionJob?.isActive == true) return
         if (state.value is ConnectionState.Failed) transitionSafely(ConnectionState.Disconnected)
         if (state.value !is ConnectionState.Disconnected) return
-        mutableReadOnlyCaptureState.value = ReadOnlyCaptureState.Idle
-        mutableInstrumentReadState.value = InstrumentReadState.Idle
-        mutableDtcReadState.value = DtcReadState.Idle
-        mutableDtcClearState.value = DtcClearUiState.Idle
-        mutableServiceResetState.value = ServiceResetUiState.Idle
+        resetOperationStates()
         val selectedProfile = mutableDevices.value
             .firstOrNull { it.address == address }
             ?.profileId
@@ -252,7 +291,7 @@ class AdapterSessionOwner(
     }
 
     fun captureReadOnlyEngineData() {
-        val captureProfile = engineReadOnlyCaptureProfile ?: return
+        val captureProfile = currentEngineReadOnlyCaptureProfile() ?: return
         val session = activeSession.get() ?: return
         runGatedOperation(
             job = ::readOnlyCaptureJob,
@@ -292,7 +331,7 @@ class AdapterSessionOwner(
     }
 
     fun readDiagnosticTroubleCodes() {
-        val readProfile = dtcReadProfile ?: return
+        val readProfile = currentDtcReadProfile() ?: return
         val descriptions = dtcDescriptions ?: return
         val session = activeSession.get() ?: return
         runGatedOperation(
@@ -345,8 +384,8 @@ class AdapterSessionOwner(
                 readProfile,
                 descriptions,
                 DiagnosticReadChannel { request -> session.execute(request).normalizedText },
-                configurationCommands = engineReadOnlyCaptureProfile?.configurationCommands.orEmpty(),
-                extractor = engineExtractor,
+                configurationCommands = currentEngineReadOnlyCaptureProfile()?.configurationCommands.orEmpty(),
+                extractor = currentEngineExtractor(),
             ).read()
             mutableDtcReadState.value = DtcReadState.Complete(
                 reportedCount = result.reportedCount,
@@ -361,7 +400,7 @@ class AdapterSessionOwner(
     }
 
     fun readInstrumentServiceInfo() {
-        val captureProfile = instrumentReadOnlyCaptureProfile ?: return
+        val captureProfile = currentInstrumentReadOnlyCaptureProfile() ?: return
         val session = activeSession.get() ?: return
         runGatedOperation(
             job = ::instrumentReadJob,
@@ -378,7 +417,7 @@ class AdapterSessionOwner(
             val result = InstrumentReadOnlyCapture(
                 captureProfile,
                 DiagnosticReadChannel { request -> session.execute(request).normalizedText },
-                extractor = instrumentExtractor,
+                extractor = currentInstrumentExtractor(),
             ).capture()
             mutableInstrumentReadState.value = when (result) {
                 is InstrumentReadOnlyCaptureResult.Complete -> InstrumentReadState.Complete(
@@ -400,15 +439,12 @@ class AdapterSessionOwner(
         }
     }
 
-    /**
-     * Clears confirmed engine DTCs. It runs SecurityAccess and sends a write, so it
-     * is gated on [writeOperationsAvailable] and only reached after user confirmation.
-     */
+    /** Clears confirmed engine DTCs with the selected profile strategy. */
     fun clearDiagnosticTroubleCodes() {
-        val clearProfile = dtcClearProfile ?: return
-        val securityProfile = engineSecurityAccessProfile ?: return
+        val clearProfile = currentDtcClearProfile() ?: return
+        val securityProfile = currentSecurityAccessProfile() ?: return
         val session = activeSession.get() ?: return
-        if (!writeOperationsAvailable) return
+        if (!dtcClearAvailable) return
         runGatedOperation(
             job = ::dtcClearJob,
             stateFlow = mutableDtcClearState,
@@ -443,8 +479,10 @@ class AdapterSessionOwner(
                 securityProfile,
                 EngineSeedKeyDerivation(securityProfile.seedKeyMultiplier),
                 writeChannel(session),
-                configurationCommands = engineReadOnlyCaptureProfile?.configurationCommands.orEmpty(),
-                extractor = engineExtractor,
+                configurationCommands = currentEngineReadOnlyCaptureProfile()?.configurationCommands.orEmpty(),
+                extractor = currentEngineExtractor(),
+                strategy = currentDtcClearStrategy(),
+                identityRequest = currentMotorcycle()?.engineFamily?.identityRequest,
             ).clear()
             mutableDtcClearState.value = when (result) {
                 is DtcClearResult.Cleared -> DtcClearUiState.Cleared(result.remainingCount)
@@ -471,12 +509,12 @@ class AdapterSessionOwner(
         distanceUnit: DistanceUnit,
         nextServiceDate: LocalDate,
     ) {
-        val instrumentProfile = instrumentReadOnlyCaptureProfile ?: return
-        val serviceProfile = serviceReminderProfile ?: return
-        val gate = clusterFingerprintGate ?: return
-        val id = motorcycleId ?: return
+        val instrumentProfile = currentInstrumentReadOnlyCaptureProfile() ?: return
+        val serviceProfile = currentServiceReminderProfile() ?: return
+        val gate = currentServiceGate() ?: return
+        val id = currentMotorcycleId() ?: return
         val session = activeSession.get() ?: return
-        if (!writeOperationsAvailable) return
+        if (!serviceResetAvailable) return
         runGatedOperation(
             job = ::serviceResetJob,
             stateFlow = mutableServiceResetState,
@@ -512,7 +550,7 @@ class AdapterSessionOwner(
                 serviceProfile,
                 gate,
                 id,
-                extractor = instrumentExtractor,
+                extractor = currentInstrumentExtractor(),
             ).reset(writeChannel(session), distance, distanceUnit, nextServiceDate)
             val uiState = WriteOutcomePolicy.serviceResult(result)
             mutableServiceResetState.value = uiState
@@ -530,6 +568,59 @@ class AdapterSessionOwner(
                 },
             )
         }
+    }
+
+    private fun currentMotorcycle(): MotorcycleCompatibilityProfile? = mutableSelectedMotorcycle.value
+
+    private fun currentEngineReadOnlyCaptureProfile(): EngineReadOnlyCaptureProfile? =
+        currentMotorcycle()?.engineFamily?.readOnlyCapture ?: engineReadOnlyCaptureProfile
+
+    private fun currentInstrumentReadOnlyCaptureProfile(): InstrumentReadOnlyCaptureProfile? =
+        currentMotorcycle()?.instrumentFamily?.readOnlyCapture ?: instrumentReadOnlyCaptureProfile
+
+    private fun currentDtcReadProfile(): DiagnosticTroubleCodeReadProfile? =
+        currentMotorcycle()?.engineFamily?.dtcRead ?: dtcReadProfile
+
+    private fun currentDtcClearProfile(): DiagnosticTroubleCodeClearProfile? =
+        currentMotorcycle()?.engineFamily?.dtcClear ?: dtcClearProfile
+
+    private fun currentSecurityAccessProfile(): EngineSecurityAccessProfile? =
+        currentMotorcycle()?.engineFamily?.securityAccess ?: engineSecurityAccessProfile
+
+    private fun currentServiceReminderProfile(): ServiceReminderOperationProfile? =
+        currentMotorcycle()?.instrumentFamily?.takeIf {
+            it.strategy == ServiceReminderStrategy.ORIGINAL_SPLIT
+        }?.originalSplit ?: serviceReminderProfile.takeIf { currentMotorcycle() == null }
+
+    private fun currentDtcClearStrategy(): DtcClearStrategy =
+        currentMotorcycle()?.dtcClearStrategy ?: DtcClearStrategy.SECURITY_ACCESS
+
+    private fun currentMotorcycleId(): String? = currentMotorcycle()?.id ?: motorcycleId
+
+    private fun currentEngineExtractor(): CanResponseExtractor? =
+        (currentMotorcycle()?.engineFamily?.module?.transport?.responseCanId ?: legacyEngineResponseCanId)
+            ?.let { CanResponseExtractor(it, isoTp = true) }
+
+    private fun currentInstrumentExtractor(): CanResponseExtractor? =
+        (currentMotorcycle()?.instrumentFamily?.module?.transport?.responseCanId ?: legacyInstrumentResponseCanId)
+            ?.let { responseId ->
+                val isoTp = currentMotorcycle()?.instrumentFamily?.strategy != ServiceReminderStrategy.ORIGINAL_SPLIT
+                CanResponseExtractor(responseId, isoTp = isoTp)
+            }
+
+    private fun currentServiceGate(): ServiceWriteGate? {
+        val current = currentMotorcycle() ?: return clusterFingerprintGate
+        val capture = current.instrumentFamily?.readOnlyCapture ?: return null
+        if (current.validationStatus == ProfileValidationStatus.VALIDATED) return clusterFingerprintGate
+        return SelectedInstrumentStatusGate(current.id, capture.expectedStatusAscii)
+    }
+
+    private fun resetOperationStates() {
+        mutableReadOnlyCaptureState.value = ReadOnlyCaptureState.Idle
+        mutableInstrumentReadState.value = InstrumentReadState.Idle
+        mutableDtcReadState.value = DtcReadState.Idle
+        mutableDtcClearState.value = DtcClearUiState.Idle
+        mutableServiceResetState.value = ServiceResetUiState.Idle
     }
 
     /**

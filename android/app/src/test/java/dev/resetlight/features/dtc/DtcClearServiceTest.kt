@@ -4,6 +4,7 @@ import dev.resetlight.diagnostics.DiagnosticWriteChannel
 import dev.resetlight.diagnostics.EngineSeedKeyDerivation
 import dev.resetlight.diagnostics.WriteIntent
 import dev.resetlight.profiles.EcuProfileLoader
+import dev.resetlight.profiles.DtcClearStrategy
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.test.runTest
@@ -117,6 +118,49 @@ class DtcClearServiceTest {
 
         assertTrue(result is DtcClearResult.Blocked)
         assertTrue(script.sent.none { it == securityProfile.seedRequestElmRequest })
+    }
+
+    @Test
+    fun `direct strategy clears in the default session without security access`() = runTest {
+        val script = ScriptedChannel(
+            mapOf(
+                "0322F18C" to "62F18C0102030405",
+                clearProfile.elmRequest to "54",
+                clearProfile.verificationElmRequest to "59010C000000",
+            ),
+        )
+
+        val result = DtcClearService(
+            clearProfile,
+            securityProfile,
+            EngineSeedKeyDerivation(0x4B48),
+            script,
+            strategy = DtcClearStrategy.DIRECT,
+            identityRequest = "0322F18C",
+        ).clear()
+
+        assertEquals(DtcClearResult.Cleared(remainingCount = 0), result)
+        assertEquals(
+            listOf("0322F18C", clearProfile.elmRequest, clearProfile.verificationElmRequest),
+            script.sent,
+        )
+    }
+
+    @Test
+    fun `direct strategy blocks before clear when the live engine identity read fails`() = runTest {
+        val script = ScriptedChannel(mapOf("0322F18C" to "7F2231"))
+
+        val result = DtcClearService(
+            clearProfile,
+            securityProfile,
+            EngineSeedKeyDerivation(0x4B48),
+            script,
+            strategy = DtcClearStrategy.DIRECT,
+            identityRequest = "0322F18C",
+        ).clear()
+
+        assertTrue(result is DtcClearResult.Blocked)
+        assertTrue(script.sent.none { it == clearProfile.elmRequest })
     }
 
     @Test

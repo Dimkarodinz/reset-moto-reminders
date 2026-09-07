@@ -175,16 +175,31 @@ class ConnectionScreenPresenterTest {
     }
 
     @Test
-    fun `service reminder reset remains unavailable without a validated write profile`() {
+    fun `unsupported service reminder is omitted without a write profile`() {
         val screen = presenter.present(
             ConnectionState.AdapterReady("ELM327", "STN1151", "vlinker-mc-android"),
             selectedAdapterName = "vLinker",
         )
 
-        assertTrue(screen.showUnavailableServiceCard)
-        assertEquals(UiText(UiMessage.SERVICE_CARD_TITLE), screen.serviceCard.title)
-        assertEquals(UiText(UiMessage.SERVICE_CARD_UNAVAILABLE_DETAIL), screen.serviceCard.detail)
-        assertFalse(screen.serviceCard.enabled)
+        assertFalse(screen.showUnavailableServiceCard)
+        assertFalse(screen.showServiceReset)
+    }
+
+    @Test
+    fun `ready screen follows capability-specific gates`() {
+        val screen = presenter.present(
+            ConnectionState.AdapterReady("ELM327", "STN1151", "adapter"),
+            selectedAdapterName = "Adapter",
+            dtcReadEnabled = true,
+            dashboardReadEnabled = false,
+            dtcClearEnabled = true,
+            serviceResetEnabled = false,
+        )
+
+        assertTrue(screen.showDtcRead)
+        assertTrue(screen.showDtcClear)
+        assertFalse(screen.showServiceInfoRead)
+        assertFalse(screen.showServiceReset)
     }
 
     @Test

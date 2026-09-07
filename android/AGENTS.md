@@ -16,7 +16,7 @@ Android is the first implementation target. Build it natively with Kotlin and Je
 
 The main app uses the fixed `ResetMotoTheme`: near-black background, restrained graphite surfaces, muted teal actions and high-contrast text/system bars. Keep this serious dark presentation independent of the phone theme; safety warnings continue to use the Material error role.
 
-The current v0.10.0 build (`versionCode 14`) adds experimental Android-only support for the original OBDLink MX Bluetooth adapter to the v0.9.0 public baseline. It retains experimental OBDLink CX BLE support, the one-time safety acknowledgement, the two bounded writes, packaged legal notices and the separation from broader research capture:
+The public v0.10.0 build (`versionCode 14`) adds experimental Android-only support for the original OBDLink MX Bluetooth adapter to the v0.9.0 baseline. The `experimental/triumph-family-profiles` branch additionally packages OBDLink LX/MX+ and the family-composed motorcycle catalogue in [`../ecu-maps/README.md`](../ecu-maps/README.md). It retains experimental OBDLink CX BLE support, the one-time safety acknowledgement, bounded writes, packaged legal notices and the separation from broader research capture:
 
 ```text
 launch -> accept safety notice once -> select or pair adapter -> connect -> identify
@@ -51,6 +51,9 @@ Keep the initial project structurally simple. Separate UI, use cases/profile gat
 | [`../adapter-maps/vlinker-mc-android.adaptermap.yaml`](../adapter-maps/vlinker-mc-android.adaptermap.yaml) | Primary Android adapter profile: Bluetooth Classic SPP/RFCOMM |
 | [`../adapter-maps/vlinker-mc-ios.adaptermap.yaml`](../adapter-maps/vlinker-mc-ios.adaptermap.yaml) | Optional Android BLE profile; command channel is still unverified |
 | [`../adapter-maps/obdlink-cx.adaptermap.yaml`](../adapter-maps/obdlink-cx.adaptermap.yaml) | Experimental Android/iOS BLE UART profile from OBDLink's public developer notes; physical project validation pending |
+| [`../adapter-maps/obdlink-lx-android.adaptermap.yaml`](../adapter-maps/obdlink-lx-android.adaptermap.yaml) | Experimental Android Classic profile; exact `OBDLink LX` name plus `STDI`/`STI` identity |
+| [`../adapter-maps/obdlink-mx-plus-android.adaptermap.yaml`](../adapter-maps/obdlink-mx-plus-android.adaptermap.yaml) | Experimental Android Classic profile; exact `OBDLink MX+` name plus `STDI`/`STI` identity |
+| [`../ecu-maps/README.md`](../ecu-maps/README.md) | Family/profile composition and the capability-specific experimental matrix |
 | [`../adapter-maps/obdlink-mx-android.adaptermap.yaml`](../adapter-maps/obdlink-mx-android.adaptermap.yaml) | Experimental Android-only original MX Bluetooth Classic profile; exact-name, physical-button pairing and identity gates; physical project validation pending |
 | [`../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml`](../ecu-maps/tiger-900-gt-pro-2021.ecumap.yaml) | Current motorcycle/module protocol evidence |
 | [`../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml`](../dtc-maps/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml) | Publishable user-facing DTC code-to-message lookup |
@@ -92,6 +95,9 @@ Android UI and lifecycle
 - The MC-IOS BLE path must not send ECU commands until the pending `ATI` proof establishes its command/response endpoint and framing.
 - The CX path must match `OBDLink CX` plus `FFF0`/`FFF1`/`FFF2`, enable OS-managed bonding, negotiate MTU, serialize acknowledged chunks and pass `ATI` before motorcycle operations. Keep it labelled experimental until a powered CX/Tiger test succeeds.
 - The original MX path must match the exact bonded name `OBDLink MX`, never `OBDLink MX+`, use only the selected profile's standard SPP UUID, then pass the manufacturer-defined `STDI` hardware identity and original-MX `STN115` firmware-family gates. Pairing requires the physical Connect button and Android settings, not a guessed PIN. Keep it labelled experimental until a powered original-MX/Tiger test succeeds.
+- LX and MX+ are independent Android Classic profiles. Their exact bonded names and `STDI` product identities must not match each other or fall back to the original MX profile.
+- Motorcycle selection is available only while disconnected. Resolve engine and instrument families atomically, show only declared capabilities, and repeat the experimental warning at write confirmation.
+- Experimental modern DTC clear performs the redacted `F18C` identity read, sends `14FFFFFF` once and verifies with `190108`. The validated 2021 profile retains its captured security-access strategy.
 - Unknown maps, schema versions, adapter identities or module identities fail closed.
 
 ## UX starting point

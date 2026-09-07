@@ -3,14 +3,20 @@ package dev.resetlight.app
 import dev.resetlight.adapter.elm.ElmCodec
 import dev.resetlight.domain.ConnectionFailure
 import dev.resetlight.domain.ConnectionState
+import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.logging.EventJournal
 import dev.resetlight.logging.JournalSink
 import dev.resetlight.profiles.AdapterProfileLoader
 import dev.resetlight.profiles.DtcMapLoader
 import dev.resetlight.profiles.EcuProfileLoader
+import dev.resetlight.profiles.EngineFamilyProfileLoader
+import dev.resetlight.profiles.InstrumentFamilyProfileLoader
+import dev.resetlight.profiles.MotorcycleProfileCatalogLoader
 import dev.resetlight.features.dtc.DtcReadState
+import dev.resetlight.features.dtc.DtcClearUiState
 import dev.resetlight.features.research.InstrumentReadState
 import dev.resetlight.features.research.ReadOnlyCaptureState
+import dev.resetlight.features.service.ServiceResetUiState
 import dev.resetlight.transport.ByteTransport
 import dev.resetlight.transport.ReplayByteTransport
 import dev.resetlight.transport.ReplayExchange
@@ -23,6 +29,7 @@ import dev.resetlight.transport.bluetooth.BondedDevice
 import dev.resetlight.transport.bluetooth.RfcommSocketConnection
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.CompletableDeferred
@@ -37,12 +44,145 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdapterSessionOwnerTest {
     @Test
-    fun `classic registry keeps vLinker and original MX profiles separate`() = runTest {
+    fun `motorcycle profile changes only while disconnected`() = runTest {
+        val adapter = adapterProfile("vlinker-mc-android.adaptermap.yaml")
+        val catalog = motorcycleCatalog()
+        val replay = ReplayByteTransport(
+            listOf(
+                exchange("ATWS", "ELM327 v2.2\r>"),
+                exchange("ATE0", "OK\r>"),
+                exchange("ATL0", "OK\r>"),
+                exchange("ATS0", "OK\r>"),
+                exchange("STI", "STN1151 v4.3.2\r>"),
+                exchange("ATH1", "OK\r>"),
+            ),
+        )
+        val owner = AdapterSessionOwner(
+            adapter,
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            motorcycleCatalog = catalog,
+        ) { _, _ -> replay }
+
+        assertEquals(catalog.defaultProfileId, owner.selectedMotorcycle.value?.id)
+        assertTrue(owner.selectMotorcycle("triumph-street-triple-765-modern"))
+        assertEquals("triumph-street-triple-765-modern", owner.selectedMotorcycle.value?.id)
+
+        owner.connect("synthetic-address")
+        advanceUntilIdle()
+
+        assertTrue(owner.state.value is ConnectionState.AdapterReady)
+        assertEquals(false, owner.selectMotorcycle(catalog.defaultProfileId))
+        assertEquals("triumph-street-triple-765-modern", owner.selectedMotorcycle.value?.id)
+    }
+
+    @Test
+    fun `experimental modern profile uses direct DTC clear without inherited security`() = runTest {
+        val adapter = adapterProfile("vlinker-mc-android.adaptermap.yaml")
+        val catalog = motorcycleCatalog()
+        val modern = catalog.profiles.single { it.id == "triumph-street-triple-765-modern" }
+        val adapterExchanges = listOf(
+            exchange("ATWS", "ELM327 v2.2\r>"),
+            exchange("ATE0", "OK\r>"),
+            exchange("ATL0", "OK\r>"),
+            exchange("ATS0", "OK\r>"),
+            exchange("STI", "STN1151 v4.3.2\r>"),
+            exchange("ATH1", "OK\r>"),
+        )
+        val configuration = modern.engineFamily.readOnlyCapture.configurationCommands
+        val replay = ReplayByteTransport(
+            adapterExchanges +
+                configuration.map { command ->
+                    exchange(command, if (command == "ATWS") "ELM327 v2.2\r>" else "OK\r>")
+                } +
+                exchange(modern.engineFamily.identityRequest, "18DAF1D50862F18C0102030405\r>") +
+                exchange(modern.engineFamily.dtcClear.elmRequest, "18DAF1D50154AAAAAAAAAAAA\r>") +
+                exchange(
+                    modern.engineFamily.dtcClear.verificationElmRequest,
+                    "18DAF1D50659010C000000AA\r>",
+                ),
+        )
+        val dictionary = DtcMapLoader().load(
+            File("build/generated/profileAssets/profiles/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml").readBytes(),
+        )
+        val owner = AdapterSessionOwner(
+            adapter,
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            motorcycleCatalog = catalog,
+            dtcDescriptions = dictionary,
+            writesEnabled = true,
+        ) { _, _ -> replay }
+
+        assertTrue(owner.selectMotorcycle(modern.id))
+        owner.connect("synthetic-address")
+        advanceUntilIdle()
+        owner.clearDiagnosticTroubleCodes()
+        advanceUntilIdle()
+
+        assertEquals(DtcClearUiState.Cleared(0), owner.dtcClearState.value)
+        replay.assertConsumed()
+    }
+
+    @Test
+    fun `experimental first generation Tiger reuses original TFT service family`() = runTest {
+        val adapter = adapterProfile("vlinker-mc-android.adaptermap.yaml")
+        val catalog = motorcycleCatalog()
+        val motorcycle = catalog.profiles.single { it.id == "triumph-tiger-900-gen1-other" }
+        val instrument = motorcycle.instrumentFamily ?: error("instrument family missing")
+        val service = instrument.originalSplit ?: error("service profile missing")
+        val adapterExchanges = listOf(
+            exchange("ATWS", "ELM327 v2.2\r>"),
+            exchange("ATE0", "OK\r>"),
+            exchange("ATL0", "OK\r>"),
+            exchange("ATS0", "OK\r>"),
+            exchange("STI", "STN1151 v4.3.2\r>"),
+            exchange("ATH1", "OK\r>"),
+        )
+        val replay = ReplayByteTransport(
+            adapterExchanges +
+                instrument.readOnlyCapture!!.configurationCommands.map { command ->
+                    exchange(command, if (command == "ATWS") "ELM327 v2.2\r>" else "OK\r>")
+                } +
+                exchange(service.initializeRequest, "704DE303433FFFFFFFF\r>") +
+                exchange(service.odometerRequest, "7048D0100AE76000000\r>") +
+                exchange("3364", "704B364000000000000\r>") +
+                exchange("5C1B0807016E0000", "704DC1B0807016E0000\r>"),
+        )
+        val owner = AdapterSessionOwner(
+            adapter,
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            motorcycleCatalog = catalog,
+            writesEnabled = true,
+        ) { _, _ -> replay }
+
+        assertTrue(owner.selectMotorcycle(motorcycle.id))
+        assertTrue(owner.serviceResetAvailable)
+        owner.connect("synthetic-address")
+        advanceUntilIdle()
+        owner.resetServiceReminder(10_000, DistanceUnit.KILOMETERS, LocalDate.of(2027, 8, 7))
+        advanceUntilIdle()
+
+        val committed = owner.serviceResetState.value as ServiceResetUiState.Committed
+        assertEquals(44_662, committed.odometerKm)
+        assertEquals(10_000, committed.distance)
+        replay.assertConsumed()
+    }
+
+    @Test
+    fun `classic registry keeps every product profile separate`() = runTest {
         val vlinker = adapterProfile("vlinker-mc-android.adaptermap.yaml")
         val mx = adapterProfile("obdlink-mx-android.adaptermap.yaml")
+        val lx = adapterProfile("obdlink-lx-android.adaptermap.yaml")
+        val mxPlus = adapterProfile("obdlink-mx-plus-android.adaptermap.yaml")
         val bluetooth = FakeBluetooth(
             listOf(
                 BondedDevice("V", "vLinker MC-Android"),
+                BondedDevice("L", "OBDLink LX"),
                 BondedDevice("M", "OBDLink MX"),
                 BondedDevice("P", "OBDLink MX+"),
                 BondedDevice("X", "OBDLink CX"),
@@ -53,17 +193,22 @@ class AdapterSessionOwnerTest {
             bluetooth,
             EventJournal(backgroundScope, MemorySink(), FixedClock()),
             this,
-            additionalProfiles = listOf(mx),
+            additionalProfiles = listOf(mx, lx, mxPlus),
         )
 
         owner.refreshBondedDevices()
 
         assertEquals(
-            mapOf("M" to "obdlink-mx-android", "V" to "vlinker-mc-android"),
+            mapOf(
+                "L" to "obdlink-lx-android",
+                "M" to "obdlink-mx-android",
+                "P" to "obdlink-mx-plus-android",
+                "V" to "vlinker-mc-android",
+            ),
             owner.devices.value.associate { it.address to it.profileId },
         )
         assertEquals(
-            mapOf("M" to true, "V" to false),
+            mapOf("L" to true, "M" to true, "P" to true, "V" to false),
             owner.devices.value.associate { it.address to it.experimental },
         )
     }
@@ -424,6 +569,23 @@ class AdapterSessionOwnerTest {
     private fun adapterProfile(name: String) = AdapterProfileLoader().load(
         File("build/generated/profileAssets/profiles/$name").readBytes(),
     )
+
+    private fun motorcycleCatalog() = run {
+        val root = File("build/generated/profileAssets/profiles")
+        val engine = EngineFamilyProfileLoader().load(File(root, "triumph-modern-can.enginefamily.yaml").readBytes())
+        val instruments = listOf(
+            "triumph-original-tft.instrumentfamily.yaml",
+            "triumph-updated-tft.instrumentfamily.yaml",
+            "triumph-hybrid-display.instrumentfamily.yaml",
+        ).associate { name ->
+            InstrumentFamilyProfileLoader().load(File(root, name).readBytes()).let { it.id to it }
+        }
+        MotorcycleProfileCatalogLoader().load(
+            File(root, "triumph.motorcycleprofiles.yaml").readBytes(),
+            mapOf(engine.id to engine),
+            instruments,
+        )
+    }
 
     private fun adapterReadyExchanges(): List<ReplayExchange> = listOf(
         exchange("ATWS", "ATWS\r\rELM327 v2.2\r>"),

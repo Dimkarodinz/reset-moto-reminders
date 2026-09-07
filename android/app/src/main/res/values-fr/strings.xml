@@ -118,7 +118,7 @@
 
     <!-- Trouble-code clear -->
     <string name="dtc_clear_title">Effacer les codes de défaut (Bêta)</string>
-    <string name="dtc_clear_body_idle">Exécute l\'accès de sécurité et efface les codes moteur confirmés. N\'effacez que les codes que vous avez déjà lus et compris.</string>
+    <string name="dtc_clear_body_idle">Efface les codes moteur confirmés avec le profil de moto sélectionné. N\'effacez que les codes que vous avez déjà lus et compris.</string>
     <string name="dtc_clear_body_running">Effacement des codes de défaut. Laissez le contact mis et ne quittez pas l\'application.</string>
     <string name="dtc_clear_body_cleared_none">Effacé. Aucun code de défaut confirmé ne subsiste.</string>
     <string name="dtc_clear_body_cleared_remaining">Effacement terminé, mais %1$d code(s) sont toujours présents.</string>
@@ -129,6 +129,7 @@
     <string name="dtc_clear_confirm">Confirmer l\'effacement</string>
     <string name="dtc_clear_failed_error">L\'effacement des codes de défaut s\'est arrêté après une erreur de connexion ou d\'adaptateur.</string>
     <string name="dtc_clear_reason_session_refused">L\'ECU a refusé la session de diagnostic étendu ; rien n\'a été effacé.</string>
+    <string name="dtc_clear_reason_identity_unavailable">L\'identité de l\'ECU moteur n\'a pas pu être confirmée ; rien n\'a été effacé.</string>
     <string name="dtc_clear_reason_no_seed">L\'ECU n\'a pas renvoyé de graine de sécurité utilisable ; rien n\'a été effacé.</string>
     <string name="dtc_clear_reason_security_rejected">L\'ECU a rejeté l\'accès de sécurité ; rien n\'a été effacé.</string>
     <string name="dtc_clear_reason_rejected">L\'ECU a rejeté la demande d\'effacement ; aucun code n\'a été effacé.</string>
@@ -168,8 +169,15 @@
     <!-- Device picker -->
     <string name="device_picker_title">Sélectionner l\'adaptateur</string>
     <string name="device_picker_empty">Recherche des adaptateurs compatibles…</string>
-    <string name="device_picker_pair_hint">Associez vLinker MC-Android dans les paramètres avec le PIN 1234. Pour OBDLink MX, appuyez sur le bouton Connect de l\'adaptateur et associez-le dans les paramètres Android. OBDLink CX s\'associe à la connexion.</string>
+    <string name="device_picker_pair_hint">Associez vLinker MC-Android avec le PIN 1234. Pour OBDLink LX, MX ou MX+, appuyez sur Connect et associez-le dans les paramètres Android. OBDLink CX s\'associe à la connexion.</string>
     <string name="device_picker_settings">Paramètres Bluetooth</string>
     <string name="adapter_default_name">Adaptateur vLinker</string>
     <string name="adapter_experimental_suffix">expérimental</string>
+    <string name="motorcycle_profile_title">Moto</string>
+    <string name="motorcycle_profile_default">Tiger 900 GT Pro (2021, validée)</string>
+    <string name="motorcycle_profile_select">Choisir la moto</string>
+    <string name="motorcycle_profile_picker_title">Choisissez votre moto</string>
+    <string name="motorcycle_profile_experimental">Expérimental — pas encore testé sur une moto</string>
+    <string name="motorcycle_profile_experimental_short">expérimental, non testé</string>
+    <string name="experimental_write_warning">Ce profil n\'a pas encore été testé sur une moto. Continuez uniquement si vous pouvez vérifier le résultat sur la moto.</string>
 </resources>

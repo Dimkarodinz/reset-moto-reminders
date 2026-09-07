@@ -118,7 +118,7 @@
 
     <!-- Trouble-code clear -->
     <string name="dtc_clear_title">Borrar códigos de avería (Beta)</string>
-    <string name="dtc_clear_body_idle">Ejecuta el acceso de seguridad y borra los códigos confirmados del motor. Borra solo los códigos que ya hayas leído y entendido.</string>
+    <string name="dtc_clear_body_idle">Borra los códigos confirmados del motor con el perfil de motocicleta seleccionado. Borra solo los códigos que ya hayas leído y entendido.</string>
     <string name="dtc_clear_body_running">Borrando los códigos de avería. Mantén el contacto puesto y no salgas de la aplicación.</string>
     <string name="dtc_clear_body_cleared_none">Borrado. No quedan códigos de avería confirmados.</string>
     <string name="dtc_clear_body_cleared_remaining">El borrado se completó, pero todavía hay %1$d código(s) presente(s).</string>
@@ -129,6 +129,7 @@
     <string name="dtc_clear_confirm">Confirmar borrado</string>
     <string name="dtc_clear_failed_error">El borrado de códigos de avería se detuvo tras un error de conexión o del adaptador.</string>
     <string name="dtc_clear_reason_session_refused">La ECU rechazó la sesión de diagnóstico extendida; no se borró nada.</string>
+    <string name="dtc_clear_reason_identity_unavailable">No se pudo confirmar la identidad de la ECU del motor; no se borró nada.</string>
     <string name="dtc_clear_reason_no_seed">La ECU no devolvió una semilla de seguridad utilizable; no se borró nada.</string>
     <string name="dtc_clear_reason_security_rejected">La ECU rechazó el acceso de seguridad; no se borró nada.</string>
     <string name="dtc_clear_reason_rejected">La ECU rechazó la solicitud de borrado; no se borró ningún código.</string>
@@ -168,8 +169,15 @@
     <!-- Device picker -->
     <string name="device_picker_title">Selecciona el adaptador</string>
     <string name="device_picker_empty">Buscando adaptadores compatibles…</string>
-    <string name="device_picker_pair_hint">Empareja vLinker MC-Android en los ajustes con el PIN 1234. Para OBDLink MX, pulsa el botón Connect del adaptador y empareja en los ajustes de Android. OBDLink CX se empareja al conectar.</string>
+    <string name="device_picker_pair_hint">Empareja vLinker MC-Android con el PIN 1234. Para OBDLink LX, MX o MX+, pulsa Connect y empareja en los ajustes de Android. OBDLink CX se empareja al conectar.</string>
     <string name="device_picker_settings">Ajustes de Bluetooth</string>
     <string name="adapter_default_name">Adaptador vLinker</string>
     <string name="adapter_experimental_suffix">experimental</string>
+    <string name="motorcycle_profile_title">Motocicleta</string>
+    <string name="motorcycle_profile_default">Tiger 900 GT Pro (2021, validada)</string>
+    <string name="motorcycle_profile_select">Elegir motocicleta</string>
+    <string name="motorcycle_profile_picker_title">Elige tu motocicleta</string>
+    <string name="motorcycle_profile_experimental">Experimental — aún no probado en una motocicleta</string>
+    <string name="motorcycle_profile_experimental_short">experimental, sin probar</string>
+    <string name="experimental_write_warning">Este perfil aún no se ha probado en una motocicleta. Continúa solo si puedes comprobar el resultado en la moto.</string>
 </resources>

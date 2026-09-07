@@ -49,6 +49,10 @@ class ConnectionScreenPresenter {
         selectedAdapterName: String?,
         researchCaptureEnabled: Boolean = false,
         writeOperationsEnabled: Boolean = false,
+        dtcReadEnabled: Boolean = true,
+        dashboardReadEnabled: Boolean = true,
+        dtcClearEnabled: Boolean = writeOperationsEnabled,
+        serviceResetEnabled: Boolean = writeOperationsEnabled,
     ): ConnectionScreenState = when (state) {
         ConnectionState.Disconnected -> disconnected(selectedAdapterName)
         ConnectionState.SelectingOrPairing -> ConnectionScreenState(
@@ -78,13 +82,13 @@ class ConnectionScreenPresenter {
             selectedAdapterName = selectedAdapterName,
             showDisconnect = true,
             showReadOnlyCapture = researchCaptureEnabled,
-            showDtcRead = true,
+            showDtcRead = dtcReadEnabled,
             // This bounded read proves the motorcycle itself responded, not
             // only the Bluetooth adapter, so it is a normal product feature.
-            showServiceInfoRead = true,
-            showDtcClear = writeOperationsEnabled,
-            showServiceReset = writeOperationsEnabled,
-            showUnavailableServiceCard = !writeOperationsEnabled,
+            showServiceInfoRead = dashboardReadEnabled,
+            showDtcClear = dtcClearEnabled,
+            showServiceReset = serviceResetEnabled,
+            showUnavailableServiceCard = false,
             elmIdentity = state.elmIdentity,
             stnIdentity = state.stnIdentity,
             mapId = state.mapId,

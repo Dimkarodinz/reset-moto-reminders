@@ -118,7 +118,7 @@
 
     <!-- Trouble-code clear -->
     <string name="dtc_clear_title">Очищення кодів несправностей (Бета)</string>
-    <string name="dtc_clear_body_idle">Виконує доступ безпеки та очищує підтверджені коди двигуна. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.</string>
+    <string name="dtc_clear_body_idle">Очищує підтверджені коди двигуна за вибраним профілем мотоцикла. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.</string>
     <string name="dtc_clear_body_running">Очищення кодів несправностей. Залиште запалювання увімкненим і не залишайте додаток.</string>
     <string name="dtc_clear_body_cleared_none">Очищено. Підтверджених кодів несправностей не залишилося.</string>
     <string name="dtc_clear_body_cleared_remaining">Очищення завершено, але %1$d код(ів) досі присутні.</string>
@@ -129,6 +129,7 @@
     <string name="dtc_clear_confirm">Підтвердити очищення</string>
     <string name="dtc_clear_failed_error">Очищення кодів несправностей зупинено через помилку з\'єднання або адаптера.</string>
     <string name="dtc_clear_reason_session_refused">ECU відхилив розширений діагностичний сеанс; нічого не було очищено.</string>
+    <string name="dtc_clear_reason_identity_unavailable">Не вдалося підтвердити ідентичність ECU двигуна; нічого не було очищено.</string>
     <string name="dtc_clear_reason_no_seed">ECU не повернув придатного початкового значення безпеки (seed); нічого не було очищено.</string>
     <string name="dtc_clear_reason_security_rejected">ECU відхилив доступ безпеки; нічого не було очищено.</string>
     <string name="dtc_clear_reason_rejected">ECU відхилив запит на очищення; жоден код не було очищено.</string>
@@ -168,8 +169,15 @@
     <!-- Device picker -->
     <string name="device_picker_title">Виберіть адаптер</string>
     <string name="device_picker_empty">Пошук підтримуваних адаптерів…</string>
-    <string name="device_picker_pair_hint">Сполучіть vLinker MC-Android у налаштуваннях із PIN 1234. Для OBDLink MX натисніть кнопку Connect на адаптері та сполучіть його в налаштуваннях Android. OBDLink CX сполучається під час підключення.</string>
+    <string name="device_picker_pair_hint">Сполучіть vLinker MC-Android із PIN 1234. Для OBDLink LX, MX або MX+ натисніть Connect і сполучіть у налаштуваннях Android. OBDLink CX сполучається під час підключення.</string>
     <string name="device_picker_settings">Налаштування Bluetooth</string>
     <string name="adapter_default_name">Адаптер vLinker</string>
     <string name="adapter_experimental_suffix">експериментальний</string>
+    <string name="motorcycle_profile_title">Мотоцикл</string>
+    <string name="motorcycle_profile_default">Tiger 900 GT Pro (2021, перевірено)</string>
+    <string name="motorcycle_profile_select">Вибрати мотоцикл</string>
+    <string name="motorcycle_profile_picker_title">Виберіть свій мотоцикл</string>
+    <string name="motorcycle_profile_experimental">Експериментально — ще не перевірено на мотоциклі</string>
+    <string name="motorcycle_profile_experimental_short">експериментально, не перевірено</string>
+    <string name="experimental_write_warning">Цей профіль ще не перевірено на мотоциклі. Продовжуйте лише якщо зможете перевірити результат на мотоциклі.</string>
 </resources>

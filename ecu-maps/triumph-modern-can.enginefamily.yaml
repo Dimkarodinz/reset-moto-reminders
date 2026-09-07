@@ -1,0 +1,77 @@
+schema_version: 1
+
+engine_family:
+  id: triumph-modern-can-engine
+  display_name: Triumph modern CAN engine ECU
+  module:
+    role: engine_management_and_diagnostics
+    family: Triumph modern CAN engine ECU
+    supplier: Keihin
+    hardware_family: unknown
+    part_number: unknown
+    software_version: unknown
+    transport:
+      knowledge_status: observed_and_project_app_replay_validated
+      minimal_configuration_confirmed: false
+      protocol: ISO 15765-4 CAN
+      can_id_format: 29-bit
+      bitrate_kbit_s: 500
+      request_can_id: "0x18DAD5F1"
+      response_can_id: "0x18DAF1D5"
+      elm_protocol_command: ATTP7
+      configuration_commands:
+        - ATWS
+        - ATE0
+        - ATL0
+        - ATS0
+        - ATH1
+        - ATTP7
+        - ATV0
+        - ATCAF0
+        - ATCFC1
+        - ATCP18
+        - ATSHDAD5F1
+
+  read_only_capture:
+    configuration_commands:
+      - ATWS
+      - ATE0
+      - ATL0
+      - ATS0
+      - ATH1
+      - ATTP7
+      - ATV0
+      - ATCAF0
+      - ATCFC1
+      - ATCP18
+      - ATSHDAD5F1
+    identifier_reads:
+      - { name: read_did_f1a0, request: "0322F1A0" }
+      - { name: read_did_f1a2, request: "0322F1A2" }
+      - { name: read_did_f1ae, request: "0322F1AE" }
+      - { name: read_programming_date, request: "0322F199" }
+      - { name: read_calibration_date, request: "0322F19B" }
+      - { name: read_did_f1a7, request: "0322F1A7" }
+
+  security_access:
+    extended_session_request: "021003"
+    extended_session_positive_prefix: "5003"
+    seed_request: "022701"
+    key_request_prefix: "042702"
+    seed_key_multiplier: "0x4B48"
+    compatibility_scope: captured_2021_tiger_900_gt_pro_engine_ecu_only
+
+  diagnostic_trouble_codes:
+    identity_request: "0322F18C"
+    read:
+      count_request: "03190108"
+      detail_request: "03190208"
+      status_mask: "0x08"
+    clear:
+      request: "0414FFFFFF"
+      pending_response: "7F1478"
+      positive_response: "54"
+      verification_request: "03190108"
+      strategies:
+        - security_access
+        - direct

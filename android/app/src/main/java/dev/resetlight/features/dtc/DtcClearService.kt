@@ -14,6 +14,7 @@ import dev.resetlight.domain.UiMessage
 import dev.resetlight.domain.UiText
 import dev.resetlight.profiles.DiagnosticTroubleCodeClearProfile
 import dev.resetlight.profiles.DtcDescriptionLookup
+import dev.resetlight.profiles.DtcClearStrategy
 import dev.resetlight.profiles.EngineSecurityAccessProfile
 import kotlinx.coroutines.CancellationException
 
@@ -28,14 +29,13 @@ class DtcClearFailure(
 ) : Exception("DTC clear failed while sending $request", cause)
 
 /**
- * Clears confirmed DTCs on the engine ECU. The only observed clear ran inside
- * the extended session after SecurityAccess, so this replays exactly that
- * sequence: `1003` → `2701` seed → derived `2702` key → `14FFFFFF` → verify a
- * zero count. Callers apply their build-specific eligibility gate and explicit
- * confirmation before instantiating this service. A refused session or key
- * returns [DtcClearResult.Blocked] without sending the clear.
+ * Clears confirmed DTCs on the engine ECU with the strategy selected by the
+ * motorcycle profile. The validated 2021 profile replays its captured
+ * `1003` → `2701` → derived `2702` path. Experimental modern profiles first
+ * require a redacted `F18C` identity response, then use the independently
+ * corroborated default-session clear. Both paths finish with a DTC-count read.
  *
- * The clear request is sent exactly once. If the ECU returns response-pending
+ * The clear request is always sent exactly once. If the ECU returns response-pending
  * (`0x78`), the adapter keeps listening until its prompt and returns the pending
  * and final frames together. Retrying the write after a pending response would
  * perform a second clear and is therefore forbidden.
@@ -47,6 +47,8 @@ class DtcClearService(
     private val channel: DiagnosticWriteChannel,
     private val configurationCommands: List<String> = emptyList(),
     private val extractor: CanResponseExtractor? = null,
+    private val strategy: DtcClearStrategy = DtcClearStrategy.SECURITY_ACCESS,
+    private val identityRequest: String? = null,
 ) {
     suspend fun clear(): DtcClearResult {
         // Re-apply the engine route first: the adapter keeps whatever route the
@@ -60,20 +62,32 @@ class DtcClearService(
             }
         }
 
-        val sessionResponse = execute(securityProfile.extendedSessionElmRequest, WriteIntent.READ)
-        if (!sessionResponse.startsWithHex(securityProfile.extendedSessionPositivePrefix)) {
-            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SESSION_REFUSED))
-        }
+        if (strategy == DtcClearStrategy.DIRECT) {
+            val request = identityRequest ?: return DtcClearResult.Blocked(
+                UiText(UiMessage.DTC_CLEAR_REASON_IDENTITY_UNAVAILABLE),
+            )
+            val identityResponse = execute(request, WriteIntent.READ)
+            if (!identityResponse.startsWithHex(IDENTITY_POSITIVE_PREFIX)) {
+                return DtcClearResult.Blocked(
+                    UiText(UiMessage.DTC_CLEAR_REASON_IDENTITY_UNAVAILABLE),
+                )
+            }
+        } else {
+            val sessionResponse = execute(securityProfile.extendedSessionElmRequest, WriteIntent.READ)
+            if (!sessionResponse.startsWithHex(securityProfile.extendedSessionPositivePrefix)) {
+                return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SESSION_REFUSED))
+            }
 
-        val seedResponse = execute(securityProfile.seedRequestElmRequest, WriteIntent.READ)
-        val keyRequest = try {
-            derivation.keyRequestFor(payload(seedResponse).hexOnly(), securityProfile.keyRequestElmPrefix)
-        } catch (parse: DiagnosticParseException) {
-            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_NO_SEED))
-        }
-        val keyResponse = execute(keyRequest, WriteIntent.WRITE)
-        if (!keyResponse.isPositive(SECURITY_ACCESS_POSITIVE)) {
-            return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED))
+            val seedResponse = execute(securityProfile.seedRequestElmRequest, WriteIntent.READ)
+            val keyRequest = try {
+                derivation.keyRequestFor(payload(seedResponse).hexOnly(), securityProfile.keyRequestElmPrefix)
+            } catch (parse: DiagnosticParseException) {
+                return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_NO_SEED))
+            }
+            val keyResponse = execute(keyRequest, WriteIntent.WRITE)
+            if (!keyResponse.isPositive(SECURITY_ACCESS_POSITIVE)) {
+                return DtcClearResult.Blocked(UiText(UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED))
+            }
         }
 
         val clearResponses = clearResponses(execute(clearProfile.elmRequest, WriteIntent.WRITE))
@@ -131,6 +145,7 @@ class DtcClearService(
     private companion object {
         const val SECURITY_ACCESS_POSITIVE = 0x67
         const val CLEAR_POSITIVE = 0x54
+        const val IDENTITY_POSITIVE_PREFIX = "62F18C"
         val EMPTY_DESCRIPTIONS = DtcDescriptionLookup { code ->
             dev.resetlight.profiles.DtcMessage(code, dev.resetlight.profiles.DtcMessageStatus.UNKNOWN)
         }

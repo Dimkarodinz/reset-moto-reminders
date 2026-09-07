@@ -10,6 +10,9 @@ import dev.resetlight.profiles.DtcDescriptionLookup
 import dev.resetlight.profiles.DtcMapLoader
 import dev.resetlight.profiles.DtcTranslationLoader
 import dev.resetlight.profiles.EcuProfileLoader
+import dev.resetlight.profiles.EngineFamilyProfileLoader
+import dev.resetlight.profiles.InstrumentFamilyProfileLoader
+import dev.resetlight.profiles.MotorcycleProfileCatalogLoader
 import dev.resetlight.profiles.LocalizedDtcDescriptions
 import java.util.Locale
 import dev.resetlight.transport.bluetooth.AndroidBluetoothFacade
@@ -32,10 +35,37 @@ class AppContainer(context: Context) {
     private val obdlinkMxProfile = applicationContext.assets
         .open("profiles/obdlink-mx-android.adaptermap.yaml")
         .use(AdapterProfileLoader()::load)
+    private val obdlinkLxProfile = applicationContext.assets
+        .open("profiles/obdlink-lx-android.adaptermap.yaml")
+        .use(AdapterProfileLoader()::load)
+    private val obdlinkMxPlusProfile = applicationContext.assets
+        .open("profiles/obdlink-mx-plus-android.adaptermap.yaml")
+        .use(AdapterProfileLoader()::load)
     private val bluetooth = AndroidBluetoothFacade(applicationContext)
     val ecuProfile = applicationContext.assets
         .open("profiles/tiger-900-gt-pro-2021.ecumap.yaml")
         .use(EcuProfileLoader()::load)
+    private val modernEngineFamily = applicationContext.assets
+        .open("profiles/triumph-modern-can.enginefamily.yaml")
+        .use(EngineFamilyProfileLoader()::load)
+    private val instrumentFamilies = listOf(
+        "triumph-original-tft.instrumentfamily.yaml",
+        "triumph-updated-tft.instrumentfamily.yaml",
+        "triumph-hybrid-display.instrumentfamily.yaml",
+    ).associate { asset ->
+        applicationContext.assets.open("profiles/$asset")
+            .use(InstrumentFamilyProfileLoader()::load)
+            .let { it.id to it }
+    }
+    private val motorcycleCatalog = applicationContext.assets
+        .open("profiles/triumph.motorcycleprofiles.yaml")
+        .use { source ->
+            MotorcycleProfileCatalogLoader().load(
+                source,
+                engineFamilies = mapOf(modernEngineFamily.id to modernEngineFamily),
+                instrumentFamilies = instrumentFamilies,
+            )
+        }
     val dtcDictionary = applicationContext.assets
         .open("profiles/triumph-tiger-900-gt-pro-2021.en.dtcmap.yaml")
         .use(DtcMapLoader()::load)
@@ -69,7 +99,12 @@ class AppContainer(context: Context) {
 
     val adapterSession = AdapterSessionOwner(
         profile = profile,
-        additionalProfiles = listOf(obdlinkCxProfile, obdlinkMxProfile),
+        additionalProfiles = listOf(
+            obdlinkCxProfile,
+            obdlinkMxProfile,
+            obdlinkLxProfile,
+            obdlinkMxPlusProfile,
+        ),
         bluetooth = bluetooth,
         bleAdapter = AndroidBleAdapterFacade(applicationContext),
         journal = journal,
@@ -84,6 +119,7 @@ class AppContainer(context: Context) {
         serviceReminderProfile = ecuProfile.serviceReminder,
         clusterFingerprintGate = ClusterFingerprintGate(ecuProfile),
         motorcycleId = ecuProfile.motorcycleId,
+        motorcycleCatalog = motorcycleCatalog,
         writesEnabled = BuildConfig.WRITE_OPERATIONS_ENABLED,
         engineResponseCanId = ecuProfile.engineEcu.transport.responseCanId,
         instrumentResponseCanId = ecuProfile.instrumentCluster.transport.responseCanId,

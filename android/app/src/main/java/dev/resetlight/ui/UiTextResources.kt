@@ -65,6 +65,7 @@ fun UiMessage.resourceId(): Int = when (this) {
 
     UiMessage.DTC_CLEAR_FAILED_ERROR -> R.string.dtc_clear_failed_error
     UiMessage.DTC_CLEAR_REASON_SESSION_REFUSED -> R.string.dtc_clear_reason_session_refused
+    UiMessage.DTC_CLEAR_REASON_IDENTITY_UNAVAILABLE -> R.string.dtc_clear_reason_identity_unavailable
     UiMessage.DTC_CLEAR_REASON_NO_SEED -> R.string.dtc_clear_reason_no_seed
     UiMessage.DTC_CLEAR_REASON_SECURITY_REJECTED -> R.string.dtc_clear_reason_security_rejected
     UiMessage.DTC_CLEAR_REASON_REJECTED -> R.string.dtc_clear_reason_rejected
