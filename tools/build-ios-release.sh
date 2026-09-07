@@ -24,7 +24,7 @@ if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git status --po
   exit 1
 fi
 
-if [[ "$(git describe --tags --exact-match 2>/dev/null || true)" != "$TAG" ]]; then
+if ! git tag --points-at HEAD | grep -Fxq "$TAG"; then
   echo "HEAD must have the exact tag $TAG." >&2
   exit 1
 fi

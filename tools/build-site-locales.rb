@@ -19,8 +19,12 @@ LOCALES = {
 
 PRESERVED_TEXT = [
   "Reset Moto Reminders", "Android", "iPhone", "Triumph Tiger 900 GT Pro, 2021",
-  "Triumph Tiger 900 GT Pro, 2022–2023", "vLinker MC-Android", "vLinker MC-IOS",
-  "android-v0.10.0", "2fdf4e70…1eb50ad6", "1234", ".", "Option", "Shift",
+  "Tiger 900 / Tiger 850 Sport — first generation", "Tiger 900 — updated generation",
+  "Tiger Sport 660", "Street Triple 765 R / RS / Moto2",
+  "Bonneville / Bobber / Speed Twin / Thruxton — modern models", "Scrambler 900 / 1200",
+  "Trident 660 / Daytona 660 / Tiger Sport 800", "Speed Triple 1200 RS / RR",
+  "Tiger 1200 GT / Rally", "vLinker MC-Android", "vLinker MC-IOS",
+  "android-v0.11.0", "2fdf4e70…1eb50ad6", "1234", ".", "Option", "Shift",
   "AltServer", "Xcode", "Signing & Capabilities", "Run", "Ko-fi",
 ].freeze
 

@@ -4,7 +4,7 @@ Native SwiftUI/CoreBluetooth app for iOS 16 and later. It reads confirmed DTCs, 
 
 ## Current status
 
-Version 0.2.0 (`build 7`) adds experimental OBDLink CX support alongside the validated vLinker MC-IOS transport. The current experimental branch also adds the shared Triumph motorcycle selector and the original, updated, hybrid and live-detected combined service-reset families listed in [`../ecu-maps/README.md`](../ecu-maps/README.md). The validated Tiger 900 GT Pro remains the default; every added motorcycle is visibly marked experimental.
+Version 0.3.0 (`build 8`) includes experimental OBDLink CX support alongside the validated vLinker MC-IOS transport. It also includes the shared Triumph motorcycle selector and the original, updated, hybrid and live-detected combined service-reset families listed in [`../ecu-maps/README.md`](../ecu-maps/README.md). The validated Tiger 900 GT Pro remains the default; every added motorcycle is visibly marked experimental.
 
 The corrected connection and default Tiger dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. Unknown combined-service response shapes stop before the reminder write; writes are sent once and verified without trying an alternate format. The main app does not export logs or record raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta, and every added motorcycle/adapter combination requires a physical test.
 

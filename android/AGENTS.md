@@ -16,7 +16,7 @@ Android is the first implementation target. Build it natively with Kotlin and Je
 
 The main app uses the fixed `ResetMotoTheme`: near-black background, restrained graphite surfaces, muted teal actions and high-contrast text/system bars. Keep this serious dark presentation independent of the phone theme; safety warnings continue to use the Material error role.
 
-The public v0.10.0 build (`versionCode 14`) adds experimental Android-only support for the original OBDLink MX Bluetooth adapter to the v0.9.0 baseline. The `experimental/triumph-family-profiles` branch additionally packages OBDLink LX/MX+ and the family-composed motorcycle catalogue in [`../ecu-maps/README.md`](../ecu-maps/README.md). It retains experimental OBDLink CX BLE support, the one-time safety acknowledgement, bounded writes, packaged legal notices and the separation from broader research capture:
+The v0.11.0 release (`versionCode 15`) packages the family-composed motorcycle catalogue in [`../ecu-maps/README.md`](../ecu-maps/README.md), experimental OBDLink CX BLE support and separate experimental Android-only OBDLink MX, LX and MX+ Classic profiles. It retains the one-time safety acknowledgement, bounded writes, packaged legal notices and the separation from broader research capture:
 
 ```text
 launch -> accept safety notice once -> select or pair adapter -> connect -> identify

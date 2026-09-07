@@ -1,28 +1,34 @@
 # Reset Moto Reminders
 
-Reset Moto Reminders is an unofficial, noncommercial source-available motorcycle diagnostic application for Android and iPhone. Its narrow purpose is to read diagnostic trouble codes and reset the service reminder on explicitly validated motorcycle profiles.
+Reset Moto Reminders is an unofficial, noncommercial source-available Android and iPhone app. It resets service reminders and reads or clears diagnostic trouble codes on explicitly listed Triumph motorcycle profiles.
 
 Canonical website: https://dimkarodinz.github.io/reset-moto-reminders/
 Source repository: https://github.com/Dimkarodinz/reset-moto-reminders
-Android release: https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/android-v0.10.0
+Android release: https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/android-v0.11.0
+iPhone release: https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/ios-v0.3.0
 License: PolyForm Noncommercial License 1.0.0
 
-## Verified compatibility
+## Compatibility
 
-- Test motorcycle: Triumph Tiger 900 GT Pro, model year 2021.
-- Declared model range: Triumph Tiger 900 GT Pro, 2021–2023, subject to the exact module/profile checks enforced by the app.
-- Tested adapter: vLinker MC+.
-- Experimental adapter: OBDLink CX on Android and iPhone, implemented from the manufacturer-documented BLE interface; physical project validation is pending.
-- Experimental Android-only adapter: original OBDLink MX Bluetooth, using exact-name Classic pairing plus manufacturer-defined STDI/STI identity gates; physical project validation is pending.
-- Android transport: Bluetooth Classic to vLinker MC-Android.
-- iPhone transport: Bluetooth Low Energy to vLinker MC-IOS.
-- Dashboard read, engine DTC read and service-reminder reset are physically validated through the project app.
+- Physically validated motorcycle: Triumph Tiger 900 GT Pro, model year 2021.
+- Experimental profiles: first-generation and updated Tiger 900, Tiger 850 Sport, Tiger Sport 660, Street Triple 765, modern Bonneville/Bobber/Speed Twin/Thruxton, Scrambler 900/1200, Trident 660, Daytona 660, Tiger Sport 800, Speed Triple 1200 and Tiger 1200 GT/Rally families.
+- Physically validated adapter: vLinker MC+.
+- Experimental Android and iPhone adapter: OBDLink CX.
+- Experimental Android-only adapters: OBDLink MX, LX and MX+.
+- Android transport: Bluetooth Classic for vLinker MC-Android and OBDLink MX/LX/MX+; Bluetooth Low Energy for OBDLink CX.
+- iPhone transport: Bluetooth Low Energy for vLinker MC-IOS and OBDLink CX.
+- Dashboard read, engine DTC read and service-reminder reset are physically validated on the 2021 Tiger 900 GT Pro with vLinker MC+.
 - DTC clear is marked Beta and awaits controlled hardware validation.
-- Android v0.10.0 adds experimental original OBDLink MX support; Android v0.9.0 and iPhone v0.2.0 added experimental OBDLink CX support.
+
+## Current releases
+
+- Android v0.11.0 includes the Triumph motorcycle catalogue and all listed adapter profiles.
+- iPhone v0.3.0 includes the same Triumph motorcycle catalogue and the vLinker MC-IOS and OBDLink CX profiles.
+- All motorcycles and adapter combinations other than the physically validated pair are visibly marked experimental.
 
 ## Scope
 
-The main app reads the TFT odometer and compatibility fingerprint, reads confirmed engine DTCs, clears DTCs only after confirmation, and sets the next-service distance/date. It does not flash firmware, edit ECU maps, tune the engine, change emissions settings, code an immobilizer, run actuator tests, fuzz commands or expose an arbitrary diagnostic console.
+The main app reads compatible dashboard information, reads confirmed engine DTCs, clears DTCs only after confirmation, and sets the next-service distance and date. It does not flash firmware, edit ECU maps, tune the engine, change emissions settings, code an immobilizer, run actuator tests, fuzz commands or expose an arbitrary diagnostic console.
 
 ## Installation
 
@@ -32,4 +38,4 @@ The main app reads the TFT odometer and compatibility fingerprint, reads confirm
 
 ## Important qualifications
 
-This project is not affiliated with Triumph Motorcycles. Similar ECU suppliers or TFT hardware do not prove compatibility. Clearing a DTC removes diagnostic evidence but does not repair the fault. Resetting a reminder does not perform maintenance. The software comes with no warranty.
+This project is not affiliated with Triumph Motorcycles. Similar ECU suppliers or TFT hardware do not prove compatibility. Clearing a DTC removes diagnostic evidence but does not repair the fault. Resetting a reminder does not perform maintenance.

@@ -8,6 +8,13 @@ keychain_account=${USER:?USER must be set}
 keystore_file="$HOME/Library/Application Support/Reset Moto Reminders/signing/reset-moto-reminders-release.p12"
 key_alias="reset-moto-reminders"
 
+version=$(sed -nE 's/.*versionName = "([^"]+)".*/\1/p' "$android_root/app/build.gradle.kts")
+if [ -z "$version" ]; then
+  echo "Could not read Android versionName." >&2
+  exit 1
+fi
+expected_tag="android-v$version"
+
 if [ ! -f "$keystore_file" ]; then
   echo "Release keystore not found: $keystore_file" >&2
   echo "Create or restore the protected project key before building a public APK." >&2
@@ -19,8 +26,8 @@ if [ "${ALLOW_UNTAGGED_RELEASE:-0}" != "1" ]; then
     echo "Refusing a release build from a dirty working tree." >&2
     exit 1
   fi
-  if ! git -C "$repo_root" describe --tags --exact-match >/dev/null 2>&1; then
-    echo "Refusing a release build that is not checked out at an exact public tag." >&2
+  if ! git -C "$repo_root" tag --points-at HEAD | grep -Fxq "$expected_tag"; then
+    echo "Refusing a release build unless HEAD has the exact tag $expected_tag." >&2
     exit 1
   fi
 fi
@@ -41,12 +48,6 @@ export RESET_MOTO_KEY_ALIAS="$key_alias"
 export RESET_MOTO_KEY_PASSWORD="$keystore_password"
 export JAVA_HOME=${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}
 export ANDROID_HOME=${ANDROID_HOME:-$HOME/Library/Android/sdk}
-
-version=$(sed -nE 's/.*versionName = "([^"]+)".*/\1/p' "$android_root/app/build.gradle.kts")
-if [ -z "$version" ]; then
-  echo "Could not read Android versionName." >&2
-  exit 1
-fi
 
 (cd "$android_root" && ./gradlew --offline --no-daemon \
   :app:clean \

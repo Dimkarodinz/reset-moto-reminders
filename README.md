@@ -2,7 +2,7 @@
 
 [![Support on Ko-fi](https://img.shields.io/badge/Support%20on-Ko--fi-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/pippicat)
 
-Reset Moto Reminders is an unofficial native Android/iOS app for Triumph Tiger 900 GT Pro (2021–2023) owners. From your phone, it connects through a Bluetooth OBD adapter to read the dashboard odometer, read or clear diagnostic trouble codes (DTCs), and reset the service reminder. Free community build, source available, no account or subscription, no dealer visit.
+Reset Moto Reminders is an unofficial native Android/iOS app for supported Triumph motorcycles. From your phone, it connects through a Bluetooth OBD adapter to read or clear diagnostic trouble codes (DTCs) and reset the service reminder. Dashboard/odometer reading is also available on compatible first-generation Tiger instruments. Free community build, source available, no account or subscription, no dealer visit.
 
 Project website and installation guides:
 <https://dimkarodinz.github.io/reset-moto-reminders/>
@@ -28,7 +28,7 @@ Most routine service is an oil change and an air filter. You can do it yourself 
 - It does not tune or increase power.
 - It does not collect your data or require an account.
 
-## It cannot break your ECU
+## How writes are constrained
 
 Safety is built into the design, not bolted on afterward:
 
@@ -51,7 +51,7 @@ Reading trouble codes and the service-reminder reset are validated on a real Tig
 
 ### Experimental motorcycle profiles (not tested)
 
-The current experimental branch lets you select the motorcycles below on Android or iPhone. Their protocol families match known implementations, but none of these combinations has been tested through this app on a real motorcycle yet.
+The current release lets you select the motorcycles below on Android or iPhone. Their protocol families match known implementations, but none of these combinations has been tested through this app on a real motorcycle yet.
 
 | Possibly supported motorcycles | Model codes | Functions currently available |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ See [`ecu-maps/README.md`](ecu-maps/README.md) for the exact profile and capabil
 ## Install
 
 Download the signed Android APK and its SHA-256 checksum from
-[GitHub Releases](https://github.com/Dimkarodinz/reset-moto-reminders/releases/latest).
+[GitHub Releases](https://github.com/Dimkarodinz/reset-moto-reminders/releases/tag/android-v0.11.0).
 The APK is built from its public source tag and signed with the project release
 key.
 
@@ -114,8 +114,9 @@ For other motorcycle brands, use the separate read-only
 ## Platforms
 
 - **Android** — current target, built with Kotlin and Jetpack Compose over Bluetooth Classic (RFCOMM).
-- **iOS** — native app for iOS 16+. Install it from Xcode with your own Apple
-  Account. Connection and dashboard reading are validated on an iPhone 12.
+- **iOS** — native app for iOS 16+. Locally sign the release IPA or build it in
+  Xcode with your own Apple Account. Connection and dashboard reading are
+  validated on an iPhone 12.
 
 ## Unofficial project
 

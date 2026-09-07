@@ -2,7 +2,7 @@
 
 Android app for reading motorcycle information, reading and clearing DTCs, and resetting the service reminder.
 
-Validated: Triumph Tiger 900 GT Pro (2021) with vLinker MC+. OBDLink CX, original MX, LX and MX+ have separate experimental profiles; the Classic products are Android-only. This experimental branch also lets the rider choose one of the bounded Triumph family profiles listed in [`../ecu-maps/README.md`](../ecu-maps/README.md).
+Version 0.11.0 (`versionCode 15`) validates the Triumph Tiger 900 GT Pro (2021) with vLinker MC+. OBDLink CX, original MX, LX and MX+ have separate experimental profiles; the Classic products are Android-only. Riders can also choose one of the bounded experimental Triumph family profiles listed in [`../ecu-maps/README.md`](../ecu-maps/README.md).
 
 ## Build from source
 
