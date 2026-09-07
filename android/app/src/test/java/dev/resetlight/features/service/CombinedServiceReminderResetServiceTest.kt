@@ -63,7 +63,7 @@ class CombinedServiceReminderResetServiceTest {
         val profile = checkNotNull(family.combinedWrite)
         val payload = CombinedServiceReminderPayloadBuilder(profile).build(
             strategy = family.strategy,
-            intervalKm = 10_000,
+            intervalKm = 10_001,
             nextServiceDate = LocalDate.of(2027, 8, 7),
             a500Payload = "62A50000AE76",
             a000Payload = "62A0000102030405",

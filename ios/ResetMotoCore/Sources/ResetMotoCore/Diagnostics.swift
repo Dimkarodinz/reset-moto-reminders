@@ -98,7 +98,14 @@ public struct DTCDecoder: Sendable {
   }
 }
 
-public enum DistanceUnit: String, Codable, CaseIterable, Sendable { case kilometres, miles }
+public enum DistanceUnit: String, Codable, CaseIterable, Sendable {
+  case kilometres
+  case miles
+
+  public func toKilometres(_ value: Int) -> Int {
+    self == .kilometres ? value : Int((Double(value) * 1.609344).rounded())
+  }
+}
 
 public struct ServiceReminderCommands: Equatable, Sendable {
   public let distance: String

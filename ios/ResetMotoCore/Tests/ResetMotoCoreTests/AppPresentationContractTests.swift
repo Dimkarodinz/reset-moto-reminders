@@ -34,7 +34,7 @@ struct AppPresentationContractTests {
     #expect(icon[25] == 2, "The App Store icon must be true-color without an alpha channel")
   }
 
-  @Test("service input is dismissible, step-validated, and refers to the motorcycle date")
+  @Test("service input is dismissible, profile-validated, and refers to the motorcycle date")
   func serviceInputSafety() throws {
     let source = try String(contentsOf: appSource("ContentView.swift"), encoding: .utf8)
     let english = try #require(localizedStrings("en"))
@@ -42,10 +42,19 @@ struct AppPresentationContractTests {
     #expect(source.contains("@FocusState private var distanceFieldFocused"))
     #expect(source.contains("ToolbarItemGroup(placement: .keyboard)"))
     #expect(source.contains("Button(L10n.text(\"action_done\"))"))
-    #expect(source.contains("value.isMultiple(of: 100)"))
-    #expect(source.contains("ios_interval_help"))
-    #expect(english["ios_interval_help"]?.contains("motorcycle’s date") == true)
+    #expect(source.contains("session.serviceIntervalConstraints"))
+    #expect(source.contains("service_reset_date_time_reminder"))
+    #expect(english["service_reset_date_time_reminder"]?.contains("motorcycle") == true)
     #expect(!english.values.contains(where: { $0.contains("iPhone date") }))
+  }
+
+  @Test("motorcycle can be selected before connection and experimental status stays visible")
+  func motorcycleSelection() throws {
+    let source = try String(contentsOf: appSource("ContentView.swift"), encoding: .utf8)
+
+    #expect(source.contains("session.availableMotorcycles"))
+    #expect(source.contains("session.selectMotorcycle"))
+    #expect(source.contains("motorcycle_profile_experimental_short"))
   }
 
   @Test("dashboard fingerprint is explained instead of presented as an unknown status")

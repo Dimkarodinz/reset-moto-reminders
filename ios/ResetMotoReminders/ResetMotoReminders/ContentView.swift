@@ -27,10 +27,10 @@ struct ContentView: View {
           connectionCard
 
           if session.state.isReady {
-            dashboardCard
-            dtcCard
-            clearCard
-            serviceCard
+            if session.dashboardReadAvailable { dashboardCard }
+            if session.dtcReadAvailable { dtcCard }
+            if session.dtcClearAvailable { clearCard }
+            if session.serviceResetAvailable { serviceCard }
           }
 
           Text(
@@ -92,6 +92,31 @@ struct ContentView: View {
     Card {
       Text(session.state.title)
         .font(.title3.weight(.semibold))
+      if session.state == .disconnected {
+        Picker(
+          L10n.text("motorcycle_profile_select"),
+          selection: Binding(
+            get: { session.selectedMotorcycle.id },
+            set: { session.selectMotorcycle($0) })
+        ) {
+          ForEach(session.availableMotorcycles) { motorcycle in
+            Text(motorcycle.displayName).tag(motorcycle.id)
+          }
+        }
+        .pickerStyle(.menu)
+      } else {
+        Text(session.selectedMotorcycle.displayName)
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+      }
+      if session.motorcycleExperimental {
+        Text(L10n.text("motorcycle_profile_experimental_short"))
+          .font(.caption2.bold())
+          .padding(.horizontal, 7)
+          .padding(.vertical, 3)
+          .background(Color.orange.opacity(0.2), in: Capsule())
+          .foregroundStyle(.orange)
+      }
       if let identity = session.adapterIdentity {
         Text(identity).font(.subheadline.monospaced()).foregroundStyle(.secondary)
         if session.adapterExperimental {
@@ -217,10 +242,10 @@ struct ContentView: View {
         in: Date()...(Calendar.current.date(byAdding: .year, value: 2, to: Date()) ?? Date()),
         displayedComponents: .date
       )
-      Text(L10n.text("ios_interval_help"))
+      Text(L10n.text("service_reset_date_time_reminder"))
         .font(.footnote)
         .foregroundStyle(.secondary)
-      if session.dashboard == nil {
+      if session.serviceResetRequiresDashboardRead && session.dashboard == nil {
         Text(L10n.text("ios_read_motorcycle_first"))
           .font(.footnote)
           .foregroundStyle(.orange)
@@ -228,7 +253,7 @@ struct ContentView: View {
       if let inputMessage { Text(inputMessage).font(.footnote).foregroundStyle(.red) }
       Button {
         guard validDistance != nil else {
-          inputMessage = L10n.text("ios_interval_error")
+          inputMessage = intervalErrorMessage
           return
         }
         distanceFieldFocused = false
@@ -239,15 +264,28 @@ struct ContentView: View {
       }
       .buttonStyle(.borderedProminent)
       .controlSize(.large)
-      .disabled(session.dashboard == nil || validDistance == nil)
+      .disabled(
+        (session.serviceResetRequiresDashboardRead && session.dashboard == nil)
+          || validDistance == nil)
     }
   }
 
   private var validDistance: Int? {
-    guard let value = Int(distance), value >= 100, value <= 25_500, value.isMultiple(of: 100) else {
+    guard let value = Int(distance),
+      session.serviceIntervalConstraints(for: distanceUnit)?.accepts(value) == true
+    else {
       return nil
     }
     return value
+  }
+
+  private var intervalErrorMessage: String {
+    guard let constraints = session.serviceIntervalConstraints(for: distanceUnit) else {
+      return L10n.text("ios_interval_error")
+    }
+    return L10n.format(
+      "service_reset_interval_error_range",
+      constraints.step, unitLabel, constraints.minimum, constraints.maximum)
   }
 
   private var unitLabel: String {
@@ -261,7 +299,10 @@ struct ContentView: View {
 
   private var clearConfirmationText: String {
     let codes = session.dtcs.map(\.code).joined(separator: ", ")
-    return L10n.format("ios_clear_confirmation_format", codes)
+    let warning =
+      session.motorcycleExperimental
+      ? " " + L10n.text("experimental_write_warning") : ""
+    return L10n.format("ios_clear_confirmation_format", codes) + warning
   }
 
   private var resetConfirmationText: String {
@@ -269,10 +310,13 @@ struct ContentView: View {
       session.dashboard.map {
         L10n.format("ios_current_odometer_format", $0.odometerKilometres) + " "
       } ?? ""
+    let warning =
+      session.motorcycleExperimental
+      ? " " + L10n.text("experimental_write_warning") : ""
     return odometer
       + L10n.format(
         "ios_reset_confirmation_format", distance, unitLabel,
-        nextServiceDate.formatted(date: .abbreviated, time: .omitted))
+        nextServiceDate.formatted(date: .abbreviated, time: .omitted)) + warning
   }
 
   private func validateDistanceInput(_ input: String) {
@@ -286,7 +330,7 @@ struct ContentView: View {
       return
     }
     inputMessage =
-      validDistance == nil ? L10n.text("ios_interval_error") : nil
+      validDistance == nil ? intervalErrorMessage : nil
   }
 
   private func performReset() {

@@ -1,11 +1,213 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "motorcycle": {
     "id": "triumph-tiger-900-gt-pro-2021",
     "manufacturer": "Triumph",
     "model": "Tiger 900 GT Pro",
     "modelYear": 2021
   },
+  "motorcycles": [
+    {
+      "id": "triumph-tiger-900-gt-pro-2021",
+      "displayName": "Tiger 900 GT Pro (2021, validated)",
+      "modelCodes": [
+        "E64"
+      ],
+      "validationStatus": "validated",
+      "instrumentFamilyID": "triumph-original-tft",
+      "serviceReminderStrategy": "original_split",
+      "dtcClearStrategy": "security_access",
+      "capabilities": {
+        "dtcRead": "validated",
+        "dtcClear": "validated",
+        "dashboardRead": "validated",
+        "serviceReset": "validated"
+      }
+    },
+    {
+      "id": "triumph-tiger-900-gen1-other",
+      "displayName": "Tiger 900 / 850 Sport (first generation)",
+      "modelCodes": [
+        "E60",
+        "E62",
+        "E63",
+        "E65",
+        "E67",
+        "E68"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-original-tft",
+      "serviceReminderStrategy": "original_split",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "experimental",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-tiger-900-gen2",
+      "displayName": "Tiger 900 (updated generation)",
+      "modelCodes": [
+        "C81",
+        "C82",
+        "C83"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-updated-tft",
+      "serviceReminderStrategy": "updated_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-tiger-sport-660",
+      "displayName": "Tiger Sport 660",
+      "modelCodes": [
+        "L20",
+        "L22"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-hybrid-display",
+      "serviceReminderStrategy": "hybrid_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-street-triple-765-modern",
+      "displayName": "Street Triple 765 (modern ECU)",
+      "modelCodes": [
+        "A55",
+        "A60",
+        "A61",
+        "A62",
+        "D31"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-modern-classics",
+      "displayName": "Bonneville / Bobber / Speed Twin / Thruxton (modern ECU)",
+      "modelCodes": [
+        "D40",
+        "D46",
+        "D53",
+        "D54",
+        "D56",
+        "DD0",
+        "DP0",
+        "DX0"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-scrambler-modern",
+      "displayName": "Scrambler 900 / 1200 (modern ECU)",
+      "modelCodes": [
+        "D44",
+        "DR0",
+        "DS0"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-660-800-modern",
+      "displayName": "Trident 660 / Daytona 660 / Tiger Sport 800",
+      "modelCodes": [
+        "L10",
+        "L21",
+        "L23",
+        "L25"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-speed-triple-1200-modern",
+      "displayName": "Speed Triple 1200 RS / RR",
+      "modelCodes": [
+        "P01",
+        "P02",
+        "P11"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    },
+    {
+      "id": "triumph-tiger-1200-modern",
+      "displayName": "Tiger 1200 GT / Rally (modern ECU)",
+      "modelCodes": [
+        "P20",
+        "P21",
+        "P22",
+        "P23",
+        "P24"
+      ],
+      "validationStatus": "experimental",
+      "instrumentFamilyID": "triumph-adaptive-combined",
+      "serviceReminderStrategy": "adaptive_combined",
+      "dtcClearStrategy": "direct",
+      "capabilities": {
+        "dtcRead": "experimental",
+        "dtcClear": "experimental",
+        "dashboardRead": "unavailable",
+        "serviceReset": "experimental"
+      }
+    }
+  ],
   "adapters": [
     {
       "id": "vlinker-mc-ios",
@@ -49,7 +251,8 @@
     "seedCommand": "022701",
     "keyRequestPrefix": "042702",
     "seedMultiplier": 19272,
-    "dtcClearCommand": "0414FFFFFF"
+    "dtcClearCommand": "0414FFFFFF",
+    "identityCommand": "0322F18C"
   },
   "instrument": {
     "configurationCommands": [
@@ -77,6 +280,161 @@
     "yearBase": 2000,
     "dateFixedSuffix": "016E0000"
   },
+  "combinedInstrumentFamilies": [
+    {
+      "id": "triumph-updated-tft",
+      "strategy": "updated_combined",
+      "configurationCommands": [
+        "ATWS",
+        "ATE0",
+        "ATL0",
+        "ATS0",
+        "ATH1",
+        "ATTP7",
+        "ATV0",
+        "ATCAF0",
+        "ATCFC1",
+        "ATCP18",
+        "ATSHDAC1F1"
+      ],
+      "responseCANID": "18DAF1C1",
+      "requestPrefix": "2EA000",
+      "inputStepKilometres": 1,
+      "hybridOdometerDivisorKilometres": null,
+      "minimumDistanceKilometres": 1,
+      "maximumDistanceKilometres": 16000,
+      "yearBase": 2000,
+      "sessionCommand": "021003",
+      "sessionPositivePrefix": "5003",
+      "seedCommand": "022701",
+      "seedPositivePrefix": "6701",
+      "keyRequestPrefix": "062702",
+      "keyPositivePrefix": "6702",
+      "securityKeys": [
+        {
+          "id": "default",
+          "timingResponseSuffix": null,
+          "aesKey": "D4B15FF4C92AB7F098316E7A5B11AC39"
+        },
+        {
+          "id": "timing_3201f4",
+          "timingResponseSuffix": "3201F4",
+          "aesKey": "EF704CA051B800CC9287DF6A3511A978"
+        },
+        {
+          "id": "timing_3200cb",
+          "timingResponseSuffix": "3200CB",
+          "aesKey": "DC9FDBA46F2FAD18A4B8E1123C7183C2"
+        }
+      ],
+      "a500Command": "0322A500",
+      "a000Command": "0322A000",
+      "a010Command": "0322A010",
+      "writePositiveResponse": "6EA000"
+    },
+    {
+      "id": "triumph-hybrid-display",
+      "strategy": "hybrid_combined",
+      "configurationCommands": [
+        "ATWS",
+        "ATE0",
+        "ATL0",
+        "ATS0",
+        "ATH1",
+        "ATTP7",
+        "ATV0",
+        "ATCAF0",
+        "ATCFC1",
+        "ATCP18",
+        "ATSHDAC1F1"
+      ],
+      "responseCANID": "18DAF1C1",
+      "requestPrefix": "2EA000",
+      "inputStepKilometres": 1,
+      "hybridOdometerDivisorKilometres": 25,
+      "minimumDistanceKilometres": 25,
+      "maximumDistanceKilometres": 16000,
+      "yearBase": 2000,
+      "sessionCommand": "021003",
+      "sessionPositivePrefix": "5003",
+      "seedCommand": "022701",
+      "seedPositivePrefix": "6701",
+      "keyRequestPrefix": "062702",
+      "keyPositivePrefix": "6702",
+      "securityKeys": [
+        {
+          "id": "default",
+          "timingResponseSuffix": null,
+          "aesKey": "D4B15FF4C92AB7F098316E7A5B11AC39"
+        },
+        {
+          "id": "timing_3201f4",
+          "timingResponseSuffix": "3201F4",
+          "aesKey": "EF704CA051B800CC9287DF6A3511A978"
+        },
+        {
+          "id": "timing_3200cb",
+          "timingResponseSuffix": "3200CB",
+          "aesKey": "DC9FDBA46F2FAD18A4B8E1123C7183C2"
+        }
+      ],
+      "a500Command": "0322A500",
+      "a000Command": "0322A000",
+      "a010Command": "0322A010",
+      "writePositiveResponse": "6EA000"
+    },
+    {
+      "id": "triumph-adaptive-combined",
+      "strategy": "adaptive_combined",
+      "configurationCommands": [
+        "ATWS",
+        "ATE0",
+        "ATL0",
+        "ATS0",
+        "ATH1",
+        "ATTP7",
+        "ATV0",
+        "ATCAF0",
+        "ATCFC1",
+        "ATCP18",
+        "ATSHDAC1F1"
+      ],
+      "responseCANID": "18DAF1C1",
+      "requestPrefix": "2EA000",
+      "inputStepKilometres": 1,
+      "hybridOdometerDivisorKilometres": 25,
+      "minimumDistanceKilometres": 1,
+      "maximumDistanceKilometres": 16000,
+      "yearBase": 2000,
+      "sessionCommand": "021003",
+      "sessionPositivePrefix": "5003",
+      "seedCommand": "022701",
+      "seedPositivePrefix": "6701",
+      "keyRequestPrefix": "062702",
+      "keyPositivePrefix": "6702",
+      "securityKeys": [
+        {
+          "id": "default",
+          "timingResponseSuffix": null,
+          "aesKey": "D4B15FF4C92AB7F098316E7A5B11AC39"
+        },
+        {
+          "id": "timing_3201f4",
+          "timingResponseSuffix": "3201F4",
+          "aesKey": "EF704CA051B800CC9287DF6A3511A978"
+        },
+        {
+          "id": "timing_3200cb",
+          "timingResponseSuffix": "3200CB",
+          "aesKey": "DC9FDBA46F2FAD18A4B8E1123C7183C2"
+        }
+      ],
+      "a500Command": "0322A500",
+      "a000Command": "0322A000",
+      "a010Command": "0322A010",
+      "writePositiveResponse": "6EA000"
+    }
+  ],
   "dtcDescriptions": {
     "C1611": "Front wheel sensor: shorted to ground; circuit open.",
     "C1612": "Front wheel sensor: invalid signal; signal missing.",

@@ -61,7 +61,7 @@ class AdapterSessionOwnerTest {
 
         assertTrue(owner.selectMotorcycle("triumph-tiger-sport-660"))
         assertTrue(owner.serviceResetAvailable)
-        assertEquals(25, owner.serviceIntervalConstraints?.stepKm)
+        assertEquals(1, owner.serviceIntervalConstraints?.stepKm)
 
         assertTrue(owner.selectMotorcycle("triumph-street-triple-765-modern"))
         assertTrue(owner.serviceResetAvailable)

@@ -33,7 +33,7 @@
 "consent_title" = "Before you connect";
 "consent_unofficial" = "Unofficial community app. Not affiliated with or endorsed by Triumph Motorcycles.";
 "device_picker_empty" = "Scanning for supported adapters…";
-"device_picker_pair_hint" = "For vLinker MC-Android, pair in Android settings with PIN 1234. OBDLink CX pairs when connected.";
+"device_picker_pair_hint" = "For vLinker MC-Android, pair in Android settings with PIN 1234. For OBDLink LX, MX or MX+, press Connect and pair in Android settings. OBDLink CX pairs when connected.";
 "device_picker_settings" = "Bluetooth settings";
 "device_picker_title" = "Select adapter";
 "diagnostics_section_title" = "Motorcycle diagnostics";
@@ -42,13 +42,14 @@
 "dtc_clear_body_blocked" = "%1$@";
 "dtc_clear_body_cleared_none" = "Cleared. No confirmed trouble codes remain.";
 "dtc_clear_body_cleared_remaining" = "Clear completed, but %1$d code(s) are still present.";
-"dtc_clear_body_idle" = "Runs security access and clears confirmed engine codes. Only clear codes you have already read and understood.";
+"dtc_clear_body_idle" = "Clears confirmed engine codes using the selected motorcycle profile. Only clear codes you have already read and understood.";
 "dtc_clear_body_running" = "Clearing trouble codes. Keep the ignition on and do not leave the app.";
 "dtc_clear_button" = "Clear trouble codes";
 "dtc_clear_button_again" = "Clear again";
 "dtc_clear_confirm" = "Confirm clear";
 "dtc_clear_failed_error" = "Clearing trouble codes stopped after a connection or adapter error.";
 "dtc_clear_reason_count_unconfirmed" = "The clear completed but the code count could not be confirmed.";
+"dtc_clear_reason_identity_unavailable" = "The engine ECU identity could not be confirmed; nothing was cleared.";
 "dtc_clear_reason_no_seed" = "The ECU did not return a usable security seed; nothing was cleared.";
 "dtc_clear_reason_rejected" = "The ECU rejected the clear request; no codes were cleared.";
 "dtc_clear_reason_security_rejected" = "The ECU rejected security access; nothing was cleared.";
@@ -68,6 +69,7 @@
 "dtc_read_title" = "Trouble codes";
 "dtc_show_original" = "Show original (English)";
 "error_ecu_no_response" = "The module did not respond. Check that the ignition is on, then try again.";
+"experimental_write_warning" = "This motorcycle profile has not been tested on hardware. Continue only if you accept that the result may need checking on the motorcycle.";
 "failure_identity_action" = "Select another adapter";
 "failure_identity_detail" = "The connected device does not match the selected adapter map. Disconnect and select the correct adapter.";
 "failure_identity_title" = "Unsupported adapter identity";
@@ -75,7 +77,7 @@
 "failure_io_detail" = "Bluetooth communication failed. Check adapter power and range, then try again.";
 "failure_io_title" = "Connection failed";
 "failure_pairing_action" = "Open Bluetooth settings";
-"failure_pairing_detail" = "Pair vLinker MC-Android in Android Bluetooth settings using PIN 1234, then return and select it.";
+"failure_pairing_detail" = "Pair the selected Classic adapter in Android Bluetooth settings, then return and select it. vLinker uses PIN 1234; OBDLink MX requires its Connect button.";
 "failure_pairing_title" = "Pairing required";
 "failure_permission_action" = "Grant permission";
 "failure_permission_detail" = "Allow the Bluetooth permission requested by Reset Moto Reminders, then try again.";
@@ -103,7 +105,7 @@
 "ios_beta" = "BETA";
 "ios_clear_confirmation_format" = "Clear %1$@? Diagnostic evidence will be erased. Existing faults are not repaired.";
 "ios_clear_confirmation_title" = "Clear confirmed trouble codes?";
-"ios_clear_detail" = "Clears confirmed DTC memory after security access. It does not repair the underlying fault.";
+"ios_clear_detail" = "Clears confirmed DTC memory after you confirm. It does not repair the underlying fault.";
 "ios_connection_hint" = "Power the motorcycle and Bluetooth OBD adapter, then connect.";
 "ios_current_odometer_format" = "Current odometer: %1$d km.";
 "ios_dashboard_label" = "Dashboard";
@@ -157,6 +159,12 @@
 "label_adapter_map" = "Adapter map";
 "label_elm_identity" = "ELM identity";
 "label_stn_identity" = "STN identity";
+"motorcycle_profile_default" = "Tiger 900 GT Pro (2021, validated)";
+"motorcycle_profile_experimental" = "Experimental — not yet tested on a motorcycle";
+"motorcycle_profile_experimental_short" = "experimental, not tested";
+"motorcycle_profile_picker_title" = "Choose your motorcycle";
+"motorcycle_profile_select" = "Choose motorcycle";
+"motorcycle_profile_title" = "Motorcycle";
 "reset_disclaimer" = "Resetting a reminder does not perform maintenance.";
 "service_card_title" = "Service reminder reset";
 "service_card_unavailable_detail" = "Unavailable until the motorcycle profile is validated.";

@@ -33,7 +33,7 @@
 "consent_title" = "Перед підключенням";
 "consent_unofficial" = "Неофіційний застосунок спільноти. Не пов'язаний із Triumph Motorcycles і не схвалений нею.";
 "device_picker_empty" = "Пошук підтримуваних адаптерів…";
-"device_picker_pair_hint" = "Сполучіть vLinker MC-Android у налаштуваннях із PIN 1234. OBDLink CX сполучається під час підключення.";
+"device_picker_pair_hint" = "Сполучіть vLinker MC-Android із PIN 1234. Для OBDLink LX, MX або MX+ натисніть Connect і сполучіть у налаштуваннях Android. OBDLink CX сполучається під час підключення.";
 "device_picker_settings" = "Налаштування Bluetooth";
 "device_picker_title" = "Виберіть адаптер";
 "diagnostics_section_title" = "Діагностика мотоцикла";
@@ -42,13 +42,14 @@
 "dtc_clear_body_blocked" = "%1$@";
 "dtc_clear_body_cleared_none" = "Очищено. Підтверджених кодів несправностей не залишилося.";
 "dtc_clear_body_cleared_remaining" = "Очищення завершено, але %1$d код(ів) досі присутні.";
-"dtc_clear_body_idle" = "Виконує доступ безпеки та очищує підтверджені коди двигуна. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.";
+"dtc_clear_body_idle" = "Очищує підтверджені коди двигуна за вибраним профілем мотоцикла. Очищуйте лише ті коди, які ви вже зчитали та зрозуміли.";
 "dtc_clear_body_running" = "Очищення кодів несправностей. Залиште запалювання увімкненим і не залишайте додаток.";
 "dtc_clear_button" = "Очистити коди несправностей";
 "dtc_clear_button_again" = "Очистити знову";
 "dtc_clear_confirm" = "Підтвердити очищення";
 "dtc_clear_failed_error" = "Очищення кодів несправностей зупинено через помилку з'єднання або адаптера.";
 "dtc_clear_reason_count_unconfirmed" = "Очищення завершено, але кількість кодів не вдалося підтвердити.";
+"dtc_clear_reason_identity_unavailable" = "Не вдалося підтвердити ідентичність ECU двигуна; нічого не було очищено.";
 "dtc_clear_reason_no_seed" = "ECU не повернув придатного початкового значення безпеки (seed); нічого не було очищено.";
 "dtc_clear_reason_rejected" = "ECU відхилив запит на очищення; жоден код не було очищено.";
 "dtc_clear_reason_security_rejected" = "ECU відхилив доступ безпеки; нічого не було очищено.";
@@ -68,6 +69,7 @@
 "dtc_read_title" = "Коди несправностей";
 "dtc_show_original" = "Показати оригінал (англійською)";
 "error_ecu_no_response" = "Модуль не відповів. Перевірте, чи ввімкнене запалювання, і спробуйте знову.";
+"experimental_write_warning" = "Цей профіль ще не перевірено на мотоциклі. Продовжуйте лише якщо зможете перевірити результат на мотоциклі.";
 "failure_identity_action" = "Вибрати інший адаптер";
 "failure_identity_detail" = "Підключений пристрій не відповідає вибраній карті адаптера. Роз'єднайтеся та виберіть правильний адаптер.";
 "failure_identity_title" = "Непідтримувана ідентичність адаптера";
@@ -75,7 +77,7 @@
 "failure_io_detail" = "Помилка зв'язку Bluetooth. Перевірте живлення та діапазон адаптера, потім спробуйте знову.";
 "failure_io_title" = "Не вдалося підключитися";
 "failure_pairing_action" = "Відкрити налаштування Bluetooth";
-"failure_pairing_detail" = "Сполучіть vLinker MC-Android у налаштуваннях Bluetooth Android за допомогою PIN 1234, потім поверніться та виберіть його.";
+"failure_pairing_detail" = "Сполучіть вибраний адаптер Classic у налаштуваннях Bluetooth Android, потім поверніться та виберіть його. vLinker використовує PIN 1234; для OBDLink MX потрібно натиснути кнопку Connect.";
 "failure_pairing_title" = "Потрібне сполучення";
 "failure_permission_action" = "Надати дозвіл";
 "failure_permission_detail" = "Надайте дозвіл Bluetooth, який запитує Reset Moto Reminders, потім спробуйте знову.";
@@ -103,7 +105,7 @@
 "ios_beta" = "БЕТА";
 "ios_clear_confirmation_format" = "Стерти %1$@? Діагностичні дані буде видалено. Наявні несправності не буде усунуто.";
 "ios_clear_confirmation_title" = "Стерти підтверджені коди несправностей?";
-"ios_clear_detail" = "Стирає підтверджену пам’ять DTC після доступу безпеки. Це не усуває основну несправність.";
+"ios_clear_detail" = "Стирає підтверджену пам’ять DTC після вашого підтвердження. Це не усуває основну несправність.";
 "ios_connection_hint" = "Увімкніть мотоцикл і Bluetooth OBD-адаптер, потім підключіться.";
 "ios_current_odometer_format" = "Поточний одометр: %1$d км.";
 "ios_dashboard_label" = "Панель приладів";
@@ -157,6 +159,12 @@
 "label_adapter_map" = "Карта адаптера";
 "label_elm_identity" = "Ідентичність ELM";
 "label_stn_identity" = "Ідентичність STN";
+"motorcycle_profile_default" = "Tiger 900 GT Pro (2021, перевірено)";
+"motorcycle_profile_experimental" = "Експериментально — ще не перевірено на мотоциклі";
+"motorcycle_profile_experimental_short" = "експериментально, не перевірено";
+"motorcycle_profile_picker_title" = "Виберіть свій мотоцикл";
+"motorcycle_profile_select" = "Вибрати мотоцикл";
+"motorcycle_profile_title" = "Мотоцикл";
 "reset_disclaimer" = "Скидання нагадування не виконує обслуговування.";
 "service_card_title" = "Скидання нагадування про обслуговування";
 "service_card_unavailable_detail" = "Недоступно, доки профіль мотоцикла не буде перевірено.";

@@ -49,4 +49,16 @@ final class ActionPolicyTests: XCTestCase {
       OperationInterruptionPolicy.isAmbiguous(
         operationRunning: true, stateChangingWriteSent: true))
   }
+
+  func testTransportFailureDuringVerificationIsAmbiguousAfterAWrite() {
+    XCTAssertFalse(
+      OperationInterruptionPolicy.isAmbiguousFailure(
+        stateChangingWriteSent: false, transportFailed: true))
+    XCTAssertFalse(
+      OperationInterruptionPolicy.isAmbiguousFailure(
+        stateChangingWriteSent: true, transportFailed: false))
+    XCTAssertTrue(
+      OperationInterruptionPolicy.isAmbiguousFailure(
+        stateChangingWriteSent: true, transportFailed: true))
+  }
 }

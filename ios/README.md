@@ -1,12 +1,12 @@
 # Reset Moto Reminders for iPhone
 
-Native SwiftUI/CoreBluetooth preview of the main app for iOS 16 and later. It mirrors the supported Tiger 900 flow: dashboard/odometer read, confirmed-DTC read, DTC clear (Beta), and service-reminder reset in kilometres or miles.
+Native SwiftUI/CoreBluetooth app for iOS 16 and later. It reads confirmed DTCs, clears them with a visible Beta warning, and resets service reminders in kilometres or miles. Dashboard/odometer reading is also available for compatible first-generation Tiger instruments.
 
 ## Current status
 
-Version 0.2.0 (`build 7`) adds experimental OBDLink CX support alongside the validated vLinker MC-IOS transport. It retains English-default German, Spanish, French and Ukrainian localization, number-pad dismissal, exact 100-unit interval validation, motorcycle-date guidance and the human-readable explanation of the `043` compatibility fingerprint.
+Version 0.2.0 (`build 7`) adds experimental OBDLink CX support alongside the validated vLinker MC-IOS transport. The current experimental branch also adds the shared Triumph motorcycle selector and the original, updated, hybrid and live-detected combined service-reset families listed in [`../ecu-maps/README.md`](../ecu-maps/README.md). The validated Tiger 900 GT Pro remains the default; every added motorcycle is visibly marked experimental.
 
-The corrected connection and dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. The main app does not export logs; it emits bounded Apple system-log events for operation and command outcomes without raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta until a controlled nonzero-DTC test is retained, and individual service-write modes keep their existing evidence gates.
+The corrected connection and default Tiger dashboard-read path is physically validated. Every connection continues to perform one harmless adapter-only `ATI` identity check. If the expected notification/write layout, complete prompt or adapter identity is missing, the app disconnects before it sends a motorcycle command. Unknown combined-service response shapes stop before the reminder write; writes are sent once and verified without trying an alternate format. The main app does not export logs or record raw replies, VINs or Bluetooth identifiers. DTC clear remains Beta, and every added motorcycle/adapter combination requires a physical test.
 
 ## Build and install with a free Apple ID
 
@@ -25,9 +25,9 @@ connected and unlocked; pressing Xcode's Run button is not required each time.
 
 Use ignition on and engine off unless the motorcycle procedure requires otherwise.
 
-1. Power the motorcycle and either `vLinker MC-IOS` or `OBDLink CX`, open the app and tap **Connect**.
+1. Before connecting, select the exact motorcycle family. Power the motorcycle and either `vLinker MC-IOS` or `OBDLink CX`, then tap **Connect**.
 2. Confirm the app reaches **Motorcycle connected** and shows an adapter identity. If it stops earlier, preserve the exact on-screen error; do not keep retrying write features.
-3. Tap **Read motorcycle**. Confirm the odometer is plausible.
+3. If **Read motorcycle** is available, tap it and confirm the odometer is plausible.
 4. Tap **Read trouble codes**. Confirm the count/list is plausible.
 5. Only after the two reads succeed, test service reset with the intended dashboard unit and date. Check that the motorcycle date is correct and verify the dashboard afterward.
 6. Treat **Clear trouble codes (Beta)** as destructive diagnostic evidence removal. Read and record the codes first, then clear only if that is intentional.

@@ -51,7 +51,7 @@ Reading trouble codes and the service-reminder reset are validated on a real Tig
 
 ### Experimental motorcycle profiles (not tested)
 
-The current experimental Android branch also lets you select the motorcycles below. Their protocol families match known implementations, but none of these combinations has been tested through this app on a real motorcycle yet.
+The current experimental branch lets you select the motorcycles below on Android or iPhone. Their protocol families match known implementations, but none of these combinations has been tested through this app on a real motorcycle yet.
 
 | Possibly supported motorcycles | Model codes | Functions currently available |
 | --- | --- | --- |

@@ -56,7 +56,7 @@ instrument_family:
       - "0322A010"
     request_prefix: "2EA000"
     write_positive_response: "6EA000"
-    input_step_km: 25
+    input_step_km: 1
     hybrid_odometer_divisor_km: 25
     minimum_distance_km: 25
     maximum_distance_km: 16000

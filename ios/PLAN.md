@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a native SwiftUI/CoreBluetooth counterpart to the main Android app for the supported 2021 Triumph Tiger 900 GT Pro profile:
+Build a native SwiftUI/CoreBluetooth counterpart to the main Android app. Keep the validated 2021 Triumph Tiger 900 GT Pro as the default profile and allow explicitly experimental profiles to reuse the shared Triumph family catalogue:
 
 - connect to `vLinker MC-IOS`;
 - read dashboard status and odometer;
@@ -10,7 +10,7 @@ Build a native SwiftUI/CoreBluetooth counterpart to the main Android app for the
 - clear confirmed DTCs with a visible **Beta** label and explicit confirmation;
 - reset the service reminder in kilometres or miles with explicit confirmation.
 
-The app is English-only in this first iOS version. It contains no map flashing, ECU configuration, adaptations, or general-purpose command console.
+The app supports English, German, Spanish, French and Ukrainian, with English as the fallback. It contains no map flashing, ECU configuration, adaptations, or general-purpose command console.
 
 ## Safety boundary
 
@@ -18,7 +18,7 @@ The production app has completed its bounded adapter-only `ATI` check over the p
 
 Only the primary channel is used. The alternate characteristic remains exclusive to the maintainer probe and is never auto-probed by the production app.
 
-Motorcycle commands come from a typed, bundled profile. Service writes additionally require the exact motorcycle profile and observed instrument status fingerprint. All complete operations are serialized. A lost response after a write is reported as ambiguous and is never retried automatically.
+Motorcycle commands come from a typed, bundled profile generated from the shared family maps. The original Tiger service write requires its observed instrument status fingerprint. Combined service writes require a mapped static format or an exact supported live response shape before the first reminder frame. All complete operations are serialized. A lost response after a write is reported as ambiguous and is never retried automatically.
 
 ## TDD increments
 
@@ -31,13 +31,14 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 7. Add failing operation-serialization tests; then implement the whole-operation gate.
 8. Build the SwiftUI UI and CoreBluetooth transport around the tested core. Keep UUIDs and motorcycle bytes in the bundled profile rather than feature views.
 9. Build without signing for the simulator and generic iOS device. Physical installation, launch, primary-channel adapter identification and the corrected dashboard read are complete. v0.1.4 addressed the form issues found in that follow-up test; v0.1.5 adds the five supported localizations without changing diagnostic commands.
+10. Add failing catalogue, capability, AES/key-derivation, adaptive-shape, full-write and presentation tests; then load the shared Triumph profiles and implement the updated/hybrid/adaptive service-reset strategies without changing the validated original path.
 
 ## Review checklist
 
 - No feature can write before adapter identity completes.
 - No second operation can change the CAN route while another is active.
 - DTC clear sends `14FFFFFF` once and waits through response-pending.
-- Service reset validates inputs before traffic, fingerprints the cluster before writes, and distinguishes rejected, partially applied, ambiguous, and committed outcomes.
+- Service reset validates inputs before traffic, requires either the original fingerprint or an exact mapped combined response shape before writes, and distinguishes rejected, partially applied, ambiguous, and committed outcomes.
 - Disconnect is disabled while an operation is running.
 - No VIN, adapter identifier, or serial is stored or displayed.
 - The UI says that clearing codes does not repair faults and resetting a reminder does not perform maintenance.
@@ -47,4 +48,6 @@ Motorcycle commands come from a typed, bundled profile. Service writes additiona
 
 The primary MC-IOS command channel, corrected initialization and dashboard read are physically observed through the production app. The alternate channel remains out of the production app; DTC clear and service modes retain their operation-specific validation gates.
 
-The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. The first live run then exposed a deterministic interoperability bug: `ATWS` returns an `ELM327` banner, not bare `OK`. A regression test now protects that special case while ordinary setup commands still require `OK`. Whole-operation serialization, single-send writes, live instrument fingerprinting and explicit partial/ambiguous outcomes remain mandatory. No known critical or very-high code issue remains; corrected motorcycle behavior still requires physical validation.
+The 2026-08-23 code review closed the identified high-risk implementation gaps: stale DTC authorization after a failed refresh/clear attempt, accepting an ELM prompt before GATT acknowledged the write, accepting diagnostic data without the configured CAN response ID, stale BLE callbacks mutating a newer session, and leaving a diagnostic session active when the app backgrounds. The first live run then exposed a deterministic interoperability bug: `ATWS` returns an `ELM327` banner, not bare `OK`. A regression test now protects that special case while ordinary setup commands still require `OK`.
+
+The 2026-09-07 family-profile review added schema rejection for experimental profiles that claim validated capabilities, exact adaptive-format selection before the reminder write, post-write read-back checks, and full hybrid transcript coverage. Malformed or pending-only replies after a state-changing request now produce partial/needs-verification outcomes; a transport failure during any later verification remains ambiguous. Whole-operation serialization, single-send writes and no automatic format retry remain mandatory. No known critical or high code issue remains; every added motorcycle profile still requires physical validation.

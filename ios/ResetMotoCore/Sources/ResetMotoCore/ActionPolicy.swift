@@ -39,4 +39,11 @@ public enum OperationInterruptionPolicy {
   ) -> Bool {
     operationRunning && stateChangingWriteSent
   }
+
+  public static func isAmbiguousFailure(
+    stateChangingWriteSent: Bool,
+    transportFailed: Bool
+  ) -> Bool {
+    stateChangingWriteSent && transportFailed
+  }
 }

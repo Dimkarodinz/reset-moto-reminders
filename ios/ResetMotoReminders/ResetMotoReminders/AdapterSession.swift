@@ -65,6 +65,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var state: AdapterConnectionState = .disconnected
   @Published private(set) var adapterIdentity: String?
   @Published private(set) var adapterExperimental = false
+  @Published private(set) var selectedMotorcycle: MotorcycleCompatibilityProfile
   @Published private(set) var dashboard: DashboardResult?
   @Published private(set) var dashboardStatus = L10n.text("instrument_read_body_idle")
   @Published private var dtcReadState = DTCReadState()
@@ -74,6 +75,16 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   @Published private(set) var operationTitle: String?
 
   let profile: ResetMotoProfile
+
+  var availableMotorcycles: [MotorcycleCompatibilityProfile] { profile.motorcycles }
+  var motorcycleExperimental: Bool { selectedMotorcycle.validationStatus == .experimental }
+  var dashboardReadAvailable: Bool { selectedMotorcycle.capabilities.dashboardRead != .unavailable }
+  var dtcReadAvailable: Bool { selectedMotorcycle.capabilities.dtcRead != .unavailable }
+  var dtcClearAvailable: Bool { selectedMotorcycle.capabilities.dtcClear != .unavailable }
+  var serviceResetAvailable: Bool { selectedMotorcycle.capabilities.serviceReset != .unavailable }
+  var serviceResetRequiresDashboardRead: Bool {
+    selectedMotorcycle.serviceReminderStrategy == .originalSplit
+  }
 
   private var central: CBCentralManager?
   private var peripheral: CBPeripheral?
@@ -92,13 +103,46 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   var hasReadDTCs: Bool { dtcReadState.hasCurrentRead }
 
   override init() {
+    let loadedProfile: ResetMotoProfile
     do {
-      profile = try ResetMotoProfile.bundledTiger900()
+      loadedProfile = try ResetMotoProfile.bundledTiger900()
     } catch {
       fatalError("Bundled motorcycle profile is invalid: \(error)")
     }
+    profile = loadedProfile
+    selectedMotorcycle = loadedProfile.defaultMotorcycle
     assembler = ElmResponseAssembler(promptByte: profile.adapters[0].promptByte)
     super.init()
+  }
+
+  func selectMotorcycle(_ id: String) {
+    guard state == .disconnected, !operationRunning,
+      let selected = availableMotorcycles.first(where: { $0.id == id })
+    else { return }
+    selectedMotorcycle = selected
+    resetFeatureState()
+  }
+
+  func serviceIntervalConstraints(for unit: DistanceUnit) -> ServiceIntervalConstraints? {
+    if selectedMotorcycle.serviceReminderStrategy == .originalSplit {
+      return ServiceIntervalConstraints(
+        step: profile.instrument.distanceRawUnit,
+        minimum: profile.instrument.distanceMinimumRaw * profile.instrument.distanceRawUnit,
+        maximum: profile.instrument.distanceMaximumRaw * profile.instrument.distanceRawUnit)
+    }
+    guard let combined = profile.combinedInstrumentFamily(for: selectedMotorcycle) else {
+      return nil
+    }
+    if unit == .kilometres {
+      return ServiceIntervalConstraints(
+        step: combined.inputStepKilometres,
+        minimum: combined.minimumDistanceKilometres,
+        maximum: combined.maximumDistanceKilometres)
+    }
+    return ServiceIntervalConstraints(
+      step: 1,
+      minimum: max(1, Int(ceil(Double(combined.minimumDistanceKilometres) / 1.609344))),
+      maximum: Int(floor(Double(combined.maximumDistanceKilometres) / 1.609344)))
   }
 
   func connect() {
@@ -142,7 +186,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func readDashboard() {
-    guard canStartOperation else { return }
+    guard canStartOperation, dashboardReadAvailable else { return }
     dashboard = nil
     dashboardStatus = L10n.text("instrument_read_body_running")
     runOperation(.dashboard) { channel in
@@ -153,7 +197,7 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func readDTCs() {
-    guard canStartOperation else { return }
+    guard canStartOperation, dtcReadAvailable else { return }
     dtcReadState.beginRead()
     dtcStatus = L10n.text("dtc_read_body_running")
     runOperation(.dtcRead) { channel in
@@ -169,12 +213,13 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func clearDTCs() {
-    guard canStartOperation, dtcReadState.canClear else { return }
+    guard canStartOperation, dtcClearAvailable, dtcReadState.canClear else { return }
     dtcReadState.beginClearAttempt()
     runOperation(.dtcClear) { channel in
       let result = try await DTCUseCase(
         profile: self.profile.engine,
-        descriptions: self.localizedDTCDescriptions
+        descriptions: self.localizedDTCDescriptions,
+        clearStrategy: self.selectedMotorcycle.dtcClearStrategy
       ).clear(using: channel)
       switch result {
       case .cleared:
@@ -189,9 +234,18 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
   }
 
   func resetService(distance: Int, unit: DistanceUnit, date: Date) {
+    guard serviceResetAvailable else { return }
     runOperation(.serviceReset) { channel in
-      let outcome = try await ServiceReminderUseCase(profile: self.profile.instrument)
-        .reset(distance: distance, unit: unit, nextServiceDate: date, using: channel)
+      let outcome: ServiceReminderOutcome
+      if self.selectedMotorcycle.serviceReminderStrategy == .originalSplit {
+        outcome = try await ServiceReminderUseCase(profile: self.profile.instrument)
+          .reset(distance: distance, unit: unit, nextServiceDate: date, using: channel)
+      } else {
+        guard let combined = self.profile.combinedInstrumentFamily(for: self.selectedMotorcycle)
+        else { throw DiagnosticParseError.unexpectedResponse }
+        outcome = try await CombinedServiceReminderUseCase(profile: combined)
+          .reset(distance: distance, unit: unit, nextServiceDate: date, using: channel)
+      }
       switch outcome {
       case .committed(let odometer):
         self.serviceStatus = L10n.format("ios_service_committed_format", odometer)
@@ -250,8 +304,11 @@ final class AdapterSession: NSObject, ObservableObject, @unchecked Sendable {
         try await action(SessionCommandChannel(session: self))
         logger.info("Operation completed: \(title, privacy: .public)")
       } catch {
+        let transportFailedAfterWrite = OperationInterruptionPolicy.isAmbiguousFailure(
+          stateChangingWriteSent: operationSentStateChangingWrite,
+          transportFailed: error is BLECommandError)
         let reportedError: Error =
-          backgroundInterruptedAfterWrite
+          backgroundInterruptedAfterWrite || transportFailedAfterWrite
           ? BLECommandError.ambiguousWrite(title)
           : error
         let message = L10n.message(for: reportedError)

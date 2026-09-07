@@ -33,7 +33,7 @@
 "consent_title" = "Antes de conectarte";
 "consent_unofficial" = "Aplicación comunitaria no oficial. No está afiliada ni respaldada por Triumph Motorcycles.";
 "device_picker_empty" = "Buscando adaptadores compatibles…";
-"device_picker_pair_hint" = "Empareja vLinker MC-Android en los ajustes con el PIN 1234. OBDLink CX se empareja al conectar.";
+"device_picker_pair_hint" = "Empareja vLinker MC-Android con el PIN 1234. Para OBDLink LX, MX o MX+, pulsa Connect y empareja en los ajustes de Android. OBDLink CX se empareja al conectar.";
 "device_picker_settings" = "Ajustes de Bluetooth";
 "device_picker_title" = "Selecciona el adaptador";
 "diagnostics_section_title" = "Diagnóstico de la motocicleta";
@@ -42,13 +42,14 @@
 "dtc_clear_body_blocked" = "%1$@";
 "dtc_clear_body_cleared_none" = "Borrado. No quedan códigos de avería confirmados.";
 "dtc_clear_body_cleared_remaining" = "El borrado se completó, pero todavía hay %1$d código(s) presente(s).";
-"dtc_clear_body_idle" = "Ejecuta el acceso de seguridad y borra los códigos confirmados del motor. Borra solo los códigos que ya hayas leído y entendido.";
+"dtc_clear_body_idle" = "Borra los códigos confirmados del motor con el perfil de motocicleta seleccionado. Borra solo los códigos que ya hayas leído y entendido.";
 "dtc_clear_body_running" = "Borrando los códigos de avería. Mantén el contacto puesto y no salgas de la aplicación.";
 "dtc_clear_button" = "Borrar códigos de avería";
 "dtc_clear_button_again" = "Borrar de nuevo";
 "dtc_clear_confirm" = "Confirmar borrado";
 "dtc_clear_failed_error" = "El borrado de códigos de avería se detuvo tras un error de conexión o del adaptador.";
 "dtc_clear_reason_count_unconfirmed" = "El borrado se completó pero no se pudo confirmar el recuento de códigos.";
+"dtc_clear_reason_identity_unavailable" = "No se pudo confirmar la identidad de la ECU del motor; no se borró nada.";
 "dtc_clear_reason_no_seed" = "La ECU no devolvió una semilla de seguridad utilizable; no se borró nada.";
 "dtc_clear_reason_rejected" = "La ECU rechazó la solicitud de borrado; no se borró ningún código.";
 "dtc_clear_reason_security_rejected" = "La ECU rechazó el acceso de seguridad; no se borró nada.";
@@ -68,6 +69,7 @@
 "dtc_read_title" = "Códigos de avería";
 "dtc_show_original" = "Mostrar original (inglés)";
 "error_ecu_no_response" = "El módulo no respondió. Comprueba que el contacto esté puesto e inténtalo de nuevo.";
+"experimental_write_warning" = "Este perfil aún no se ha probado en una motocicleta. Continúa solo si puedes comprobar el resultado en la moto.";
 "failure_identity_action" = "Seleccionar otro adaptador";
 "failure_identity_detail" = "El dispositivo conectado no coincide con el mapa de adaptador seleccionado. Desconecta y selecciona el adaptador correcto.";
 "failure_identity_title" = "Identidad de adaptador no compatible";
@@ -75,7 +77,7 @@
 "failure_io_detail" = "Falló la comunicación por Bluetooth. Comprueba la alimentación y el alcance del adaptador, luego vuelve a intentarlo.";
 "failure_io_title" = "Error de conexión";
 "failure_pairing_action" = "Abrir ajustes de Bluetooth";
-"failure_pairing_detail" = "Empareja vLinker MC-Android en los ajustes de Bluetooth de Android usando el PIN 1234, luego vuelve y selecciónalo.";
+"failure_pairing_detail" = "Empareja el adaptador Classic seleccionado en los ajustes de Bluetooth de Android, vuelve y selecciónalo. vLinker usa el PIN 1234; OBDLink MX requiere pulsar su botón Connect.";
 "failure_pairing_title" = "Emparejamiento necesario";
 "failure_permission_action" = "Conceder permiso";
 "failure_permission_detail" = "Concede el permiso de Bluetooth solicitado por Reset Moto Reminders y vuelve a intentarlo.";
@@ -103,7 +105,7 @@
 "ios_beta" = "BETA";
 "ios_clear_confirmation_format" = "¿Borrar %1$@? Se eliminarán datos de diagnóstico. Las averías existentes no se reparan.";
 "ios_clear_confirmation_title" = "¿Borrar los códigos de avería confirmados?";
-"ios_clear_detail" = "Borra la memoria DTC confirmada tras el acceso de seguridad. No repara la avería subyacente.";
+"ios_clear_detail" = "Borra la memoria DTC confirmada después de tu confirmación. No repara la avería subyacente.";
 "ios_connection_hint" = "Enciende la moto y el adaptador OBD Bluetooth y, después, conecta.";
 "ios_current_odometer_format" = "Odómetro actual: %1$d km.";
 "ios_dashboard_label" = "Cuadro";
@@ -157,6 +159,12 @@
 "label_adapter_map" = "Mapa del adaptador";
 "label_elm_identity" = "Identidad ELM";
 "label_stn_identity" = "Identidad STN";
+"motorcycle_profile_default" = "Tiger 900 GT Pro (2021, validada)";
+"motorcycle_profile_experimental" = "Experimental — aún no probado en una motocicleta";
+"motorcycle_profile_experimental_short" = "experimental, sin probar";
+"motorcycle_profile_picker_title" = "Elige tu motocicleta";
+"motorcycle_profile_select" = "Elegir motocicleta";
+"motorcycle_profile_title" = "Motocicleta";
 "reset_disclaimer" = "Restablecer un aviso no realiza el mantenimiento.";
 "service_card_title" = "Restablecimiento del aviso de mantenimiento";
 "service_card_unavailable_detail" = "No disponible hasta que se valide el perfil de la motocicleta.";

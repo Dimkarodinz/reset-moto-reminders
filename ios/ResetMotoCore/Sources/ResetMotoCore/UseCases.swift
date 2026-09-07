@@ -55,11 +55,17 @@ public struct DTCUseCase: Sendable {
   private let profile: EngineProfile
   private let decoder: DTCDecoder
   private let extractor: CanResponseExtractor
+  private let clearStrategy: DTCClearStrategy
 
-  public init(profile: EngineProfile, descriptions: [String: String]) {
+  public init(
+    profile: EngineProfile,
+    descriptions: [String: String],
+    clearStrategy: DTCClearStrategy = .securityAccess
+  ) {
     self.profile = profile
     self.decoder = DTCDecoder(descriptions: descriptions)
     self.extractor = CanResponseExtractor(responseCANID: profile.responseCANID, isoTP: true)
+    self.clearStrategy = clearStrategy
   }
 
   public func read(using channel: any DiagnosticCommanding) async throws -> [DiagnosticTroubleCode]
@@ -78,25 +84,51 @@ public struct DTCUseCase: Sendable {
 
   public func clear(using channel: any DiagnosticCommanding) async throws -> DTCClearOutcome {
     try await configure(profile.configurationCommands, channel)
-    let session = try extractor.extract(
-      await channel.execute(profile.extendedSessionCommand, intent: .read))
-    guard session.hasPrefix("5003") else { return .blocked }
-    let seed = try extractor.extract(await channel.execute(profile.seedCommand, intent: .read))
-    let keyRequest = try SeedKeyDerivation(multiplier: profile.seedMultiplier)
-      .keyRequest(seedResponse: seed, prefix: profile.keyRequestPrefix)
-    // Security access unlocks the following request but does not itself change
-    // diagnostic memory, so an interrupted key exchange is not a write outcome.
-    let key = try extractor.extract(await channel.execute(keyRequest, intent: .read))
-    guard key.hasPrefix("6702") else { return .blocked }
+    switch clearStrategy {
+    case .securityAccess:
+      let session = try extractor.extract(
+        await channel.execute(profile.extendedSessionCommand, intent: .read))
+      guard session.hasPrefix("5003") else { return .blocked }
+      let seed = try extractor.extract(await channel.execute(profile.seedCommand, intent: .read))
+      let keyRequest = try SeedKeyDerivation(multiplier: profile.seedMultiplier)
+        .keyRequest(seedResponse: seed, prefix: profile.keyRequestPrefix)
+      // Security access unlocks the following request but does not itself change
+      // diagnostic memory, so an interrupted key exchange is not a write outcome.
+      let key = try extractor.extract(await channel.execute(keyRequest, intent: .read))
+      guard key.hasPrefix("6702") else { return .blocked }
+    case .direct:
+      let identity = try extractor.extract(
+        await channel.execute(profile.identityCommand, intent: .read))
+      guard identity.hasPrefix("62F18C") else { return .blocked }
+    }
 
     // The state-changing request is deliberately sent once. Response-pending
     // and the final positive response are consumed from that one ELM reply.
     let clearRaw = try await channel.execute(profile.dtcClearCommand, intent: .write)
-    let clearReplies = (try? extractor.extractAll(clearRaw)) ?? []
-    guard clearReplies.contains(where: { $0 == "54" }) else { return .blocked }
-    let verification = try extractor.extract(
-      await channel.execute(profile.dtcCountCommand, intent: .read))
-    return try decoder.decodeCount(verification) == 0 ? .cleared : .needsVerification
+    let clearReplies: [String]
+    do {
+      clearReplies = try extractor.extractAll(clearRaw)
+    } catch is DiagnosticParseError {
+      return .needsVerification
+    }
+    guard clearReplies.contains(where: { $0 == "54" }) else {
+      let explicitlyRejected = clearReplies.contains {
+        $0.hasPrefix("7F14") && !$0.hasSuffix("78")
+      }
+      return explicitlyRejected ? .blocked : .needsVerification
+    }
+    let verificationRaw = try await channel.execute(profile.dtcCountCommand, intent: .read)
+    let verification: String
+    do {
+      verification = try extractor.extract(verificationRaw)
+    } catch is DiagnosticParseError {
+      return .needsVerification
+    }
+    do {
+      return try decoder.decodeCount(verification) == 0 ? .cleared : .needsVerification
+    } catch is DiagnosticParseError {
+      return .needsVerification
+    }
   }
 }
 
@@ -133,10 +165,21 @@ public struct ServiceReminderUseCase: Sendable {
       extractor.extract(await channel.execute(profile.odometerCommand, intent: .read)))
     guard status == profile.expectedStatusASCII else { return .blocked }
 
-    let distanceReply = try extractor.extract(
-      await channel.execute(commands.distance, intent: .write))
+    let distanceRaw = try await channel.execute(commands.distance, intent: .write)
+    let distanceReply: String
+    do {
+      distanceReply = try extractor.extract(distanceRaw)
+    } catch is DiagnosticParseError {
+      return .partiallyApplied
+    }
     guard positiveEcho(request: commands.distance, response: distanceReply) else { return .blocked }
-    let dateReply = try extractor.extract(await channel.execute(commands.date, intent: .write))
+    let dateRaw = try await channel.execute(commands.date, intent: .write)
+    let dateReply: String
+    do {
+      dateReply = try extractor.extract(dateRaw)
+    } catch is DiagnosticParseError {
+      return .partiallyApplied
+    }
     guard positiveEcho(request: commands.date, response: dateReply) else {
       return .partiallyApplied
     }
@@ -144,7 +187,7 @@ public struct ServiceReminderUseCase: Sendable {
   }
 }
 
-private func configure(_ commands: [String], _ channel: any DiagnosticCommanding) async throws {
+func configure(_ commands: [String], _ channel: any DiagnosticCommanding) async throws {
   for command in commands {
     let response = try await channel.execute(command, intent: .read)
     guard configurationAccepted(command: command, response: response) else {

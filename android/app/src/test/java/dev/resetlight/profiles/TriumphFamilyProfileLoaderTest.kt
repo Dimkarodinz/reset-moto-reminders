@@ -50,7 +50,7 @@ class TriumphFamilyProfileLoaderTest {
         assertEquals(3, updated.combinedWrite?.securityKeys?.size)
 
         assertEquals(ServiceReminderStrategy.HYBRID_COMBINED, hybrid.strategy)
-        assertEquals(25, hybrid.combinedWrite?.inputStepKm)
+        assertEquals(1, hybrid.combinedWrite?.inputStepKm)
         assertEquals(25, hybrid.combinedWrite?.hybridOdometerDivisorKm)
         assertEquals("2EA000", hybrid.combinedWrite?.requestPrefix)
 
