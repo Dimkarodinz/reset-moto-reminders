@@ -22,6 +22,7 @@ enum class ServiceReminderStrategy(val serializedValue: String) {
     ORIGINAL_SPLIT("original_split"),
     UPDATED_COMBINED("updated_combined"),
     HYBRID_COMBINED("hybrid_combined"),
+    ADAPTIVE_COMBINED("adaptive_combined"),
 }
 
 data class EngineFamilyProfile(
@@ -40,7 +41,8 @@ data class EngineFamilyProfile(
 
 data class CombinedServiceWriteProfile(
     val requestPrefix: String,
-    val distanceStepKm: Int,
+    val inputStepKm: Int,
+    val hybridOdometerDivisorKm: Int?,
     val minimumDistanceKm: Int,
     val maximumDistanceKm: Int,
     val yearBase: Int,
@@ -221,7 +223,8 @@ class InstrumentFamilyProfileLoader {
         val combined = if (strategy != ServiceReminderStrategy.ORIGINAL_SPLIT) {
             CombinedServiceWriteProfile(
                 requestPrefix = service.child("request_prefix").familyHex(),
-                distanceStepKm = service.child("distance_step_km").integer(),
+                inputStepKm = service.child("input_step_km").integer(),
+                hybridOdometerDivisorKm = service.optionalChild("hybrid_odometer_divisor_km")?.integer(),
                 minimumDistanceKm = service.child("minimum_distance_km").integer(),
                 maximumDistanceKm = service.child("maximum_distance_km").integer(),
                 yearBase = service.child("year_base").integer(),
@@ -256,7 +259,18 @@ class InstrumentFamilyProfileLoader {
                         }
                     },
                 writePositiveResponse = service.child("write_positive_response").familyHex(),
-            )
+            ).also { profile ->
+                if (profile.inputStepKm <= 0) {
+                    throw ProfileLoadException("Combined service input step must be positive")
+                }
+                if (strategy in setOf(
+                        ServiceReminderStrategy.HYBRID_COMBINED,
+                        ServiceReminderStrategy.ADAPTIVE_COMBINED,
+                    ) && (profile.hybridOdometerDivisorKm ?: 0) <= 0
+                ) {
+                    throw ProfileLoadException("Hybrid combined service encoding requires a positive odometer divisor")
+                }
+            }
         } else null
 
         return InstrumentFamilyProfile(

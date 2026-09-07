@@ -6,6 +6,7 @@ import dev.resetlight.diagnostics.WriteIntent
 import dev.resetlight.domain.DistanceUnit
 import dev.resetlight.profiles.InstrumentFamilyProfile
 import dev.resetlight.profiles.InstrumentFamilyProfileLoader
+import dev.resetlight.profiles.ServiceReminderStrategy
 import dev.resetlight.profiles.securityKeyFor
 import java.io.File
 import java.time.LocalDate
@@ -49,6 +50,7 @@ class CombinedServiceReminderResetServiceTest {
 
         assertEquals(44_662, payload.odometerKm)
         assertEquals(54_662, payload.nextServiceOdometerKm)
+        assertEquals(ServiceReminderStrategy.UPDATED_COMBINED, payload.resolvedStrategy)
         assertEquals(
             listOf("100F2EA00000AE76", "2100D5860102031B", "2208070000000000"),
             payload.frames,
@@ -71,6 +73,97 @@ class CombinedServiceReminderResetServiceTest {
             listOf("10082EA000088A1B", "2108070000000000"),
             payload.frames,
         )
+        assertEquals(ServiceReminderStrategy.HYBRID_COMBINED, payload.resolvedStrategy)
+    }
+
+    @Test
+    fun `adaptive payload selects updated encoding from twelve byte A000 data`() {
+        val family = adaptive()
+        val payload = CombinedServiceReminderPayloadBuilder(checkNotNull(family.combinedWrite)).build(
+            strategy = family.strategy,
+            intervalKm = 10_000,
+            nextServiceDate = LocalDate.of(2027, 8, 7),
+            a500Payload = "62A50000AE76",
+            a000Payload = "62A0000102030405060708090A0B0C",
+        )
+
+        assertEquals(ServiceReminderStrategy.UPDATED_COMBINED, payload.resolvedStrategy)
+        assertEquals(
+            listOf("100F2EA00000AE76", "2100D5860102031B", "2208070000000000"),
+            payload.frames,
+        )
+    }
+
+    @Test
+    fun `adaptive payload selects hybrid encoding from five byte A000 data`() {
+        val family = adaptive()
+        val payload = CombinedServiceReminderPayloadBuilder(checkNotNull(family.combinedWrite)).build(
+            strategy = family.strategy,
+            intervalKm = 10_000,
+            nextServiceDate = LocalDate.of(2027, 8, 7),
+            a500Payload = "62A50000AE76",
+            a000Payload = "62A0000102030405",
+        )
+
+        assertEquals(ServiceReminderStrategy.HYBRID_COMBINED, payload.resolvedStrategy)
+        assertEquals(listOf("10082EA000088A1B", "2108070000000000"), payload.frames)
+    }
+
+    @Test
+    fun `adaptive reset rejects an unknown A000 shape before any write`() = runTest {
+        val family = adaptive()
+        val profile = checkNotNull(family.combinedWrite)
+        val channel = QueueChannel(
+            configResponses(family) + mapOf(
+                profile.sessionRequest to listOf("5003003201F4"),
+                profile.seedRequest to listOf("670100112233445566778899AABBCCDDEEFF"),
+                "062702E91266B2" to listOf("6702"),
+                "0322A500" to listOf("62A50000AE76"),
+                "0322A000" to listOf("62A000010203040506"),
+                "0322A010" to listOf("62A0100102"),
+            ),
+        )
+
+        val result = CombinedServiceReminderResetService(family).reset(
+            channel,
+            10_000,
+            DistanceUnit.KILOMETERS,
+            LocalDate.of(2027, 8, 7),
+        )
+
+        assertTrue(result is ServiceReminderResetResult.Blocked)
+        assertTrue(channel.writes.isEmpty())
+    }
+
+    @Test
+    fun `adaptive hybrid reset uses live selection through post-write verification`() = runTest {
+        val family = adaptive()
+        val profile = checkNotNull(family.combinedWrite)
+        val channel = QueueChannel(
+            configResponses(family) + mapOf(
+                profile.sessionRequest to listOf("5003003201F4"),
+                profile.seedRequest to listOf("670100112233445566778899AABBCCDDEEFF"),
+                "062702E91266B2" to listOf("6702"),
+                "0322A500" to listOf("62A50000AE76"),
+                "0322A000" to listOf(
+                    "62A0000102030405",
+                    "62A000088A1B0807",
+                ),
+                "0322A010" to listOf("62A0100102", "62A0100102"),
+                "10082EA000088A1B" to listOf("3000000000000000"),
+                "2108070000000000" to listOf("6EA000"),
+            ),
+        )
+
+        val result = CombinedServiceReminderResetService(family).reset(
+            channel,
+            10_001,
+            DistanceUnit.KILOMETERS,
+            LocalDate.of(2027, 8, 7),
+        )
+
+        assertTrue(result is ServiceReminderResetResult.Committed)
+        assertEquals(listOf("10082EA000088A1B", "2108070000000000"), channel.writes)
     }
 
     @Test
@@ -249,6 +342,7 @@ class CombinedServiceReminderResetServiceTest {
 
     private fun updated() = family("triumph-updated-tft.instrumentfamily.yaml")
     private fun hybrid() = family("triumph-hybrid-display.instrumentfamily.yaml")
+    private fun adaptive() = family("triumph-adaptive-combined.instrumentfamily.yaml")
 
     private fun family(name: String): InstrumentFamilyProfile = InstrumentFamilyProfileLoader().load(
         File("build/generated/profileAssets/profiles/$name").readBytes(),

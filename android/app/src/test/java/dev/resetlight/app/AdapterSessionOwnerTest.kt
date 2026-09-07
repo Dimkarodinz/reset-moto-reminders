@@ -62,6 +62,10 @@ class AdapterSessionOwnerTest {
         assertTrue(owner.selectMotorcycle("triumph-tiger-sport-660"))
         assertTrue(owner.serviceResetAvailable)
         assertEquals(25, owner.serviceIntervalConstraints?.stepKm)
+
+        assertTrue(owner.selectMotorcycle("triumph-street-triple-765-modern"))
+        assertTrue(owner.serviceResetAvailable)
+        assertEquals(1, owner.serviceIntervalConstraints?.stepKm)
     }
 
     @Test
@@ -598,6 +602,7 @@ class AdapterSessionOwnerTest {
             "triumph-original-tft.instrumentfamily.yaml",
             "triumph-updated-tft.instrumentfamily.yaml",
             "triumph-hybrid-display.instrumentfamily.yaml",
+            "triumph-adaptive-combined.instrumentfamily.yaml",
         ).associate { name ->
             InstrumentFamilyProfileLoader().load(File(root, name).readBytes()).let { it.id to it }
         }

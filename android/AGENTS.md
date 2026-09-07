@@ -98,7 +98,7 @@ Android UI and lifecycle
 - LX and MX+ are independent Android Classic profiles. Their exact bonded names and `STDI` product identities must not match each other or fall back to the original MX profile.
 - Motorcycle selection is available only while disconnected. Resolve engine and instrument families atomically, show only declared capabilities, and repeat the experimental warning at write confirmation.
 - Experimental modern DTC clear performs the redacted `F18C` identity read, sends `14FFFFFF` once and verifies with `190108`. The validated 2021 profile retains its captured security-access strategy.
-- Updated-generation Tiger 900 and Tiger Sport 660 service reset use distinct combined encodings under one reusable service. Both are executable and unit-tested but must stay experimental until a real motorcycle run confirms the complete write and read-back. Engine-only motorcycle profiles must never inherit either service capability.
+- Updated-generation Tiger 900 and Tiger Sport 660 retain explicit combined encodings under one reusable service. Other listed modern Triumph groups use an adaptive combined family that selects updated TFT only for an exact 12-byte `A000` data response and hybrid only for an exact 5-byte response. Any other response blocks before the reminder write; the app never retries with the alternate encoding. All combined paths are executable and unit-tested but remain experimental until a real motorcycle run confirms the complete write and read-back.
 - Unknown maps, schema versions, adapter identities or module identities fail closed.
 
 ## UX starting point

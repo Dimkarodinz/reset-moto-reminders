@@ -59,12 +59,12 @@ motorcycles:
     model_codes: [A55, A60, A61, A62, D31]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-modern-classics
@@ -72,12 +72,12 @@ motorcycles:
     model_codes: [D40, D46, D53, D54, D56, DD0, DP0, DX0]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-scrambler-modern
@@ -85,12 +85,12 @@ motorcycles:
     model_codes: [D44, DR0, DS0]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-660-800-modern
@@ -98,12 +98,12 @@ motorcycles:
     model_codes: [L10, L21, L23, L25]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-speed-triple-1200-modern
@@ -111,12 +111,12 @@ motorcycles:
     model_codes: [P01, P02, P11]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-tiger-1200-modern
@@ -124,10 +124,10 @@ motorcycles:
     model_codes: [P20, P21, P22, P23, P24]
     validation_status: experimental
     engine_family: triumph-modern-can-engine
-    instrument_family: none
+    instrument_family: triumph-adaptive-combined
     dtc_clear_strategy: direct
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable

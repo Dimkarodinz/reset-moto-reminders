@@ -33,8 +33,8 @@ Most routine service is an oil change and an air filter. You can do it yourself 
 Safety is built into the design, not bolted on afterward:
 
 - The app performs **only the bounded operations above** — there is no code path that flashes firmware, writes calibration, or reprograms a module.
-- Every command it sends is a **byte sequence observed from a real Tiger 900**. It never guesses, fuzzes, or probes unknown commands.
-- Writes are **fail-closed and gated**: the app refuses to write unless it recognizes the exact motorcycle profile, and it asks you to confirm each write. An unknown or mismatched bike stays read-only.
+- Every write format is a **fixed, mapped diagnostic sequence**. The app never fuzzes or probes unknown write commands.
+- Writes are **fail-closed and gated**: the app requires the selected motorcycle profile and a recognized live instrument response, and it asks you to confirm each write. An unknown response shape stops before the reminder write.
 - It **never retries a write** after a disconnect or an unclear result.
 
 Reading trouble codes and the service-reminder reset are validated on a real Tiger 900. DTC clear is available, clearly marked Beta, and still awaits its first controlled project-app motorcycle test.
@@ -58,14 +58,14 @@ The current experimental Android branch also lets you select the motorcycles bel
 | Tiger 900, Tiger 900 GT, Tiger 900 Rally, Tiger 900 GT (LRH), Tiger 900 Rally Pro and Tiger 850 Sport — first generation | E60, E62, E63, E65, E67, E68 | Dashboard read, DTC read/clear and service reset |
 | Tiger 900 — updated generation | C81, C82, C83 | DTC read/clear and updated-TFT service reset |
 | Tiger Sport 660 | L20, L22 | DTC read/clear and hybrid-display service reset |
-| Street Triple RS 765, Street Triple R, Street Triple RS and Street Triple Moto2 | A55, A60, A61, A62, D31 | DTC read/clear only |
-| Bonneville T120, Bonneville Speedmaster, Bonneville Bobber, Speed Twin 900/1200/1200 RS, Thruxton RS and Bobber TFC | D40, D46, D53, D54, D56, DD0, DP0, DX0 | DTC read/clear only |
-| Scrambler 900, Scrambler 1200 X and Scrambler 1200 XE | D44, DR0, DS0 | DTC read/clear only |
-| Trident 660, Daytona 660 and Tiger Sport 800 | L10, L21, L23, L25 | DTC read/clear only |
-| Speed Triple 1200 RS and RR | P01, P02, P11 | DTC read/clear only |
-| Tiger 1200 GT and Rally family | P20, P21, P22, P23, P24 | DTC read/clear only |
+| Street Triple RS 765, Street Triple R, Street Triple RS and Street Triple Moto2 | A55, A60, A61, A62, D31 | DTC read/clear and live-detected service reset |
+| Bonneville T120, Bonneville Speedmaster, Bonneville Bobber, Speed Twin 900/1200/1200 RS, Thruxton RS and Bobber TFC | D40, D46, D53, D54, D56, DD0, DP0, DX0 | DTC read/clear and live-detected service reset |
+| Scrambler 900, Scrambler 1200 X and Scrambler 1200 XE | D44, DR0, DS0 | DTC read/clear and live-detected service reset |
+| Trident 660, Daytona 660 and Tiger Sport 800 | L10, L21, L23, L25 | DTC read/clear and live-detected service reset |
+| Speed Triple 1200 RS and RR | P01, P02, P11 | DTC read/clear and live-detected service reset |
+| Tiger 1200 GT and Rally family | P20, P21, P22, P23, P24 | DTC read/clear and live-detected service reset |
 
-Every row in this table is **experimental and not yet tested**. A listed model may still use a different ECU, instrument cluster or diagnostic-port wiring depending on its year and market. The app must recognize the expected live profile before it offers an operation.
+Every row in this table is **experimental and not yet tested**. A listed model may still use a different ECU, instrument cluster or diagnostic-port wiring depending on its year and market. For live-detected resets, the app reads the service data first and writes only when its exact shape matches one of the two supported formats.
 
 See [`ecu-maps/README.md`](ecu-maps/README.md) for the exact profile and capability matrix. A shared ECU supplier or model name alone never proves compatibility.
 

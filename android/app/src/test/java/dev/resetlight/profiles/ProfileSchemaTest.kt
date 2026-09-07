@@ -35,6 +35,7 @@ class ProfileSchemaTest {
             "triumph-original-tft.instrumentfamily.yaml",
             "triumph-updated-tft.instrumentfamily.yaml",
             "triumph-hybrid-display.instrumentfamily.yaml",
+            "triumph-adaptive-combined.instrumentfamily.yaml",
         ).forEach { assertValid("instrumentfamily.schema.json", it) }
         assertValid("motorcycleprofiles.schema.json", "triumph.motorcycleprofiles.yaml")
     }

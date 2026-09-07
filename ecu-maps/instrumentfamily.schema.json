@@ -14,7 +14,7 @@
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
         "display_name": { "type": "string", "minLength": 1 },
-        "strategy": { "enum": ["original_split", "updated_combined", "hybrid_combined"] },
+        "strategy": { "enum": ["original_split", "updated_combined", "hybrid_combined", "adaptive_combined"] },
         "module": { "type": "object" },
         "read_only_capture": { "type": "object" },
         "service_reminder": { "type": "object" }

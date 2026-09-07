@@ -1,12 +1,12 @@
 schema_version: 1
 
 instrument_family:
-  id: triumph-updated-tft
-  display_name: Triumph updated TFT instrument
-  strategy: updated_combined
+  id: triumph-adaptive-combined
+  display_name: Triumph live-detected combined-service instrument
+  strategy: adaptive_combined
   module:
     role: service_reminder_storage_and_reset
-    family: Triumph updated TFT instrument
+    family: Triumph combined-service instrument, detected from live response
     supplier: unknown
     hardware_family: unknown
     part_number: unknown
@@ -34,7 +34,7 @@ instrument_family:
         - ATSHDAC1F1
 
   service_reminder:
-    knowledge_status: experimental_not_hardware_validated
+    knowledge_status: experimental_live_shape_detection_not_hardware_validated
     session_request: "021003"
     session_positive_prefix: "5003"
     seed_request: "022701"
@@ -57,6 +57,7 @@ instrument_family:
     request_prefix: "2EA000"
     write_positive_response: "6EA000"
     input_step_km: 1
+    hybrid_odometer_divisor_km: 25
     minimum_distance_km: 1
     maximum_distance_km: 16000
     year_base: 2000

@@ -100,6 +100,7 @@ val triumphFamilyProfileSources = listOf(
     "triumph-original-tft.instrumentfamily.yaml",
     "triumph-updated-tft.instrumentfamily.yaml",
     "triumph-hybrid-display.instrumentfamily.yaml",
+    "triumph-adaptive-combined.instrumentfamily.yaml",
     "triumph.motorcycleprofiles.yaml",
 ).map { rootProject.file("../ecu-maps/$it") }
 val ecuSchemaSource = rootProject.file("../ecu-maps/ecumap.schema.json")

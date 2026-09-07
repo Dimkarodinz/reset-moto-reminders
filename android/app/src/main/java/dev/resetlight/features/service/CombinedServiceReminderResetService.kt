@@ -23,6 +23,7 @@ import kotlinx.coroutines.CancellationException
 data class CombinedServiceReminderPayload(
     val odometerKm: Int,
     val nextServiceOdometerKm: Int,
+    val resolvedStrategy: ServiceReminderStrategy,
     val frames: List<String>,
 )
 
@@ -54,7 +55,7 @@ class CombinedServiceReminderPayloadBuilder(
         a000Payload: String,
     ): CombinedServiceReminderPayload {
         require(intervalKm in profile.minimumDistanceKm..profile.maximumDistanceKm)
-        require(intervalKm % profile.distanceStepKm == 0)
+        require(intervalKm % profile.inputStepKm == 0)
         val year = nextServiceDate.year - profile.yearBase
         require(year in 0..0xFF)
 
@@ -62,10 +63,20 @@ class CombinedServiceReminderPayloadBuilder(
         val odometerKm = odometerBytes.unsignedInt()
         val nextServiceOdometerKm = Math.addExact(odometerKm, intervalKm)
 
-        val payload = when (strategy) {
+        val a000Data = didData(a000Payload, A000)
+        val resolvedStrategy = when (strategy) {
+            ServiceReminderStrategy.ADAPTIVE_COMBINED -> when (a000Data.size) {
+                UPDATED_A000_BYTES -> ServiceReminderStrategy.UPDATED_COMBINED
+                HYBRID_A000_BYTES -> ServiceReminderStrategy.HYBRID_COMBINED
+                else -> throw IllegalArgumentException("Unsupported A000 response shape")
+            }
+            else -> strategy
+        }
+        val payload = when (resolvedStrategy) {
             ServiceReminderStrategy.UPDATED_COMBINED -> {
                 require(nextServiceOdometerKm <= 0xFFFFFF)
-                val preserved = didData(a000Payload, A000, expectedBytes = 12).copyOfRange(0, 3)
+                require(a000Data.size == UPDATED_A000_BYTES)
+                val preserved = a000Data.copyOfRange(0, 3)
                 profile.requestPrefix.diagnosticHexBytes() +
                     odometerBytes +
                     nextServiceOdometerKm.toBytes(3) +
@@ -73,36 +84,44 @@ class CombinedServiceReminderPayloadBuilder(
                     byteArrayOf(year.toByte(), nextServiceDate.monthValue.toByte(), nextServiceDate.dayOfMonth.toByte())
             }
             ServiceReminderStrategy.HYBRID_COMBINED -> {
-                didData(a000Payload, A000, expectedBytes = 5)
-                val encodedDistance = nextServiceOdometerKm / profile.distanceStepKm
+                require(a000Data.size == HYBRID_A000_BYTES)
+                val divisor = requireNotNull(profile.hybridOdometerDivisorKm)
+                val encodedDistance = nextServiceOdometerKm / divisor
                 require(encodedDistance <= 0xFFFF)
                 profile.requestPrefix.diagnosticHexBytes() +
                     encodedDistance.toBytes(2) +
                     byteArrayOf(year.toByte(), nextServiceDate.monthValue.toByte(), nextServiceDate.dayOfMonth.toByte())
             }
             ServiceReminderStrategy.ORIGINAL_SPLIT -> error("Original split reset does not use a combined payload")
+            ServiceReminderStrategy.ADAPTIVE_COMBINED -> error("Adaptive strategy must resolve before construction")
         }
         return CombinedServiceReminderPayload(
             odometerKm = odometerKm,
             nextServiceOdometerKm = nextServiceOdometerKm,
+            resolvedStrategy = resolvedStrategy,
             frames = payload.toIsoTpFrames(),
         )
     }
 
-    private fun didData(payload: String, did: String, expectedBytes: Int): ByteArray {
-        val normalized = payload.hexOnly()
-        val prefix = "62$did"
-        require(normalized.startsWith(prefix)) { "Unexpected response for DID $did" }
-        return normalized.substring(prefix.length).diagnosticHexBytes().also {
+    private fun didData(payload: String, did: String, expectedBytes: Int): ByteArray =
+        didData(payload, did).also {
             require(it.size == expectedBytes) {
                 "Response for DID $did has ${it.size} bytes; expected $expectedBytes"
             }
         }
+
+    private fun didData(payload: String, did: String): ByteArray {
+        val normalized = payload.hexOnly()
+        val prefix = "62$did"
+        require(normalized.startsWith(prefix)) { "Unexpected response for DID $did" }
+        return normalized.substring(prefix.length).diagnosticHexBytes()
     }
 
     private companion object {
         const val A500 = "A500"
         const val A000 = "A000"
+        const val UPDATED_A000_BYTES = 12
+        const val HYBRID_A000_BYTES = 5
     }
 }
 
@@ -219,16 +238,18 @@ class CombinedServiceReminderResetService(
         val normalized = response.hexOnly()
         if (!normalized.startsWith("62A000")) return false
         val data = normalized.substring(6).diagnosticHexBytes()
-        when (family.strategy) {
+        when (built.resolvedStrategy) {
             ServiceReminderStrategy.UPDATED_COMBINED -> data.size == 12 &&
                 data.copyOfRange(3, 6).unsignedInt() == built.nextServiceOdometerKm &&
                 data[9].u() == date.year - profile.yearBase &&
                 data[10].u() == date.monthValue && data[11].u() == date.dayOfMonth
             ServiceReminderStrategy.HYBRID_COMBINED -> data.size == 5 &&
-                data.copyOfRange(0, 2).unsignedInt() == built.nextServiceOdometerKm / profile.distanceStepKm &&
+                data.copyOfRange(0, 2).unsignedInt() ==
+                built.nextServiceOdometerKm / requireNotNull(profile.hybridOdometerDivisorKm) &&
                 data[2].u() == date.year - profile.yearBase &&
                 data[3].u() == date.monthValue && data[4].u() == date.dayOfMonth
             ServiceReminderStrategy.ORIGINAL_SPLIT -> false
+            ServiceReminderStrategy.ADAPTIVE_COMBINED -> false
         }
     } catch (_: IllegalArgumentException) {
         false
@@ -246,7 +267,7 @@ class CombinedServiceReminderResetService(
 
     private fun validInput(intervalKm: Int, date: LocalDate): Boolean =
         intervalKm in profile.minimumDistanceKm..profile.maximumDistanceKm &&
-            intervalKm % profile.distanceStepKm == 0 &&
+            intervalKm % profile.inputStepKm == 0 &&
             date.year - profile.yearBase in 0..0xFF
 
     private fun invalidInput() = ServiceReminderResetResult.Blocked(

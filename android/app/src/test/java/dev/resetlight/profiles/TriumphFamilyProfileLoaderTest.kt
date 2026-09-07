@@ -32,6 +32,7 @@ class TriumphFamilyProfileLoaderTest {
         val original = instruments.getValue("triumph-original-tft")
         val updated = instruments.getValue("triumph-updated-tft")
         val hybrid = instruments.getValue("triumph-hybrid-display")
+        val adaptive = instruments.getValue("triumph-adaptive-combined")
 
         assertEquals(ServiceReminderStrategy.ORIGINAL_SPLIT, original.strategy)
         assertEquals("0x701", original.module.transport.requestCanId)
@@ -40,7 +41,8 @@ class TriumphFamilyProfileLoaderTest {
 
         assertEquals(ServiceReminderStrategy.UPDATED_COMBINED, updated.strategy)
         assertEquals("0x18DAC1F1", updated.module.transport.requestCanId)
-        assertEquals(1, updated.combinedWrite?.distanceStepKm)
+        assertEquals(1, updated.combinedWrite?.inputStepKm)
+        assertNull(updated.combinedWrite?.hybridOdometerDivisorKm)
         assertEquals("2EA000", updated.combinedWrite?.requestPrefix)
         assertEquals("5003", updated.combinedWrite?.sessionPositivePrefix)
         assertEquals("6701", updated.combinedWrite?.seedPositivePrefix)
@@ -48,8 +50,13 @@ class TriumphFamilyProfileLoaderTest {
         assertEquals(3, updated.combinedWrite?.securityKeys?.size)
 
         assertEquals(ServiceReminderStrategy.HYBRID_COMBINED, hybrid.strategy)
-        assertEquals(25, hybrid.combinedWrite?.distanceStepKm)
+        assertEquals(25, hybrid.combinedWrite?.inputStepKm)
+        assertEquals(25, hybrid.combinedWrite?.hybridOdometerDivisorKm)
         assertEquals("2EA000", hybrid.combinedWrite?.requestPrefix)
+
+        assertEquals(ServiceReminderStrategy.ADAPTIVE_COMBINED, adaptive.strategy)
+        assertEquals(1, adaptive.combinedWrite?.inputStepKm)
+        assertEquals(25, adaptive.combinedWrite?.hybridOdometerDivisorKm)
     }
 
     @Test
@@ -74,10 +81,20 @@ class TriumphFamilyProfileLoaderTest {
         val hybrid = catalog.profiles.single { it.id == "triumph-tiger-sport-660" }
         assertEquals(CapabilityStatus.EXPERIMENTAL, hybrid.capabilities.serviceReset)
 
-        val streetTriple = catalog.profiles.single { it.id == "triumph-street-triple-765-modern" }
-        assertNull(streetTriple.instrumentFamily)
-        assertEquals(CapabilityStatus.UNAVAILABLE, streetTriple.capabilities.serviceReset)
-        assertEquals(CapabilityStatus.EXPERIMENTAL, streetTriple.capabilities.dtcClear)
+        val adaptiveProfileIds = setOf(
+            "triumph-street-triple-765-modern",
+            "triumph-modern-classics",
+            "triumph-scrambler-modern",
+            "triumph-660-800-modern",
+            "triumph-speed-triple-1200-modern",
+            "triumph-tiger-1200-modern",
+        )
+        adaptiveProfileIds.forEach { profileId ->
+            val motorcycle = catalog.profiles.single { it.id == profileId }
+            assertEquals(ServiceReminderStrategy.ADAPTIVE_COMBINED, motorcycle.instrumentFamily?.strategy)
+            assertEquals(CapabilityStatus.EXPERIMENTAL, motorcycle.capabilities.serviceReset)
+            assertEquals(CapabilityStatus.EXPERIMENTAL, motorcycle.capabilities.dtcClear)
+        }
 
         assertTrue(catalog.profiles.distinctBy { it.id }.size == catalog.profiles.size)
     }
@@ -121,8 +138,8 @@ class TriumphFamilyProfileLoaderTest {
     fun `catalog rejects a service capability without an instrument family`() {
         val broken = generatedProfile(CATALOG).decodeToString()
             .replaceFirst(
-                "service_reset: unavailable\n      dashboard_read: unavailable",
-                "service_reset: experimental\n      dashboard_read: unavailable",
+                "instrument_family: triumph-adaptive-combined",
+                "instrument_family: none",
             )
 
         assertThrows(ProfileLoadException::class.java) {
@@ -148,6 +165,17 @@ class TriumphFamilyProfileLoaderTest {
         }
     }
 
+    @Test
+    fun `adaptive instrument requires a positive hybrid odometer divisor`() {
+        val broken = generatedProfile("triumph-adaptive-combined.instrumentfamily.yaml")
+            .decodeToString()
+            .replace("hybrid_odometer_divisor_km: 25", "hybrid_odometer_divisor_km: 0")
+
+        assertThrows(ProfileLoadException::class.java) {
+            InstrumentFamilyProfileLoader().load(broken.encodeToByteArray())
+        }
+    }
+
     private fun generatedProfile(name: String): ByteArray {
         val file = File("build/generated/profileAssets/profiles/$name")
         check(file.isFile) { "Generated profile is missing: ${file.absolutePath}" }
@@ -161,6 +189,7 @@ class TriumphFamilyProfileLoaderTest {
             "triumph-original-tft.instrumentfamily.yaml",
             "triumph-updated-tft.instrumentfamily.yaml",
             "triumph-hybrid-display.instrumentfamily.yaml",
+            "triumph-adaptive-combined.instrumentfamily.yaml",
         )
     }
 }

@@ -137,7 +137,7 @@ class AdapterSessionOwner(
             )
         } ?: currentInstrumentFamily()?.combinedWrite?.let {
             ServiceIntervalConstraints(
-                stepKm = it.distanceStepKm,
+                stepKm = it.inputStepKm,
                 minKm = it.minimumDistanceKm,
                 maxKm = it.maximumDistanceKm,
             )

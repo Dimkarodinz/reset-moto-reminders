@@ -52,6 +52,7 @@ class AppContainer(context: Context) {
         "triumph-original-tft.instrumentfamily.yaml",
         "triumph-updated-tft.instrumentfamily.yaml",
         "triumph-hybrid-display.instrumentfamily.yaml",
+        "triumph-adaptive-combined.instrumentfamily.yaml",
     ).associate { asset ->
         applicationContext.assets.open("profiles/$asset")
             .use(InstrumentFamilyProfileLoader()::load)
