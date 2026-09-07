@@ -28,13 +28,13 @@ The archives under `logs/` are private evidence. Before the first public commit,
 - Display: `Unofficial project. Not affiliated with or endorsed by Triumph Motorcycles.`
 - Never describe the application as official, dealer, certified or universally compatible.
 
-Independently written source, sanitized protocol observations, documented profiles, original project assets, release-signed APKs and iOS source/self-build instructions may be published subject to these rules.
+Independently written source, sanitized protocol observations, documented profiles, original project assets, release-signed APKs, unsigned iOS application archives and iOS source/self-build instructions may be published subject to these rules.
 
 ## Binary distribution
 
 Every Android APK must be built from a public immutable tag, signed with the protected project key, accompanied by a SHA-256 checksum and contain no capture data, credentials or test identifiers.
 
-Do not publish an IPA signed with a development, Personal Team, ad-hoc or enterprise profile. The no-fee iPhone method is source plus self-build instructions. Public installation must use an Apple-authorized channel such as the App Store, TestFlight for testing, an eligible alternative marketplace or authorized EU Web Distribution.
+A public GitHub release may include an unsigned IPA prepared from the same immutable source tag, accompanied by its SHA-256 checksum and source/self-build package. The archive must contain no code signature, provisioning profile, Apple certificate, account data or device registration. Describe it accurately as a prebuilt archive that is not directly installable: the user signs it locally with their own Apple Account through a sideloading tool, or builds and installs the source with Xcode. Never publish an IPA signed with the maintainer's development, Personal Team, ad-hoc or enterprise identity.
 
 ## Source license
 
@@ -104,7 +104,7 @@ liability, consumer-law, and store-policy review before launch.
 - [ ] Unknown/mismatched profiles and unknown precursor response shapes cannot execute writes; no write format is probed, retried or substituted.
 - [ ] Unofficial-project and safety warnings are visible.
 - [ ] Each binary matches a public source tag and checksum.
-- [ ] iOS distribution is authorized or source-only.
+- [ ] Every public IPA is unsigned, contains no provisioning/signing material, matches an immutable source tag and checksum, and is accompanied by source/Xcode instructions for user-controlled local signing.
 - [ ] New security-sensitive or commercial functionality received legal review.
 - [ ] Any separate commercial publisher has a signed copyright/branding agreement with Dmytro Rodin.
 

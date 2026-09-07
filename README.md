@@ -76,7 +76,7 @@ See [`ecu-maps/README.md`](ecu-maps/README.md) for the exact profile and capabil
 - **OBDLink CX** support is included on Android and iPhone using OBDLink's published BLE interface. It is marked experimental until a powered CX and Tiger 900 test is completed.
 - The discontinued original **OBDLink MX Bluetooth** adapter is supported experimentally on Android only. Press its physical Connect button and pair `OBDLink MX` in Android settings; it does not use a fixed PIN.
 - **OBDLink LX and MX+** have separate experimental Android profiles. Press Connect, pair the exact product name in Android settings, then select it in the app.
-- An Android 8+ phone, or an iPhone running iOS 16+ for the source/self-build version.
+- An Android 8+ phone or an iPhone running iOS 16+.
 
 *Personal note: the vLinker MC+ costs about €40, has no subscription, and does not wear out. It works with almost any car or motorcycle OBD-II port. Worth buying well beyond this app — a general diagnostic tool you keep for years.*
 
@@ -88,8 +88,9 @@ The APK is built from its public source tag and signed with the project release
 key.
 
 Android build instructions and the full hardware-test procedure are in
-[`android/README.md`](android/README.md). The iPhone app is installed from the
-public Xcode project with the rider's own Apple Account; see the
+[`android/README.md`](android/README.md). The iPhone release provides an unsigned
+IPA for local signing and the public Xcode project for self-build; both use the
+rider's own Apple Account. See the
 [step-by-step iPhone guide](https://dimkarodinz.github.io/reset-moto-reminders/install-ios.html)
 and [`ios/README.md`](ios/README.md).
 
