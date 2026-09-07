@@ -51,13 +51,21 @@ Reading trouble codes and the service-reminder reset are validated on a real Tig
 
 ### Experimental motorcycle profiles (not tested)
 
-The Android experimental branch includes selectable family profiles. They require real-motorcycle verification before being declared compatible:
+The current experimental Android branch also lets you select the motorcycles below. Their protocol families match known implementations, but none of these combinations has been tested through this app on a real motorcycle yet.
 
-| Motorcycle | Why it is a candidate | Status |
+| Possibly supported motorcycles | Model codes | Functions currently available |
 | --- | --- | --- |
-| Other listed first-generation Tiger 900 and Tiger 850 Sport variants | Modern engine family + original TFT family | DTC read/clear, dashboard read and service reset are implemented as experimental |
-| Updated-generation Tiger 900 and Tiger Sport 660 | Modern engine family; different instrument families | DTC read/clear are experimental; dashboard/service reset are not exposed |
-| Listed modern Street Triple, modern classics, Scrambler, Trident/Daytona/Tiger Sport, Speed Triple 1200 and Tiger 1200 groups | Modern engine family | DTC read/clear only, experimental |
+| Tiger 900, Tiger 900 GT, Tiger 900 Rally, Tiger 900 GT (LRH), Tiger 900 Rally Pro and Tiger 850 Sport — first generation | E60, E62, E63, E65, E67, E68 | Dashboard read, DTC read/clear and service reset |
+| Tiger 900 — updated generation | C81, C82, C83 | DTC read/clear only |
+| Tiger Sport 660 | L20, L22 | DTC read/clear only |
+| Street Triple RS 765, Street Triple R, Street Triple RS and Street Triple Moto2 | A55, A60, A61, A62, D31 | DTC read/clear only |
+| Bonneville T120, Bonneville Speedmaster, Bonneville Bobber, Speed Twin 900/1200/1200 RS, Thruxton RS and Bobber TFC | D40, D46, D53, D54, D56, DD0, DP0, DX0 | DTC read/clear only |
+| Scrambler 900, Scrambler 1200 X and Scrambler 1200 XE | D44, DR0, DS0 | DTC read/clear only |
+| Trident 660, Daytona 660 and Tiger Sport 800 | L10, L21, L23, L25 | DTC read/clear only |
+| Speed Triple 1200 RS and RR | P01, P02, P11 | DTC read/clear only |
+| Tiger 1200 GT and Rally family | P20, P21, P22, P23, P24 | DTC read/clear only |
+
+Every row in this table is **experimental and not yet tested**. A listed model may still use a different ECU, instrument cluster or diagnostic-port wiring depending on its year and market. The app must recognize the expected live profile before it offers an operation.
 
 See [`ecu-maps/README.md`](ecu-maps/README.md) for the exact profile and capability matrix. A shared ECU supplier or model name alone never proves compatibility.
 
