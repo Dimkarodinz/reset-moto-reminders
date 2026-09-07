@@ -36,12 +36,26 @@ instrument_family:
   service_reminder:
     knowledge_status: experimental_not_hardware_validated
     session_request: "021003"
+    session_positive_prefix: "5003"
     seed_request: "022701"
+    seed_positive_prefix: "6701"
+    key_request_prefix: "062702"
+    key_positive_prefix: "6702"
+    security_keys:
+      - id: default
+        aes_key: "D4B15FF4C92AB7F098316E7A5B11AC39"
+      - id: timing_3201f4
+        timing_response_suffix: "3201F4"
+        aes_key: "EF704CA051B800CC9287DF6A3511A978"
+      - id: timing_3200cb
+        timing_response_suffix: "3200CB"
+        aes_key: "DC9FDBA46F2FAD18A4B8E1123C7183C2"
     read_requests:
       - "0322A500"
       - "0322A000"
       - "0322A010"
     request_prefix: "2EA000"
+    write_positive_response: "6EA000"
     distance_step_km: 25
     minimum_distance_km: 25
     maximum_distance_km: 16000

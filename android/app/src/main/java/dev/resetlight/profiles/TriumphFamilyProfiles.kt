@@ -45,9 +45,31 @@ data class CombinedServiceWriteProfile(
     val maximumDistanceKm: Int,
     val yearBase: Int,
     val sessionRequest: String,
+    val sessionPositivePrefix: String,
     val seedRequest: String,
+    val seedPositivePrefix: String,
+    val keyRequestPrefix: String,
+    val keyPositivePrefix: String,
+    val securityKeys: List<InstrumentSecurityKey>,
     val readRequests: List<String>,
+    val writePositiveResponse: String,
 )
+
+data class InstrumentSecurityKey(
+    val id: String,
+    val timingResponseSuffix: String?,
+    val aesKey: String,
+)
+
+fun CombinedServiceWriteProfile.securityKeyFor(sessionResponse: String): InstrumentSecurityKey {
+    val normalized = sessionResponse.filter(Char::isLetterOrDigit).uppercase()
+    require(normalized.startsWith(sessionPositivePrefix.uppercase())) {
+        "Instrument rejected the extended diagnostic session"
+    }
+    return securityKeys.firstOrNull { key ->
+        key.timingResponseSuffix?.let(normalized::endsWith) == true
+    } ?: securityKeys.single { it.timingResponseSuffix == null }
+}
 
 data class InstrumentFamilyProfile(
     val schemaVersion: Int,
@@ -204,8 +226,36 @@ class InstrumentFamilyProfileLoader {
                 maximumDistanceKm = service.child("maximum_distance_km").integer(),
                 yearBase = service.child("year_base").integer(),
                 sessionRequest = service.child("session_request").familyHex(),
+                sessionPositivePrefix = service.child("session_positive_prefix").familyHex(),
                 seedRequest = service.child("seed_request").familyHex(),
-                readRequests = service.child("read_requests").requireNonEmptyList().map(YamlNode::familyHex),
+                seedPositivePrefix = service.child("seed_positive_prefix").familyHex(),
+                keyRequestPrefix = service.child("key_request_prefix").familyHex(),
+                keyPositivePrefix = service.child("key_positive_prefix").familyHex(),
+                securityKeys = service.child("security_keys").requireNonEmptyList().map { key ->
+                    InstrumentSecurityKey(
+                        id = key.child("id").string(),
+                        timingResponseSuffix = key.optionalChild("timing_response_suffix")?.familyHex(),
+                        aesKey = key.child("aes_key").familyHex().also {
+                            if (it.length != 32) {
+                                throw ProfileLoadException("Instrument AES keys must contain 16 bytes")
+                            }
+                        },
+                    )
+                }.also { keys ->
+                    if (keys.count { it.timingResponseSuffix == null } != 1) {
+                        throw ProfileLoadException("Instrument security must define exactly one fallback key")
+                    }
+                },
+                readRequests = service.child("read_requests").requireNonEmptyList()
+                    .map(YamlNode::familyHex)
+                    .also { requests ->
+                        if (requests.toSet() != COMBINED_SERVICE_READ_REQUESTS) {
+                            throw ProfileLoadException(
+                                "Combined service reset must define exactly A500, A000 and A010 reads",
+                            )
+                        }
+                    },
+                writePositiveResponse = service.child("write_positive_response").familyHex(),
             )
         } else null
 
@@ -264,7 +314,9 @@ class MotorcycleProfileCatalogLoader {
             ) {
                 throw ProfileLoadException("Motorcycle $id exposes instrument capabilities without an instrument family")
             }
-            if (capabilities.serviceReset != CapabilityStatus.UNAVAILABLE && instrument?.originalSplit == null) {
+            if (capabilities.serviceReset != CapabilityStatus.UNAVAILABLE &&
+                instrument?.originalSplit == null && instrument?.combinedWrite == null
+            ) {
                 throw ProfileLoadException(
                     "Motorcycle $id exposes a service reset without an executable instrument strategy",
                 )
@@ -386,3 +438,4 @@ private fun MotorcycleCapabilities.asList(): List<CapabilityStatus> =
     listOf(dtcRead, dtcClear, dashboardRead, serviceReset)
 
 private const val SUPPORTED_SCHEMA_VERSION = 1
+private val COMBINED_SERVICE_READ_REQUESTS = setOf("0322A500", "0322A000", "0322A010")

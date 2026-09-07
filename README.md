@@ -56,8 +56,8 @@ The current experimental Android branch also lets you select the motorcycles bel
 | Possibly supported motorcycles | Model codes | Functions currently available |
 | --- | --- | --- |
 | Tiger 900, Tiger 900 GT, Tiger 900 Rally, Tiger 900 GT (LRH), Tiger 900 Rally Pro and Tiger 850 Sport — first generation | E60, E62, E63, E65, E67, E68 | Dashboard read, DTC read/clear and service reset |
-| Tiger 900 — updated generation | C81, C82, C83 | DTC read/clear only |
-| Tiger Sport 660 | L20, L22 | DTC read/clear only |
+| Tiger 900 — updated generation | C81, C82, C83 | DTC read/clear and updated-TFT service reset |
+| Tiger Sport 660 | L20, L22 | DTC read/clear and hybrid-display service reset |
 | Street Triple RS 765, Street Triple R, Street Triple RS and Street Triple Moto2 | A55, A60, A61, A62, D31 | DTC read/clear only |
 | Bonneville T120, Bonneville Speedmaster, Bonneville Bobber, Speed Twin 900/1200/1200 RS, Thruxton RS and Bobber TFC | D40, D46, D53, D54, D56, DD0, DP0, DX0 | DTC read/clear only |
 | Scrambler 900, Scrambler 1200 X and Scrambler 1200 XE | D44, DR0, DS0 | DTC read/clear only |

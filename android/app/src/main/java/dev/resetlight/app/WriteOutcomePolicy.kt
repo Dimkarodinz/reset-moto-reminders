@@ -34,6 +34,11 @@ internal object WriteOutcomePolicy {
         failure: ServiceReminderResetFailure,
         profile: ServiceReminderOperationProfile,
     ): ServiceResetUiState.NeedsInspection? {
+        if (failure.writeStarted) {
+            return ServiceResetUiState.NeedsInspection(
+                UiText(UiMessage.SERVICE_RESET_REASON_WRITE_AMBIGUOUS),
+            )
+        }
         val request = failure.request.uppercase()
         val isReminderWrite =
             request.startsWith(profile.distanceRequestPrefixKm.uppercase()) ||

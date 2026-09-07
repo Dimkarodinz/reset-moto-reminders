@@ -38,7 +38,7 @@ motorcycles:
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-tiger-sport-660
@@ -51,7 +51,7 @@ motorcycles:
     capabilities:
       dtc_read: experimental
       dtc_clear: experimental
-      service_reset: unavailable
+      service_reset: experimental
       dashboard_read: unavailable
 
   - id: triumph-street-triple-765-modern

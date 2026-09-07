@@ -42,6 +42,10 @@ class TriumphFamilyProfileLoaderTest {
         assertEquals("0x18DAC1F1", updated.module.transport.requestCanId)
         assertEquals(1, updated.combinedWrite?.distanceStepKm)
         assertEquals("2EA000", updated.combinedWrite?.requestPrefix)
+        assertEquals("5003", updated.combinedWrite?.sessionPositivePrefix)
+        assertEquals("6701", updated.combinedWrite?.seedPositivePrefix)
+        assertEquals("062702", updated.combinedWrite?.keyRequestPrefix)
+        assertEquals(3, updated.combinedWrite?.securityKeys?.size)
 
         assertEquals(ServiceReminderStrategy.HYBRID_COMBINED, hybrid.strategy)
         assertEquals(25, hybrid.combinedWrite?.distanceStepKm)
@@ -65,7 +69,10 @@ class TriumphFamilyProfileLoaderTest {
         val gen2 = catalog.profiles.single { it.id == "triumph-tiger-900-gen2" }
         assertEquals(ProfileValidationStatus.EXPERIMENTAL, gen2.validationStatus)
         assertEquals(ServiceReminderStrategy.UPDATED_COMBINED, gen2.instrumentFamily?.strategy)
-        assertEquals(CapabilityStatus.UNAVAILABLE, gen2.capabilities.serviceReset)
+        assertEquals(CapabilityStatus.EXPERIMENTAL, gen2.capabilities.serviceReset)
+
+        val hybrid = catalog.profiles.single { it.id == "triumph-tiger-sport-660" }
+        assertEquals(CapabilityStatus.EXPERIMENTAL, hybrid.capabilities.serviceReset)
 
         val streetTriple = catalog.profiles.single { it.id == "triumph-street-triple-765-modern" }
         assertNull(streetTriple.instrumentFamily)

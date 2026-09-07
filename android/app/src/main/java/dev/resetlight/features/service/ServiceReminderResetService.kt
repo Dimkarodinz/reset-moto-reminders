@@ -30,6 +30,7 @@ sealed interface ServiceReminderResetResult {
 class ServiceReminderResetFailure(
     val request: String,
     cause: Throwable,
+    val writeStarted: Boolean = false,
 ) : Exception("Service reminder reset failed while sending $request", cause)
 
 /**
@@ -164,6 +165,6 @@ class ServiceReminderResetService(
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (failure: Throwable) {
-        throw ServiceReminderResetFailure(request, failure)
+        throw ServiceReminderResetFailure(request, failure, writeStarted = intent == WriteIntent.WRITE)
     }
 }

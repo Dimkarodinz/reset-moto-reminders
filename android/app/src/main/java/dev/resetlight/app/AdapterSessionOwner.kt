@@ -36,6 +36,7 @@ import dev.resetlight.features.research.ReadOnlyEngineCapture
 import dev.resetlight.features.research.ReadOnlyEngineCaptureFailure
 import dev.resetlight.features.research.ReadOnlyEngineCaptureResult
 import dev.resetlight.features.service.ClusterFingerprintGate
+import dev.resetlight.features.service.CombinedServiceReminderResetService
 import dev.resetlight.features.service.ServiceReminderResetFailure
 import dev.resetlight.features.service.ServiceReminderResetResult
 import dev.resetlight.features.service.ServiceReminderResetService
@@ -48,6 +49,7 @@ import dev.resetlight.profiles.DtcDescriptionLookup
 import dev.resetlight.profiles.EngineReadOnlyCaptureProfile
 import dev.resetlight.profiles.EngineSecurityAccessProfile
 import dev.resetlight.profiles.InstrumentReadOnlyCaptureProfile
+import dev.resetlight.profiles.InstrumentFamilyProfile
 import dev.resetlight.profiles.ServiceReminderOperationProfile
 import dev.resetlight.profiles.AdapterProfile
 import dev.resetlight.profiles.CapabilityStatus
@@ -128,12 +130,18 @@ class AdapterSessionOwner(
      */
     val serviceIntervalConstraints: ServiceIntervalConstraints?
         get() = currentServiceReminderProfile()?.let {
-        ServiceIntervalConstraints(
-            stepKm = it.distanceRawUnitKm,
-            minKm = it.distanceMinimumRaw * it.distanceRawUnitKm,
-            maxKm = it.distanceMaximumRaw * it.distanceRawUnitKm,
-        )
-    }
+            ServiceIntervalConstraints(
+                stepKm = it.distanceRawUnitKm,
+                minKm = it.distanceMinimumRaw * it.distanceRawUnitKm,
+                maxKm = it.distanceMaximumRaw * it.distanceRawUnitKm,
+            )
+        } ?: currentInstrumentFamily()?.combinedWrite?.let {
+            ServiceIntervalConstraints(
+                stepKm = it.distanceStepKm,
+                minKm = it.minimumDistanceKm,
+                maxKm = it.maximumDistanceKm,
+            )
+        }
 
     /**
      * Extract live framed responses (headers on, raw frames) into the bare
@@ -192,9 +200,9 @@ class AdapterSessionOwner(
 
     val serviceResetAvailable: Boolean
         get() = writesEnabled &&
-            currentInstrumentReadOnlyCaptureProfile() != null &&
-            currentServiceReminderProfile() != null &&
-            currentServiceGate() != null &&
+            (currentServiceReminderProfile() != null || currentInstrumentFamily()?.combinedWrite != null) &&
+            (currentServiceReminderProfile() == null ||
+                (currentInstrumentReadOnlyCaptureProfile() != null && currentServiceGate() != null)) &&
             currentMotorcycleId() != null &&
             (currentMotorcycle()?.capabilities?.serviceReset != CapabilityStatus.UNAVAILABLE)
 
@@ -500,18 +508,21 @@ class AdapterSessionOwner(
     }
 
     /**
-     * Replays the observed service-reminder reset. Available only in the research
-     * build; the [ClusterFingerprintGate] inside the service fails closed before
-     * any write byte leaves the adapter.
+     * Runs the service-reminder strategy declared by the selected instrument
+     * family. The validated original-TFT path keeps its fingerprint gate; the
+     * experimental combined paths require positive session/security and live
+     * precursor responses before sending their single ISO-TP write sequence.
      */
     fun resetServiceReminder(
         distance: Int,
         distanceUnit: DistanceUnit,
         nextServiceDate: LocalDate,
     ) {
-        val instrumentProfile = currentInstrumentReadOnlyCaptureProfile() ?: return
-        val serviceProfile = currentServiceReminderProfile() ?: return
-        val gate = currentServiceGate() ?: return
+        val instrumentProfile = currentInstrumentReadOnlyCaptureProfile()
+        val serviceProfile = currentServiceReminderProfile()
+        val instrumentFamily = currentInstrumentFamily()
+        if (serviceProfile == null && instrumentFamily?.combinedWrite == null) return
+        val gate = if (serviceProfile != null) currentServiceGate() ?: return else null
         val id = currentMotorcycleId() ?: return
         val session = activeSession.get() ?: return
         if (!serviceResetAvailable) return
@@ -528,8 +539,14 @@ class AdapterSessionOwner(
             startedText = "requested distance=$distance unit=$distanceUnit date=$nextServiceDate",
             failedEvent = "service_reset_failed",
             recover = { failure ->
-                val outcome = (failure as? ServiceReminderResetFailure)?.let {
-                    WriteOutcomePolicy.serviceFailure(it, serviceProfile)
+                val outcome = (failure as? ServiceReminderResetFailure)?.let { resetFailure ->
+                    if (resetFailure.writeStarted) {
+                        ServiceResetUiState.NeedsInspection(
+                            UiText(UiMessage.SERVICE_RESET_REASON_WRITE_AMBIGUOUS),
+                        )
+                    } else {
+                        serviceProfile?.let { WriteOutcomePolicy.serviceFailure(resetFailure, it) }
+                    }
                 }
                 if (outcome == null) {
                     false
@@ -545,13 +562,20 @@ class AdapterSessionOwner(
                 }
             },
         ) {
-            val result = ServiceReminderResetService(
-                instrumentProfile,
-                serviceProfile,
-                gate,
-                id,
-                extractor = currentInstrumentExtractor(),
-            ).reset(writeChannel(session), distance, distanceUnit, nextServiceDate)
+            val result = if (serviceProfile != null) {
+                ServiceReminderResetService(
+                    checkNotNull(instrumentProfile),
+                    serviceProfile,
+                    checkNotNull(gate),
+                    id,
+                    extractor = currentInstrumentExtractor(),
+                ).reset(writeChannel(session), distance, distanceUnit, nextServiceDate)
+            } else {
+                CombinedServiceReminderResetService(
+                    checkNotNull(instrumentFamily),
+                    extractor = currentInstrumentExtractor(),
+                ).reset(writeChannel(session), distance, distanceUnit, nextServiceDate)
+            }
             val uiState = WriteOutcomePolicy.serviceResult(result)
             mutableServiceResetState.value = uiState
             journal.record(
@@ -571,6 +595,8 @@ class AdapterSessionOwner(
     }
 
     private fun currentMotorcycle(): MotorcycleCompatibilityProfile? = mutableSelectedMotorcycle.value
+
+    private fun currentInstrumentFamily(): InstrumentFamilyProfile? = currentMotorcycle()?.instrumentFamily
 
     private fun currentEngineReadOnlyCaptureProfile(): EngineReadOnlyCaptureProfile? =
         currentMotorcycle()?.engineFamily?.readOnlyCapture ?: engineReadOnlyCaptureProfile

@@ -44,6 +44,27 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdapterSessionOwnerTest {
     @Test
+    fun `updated and hybrid profiles expose experimental service reset`() = runTest {
+        val catalog = motorcycleCatalog()
+        val owner = AdapterSessionOwner(
+            adapterProfile("vlinker-mc-android.adaptermap.yaml"),
+            FakeBluetooth(),
+            EventJournal(backgroundScope, MemorySink(), FixedClock()),
+            this,
+            motorcycleCatalog = catalog,
+            writesEnabled = true,
+        )
+
+        assertTrue(owner.selectMotorcycle("triumph-tiger-900-gen2"))
+        assertTrue(owner.serviceResetAvailable)
+        assertEquals(1, owner.serviceIntervalConstraints?.stepKm)
+
+        assertTrue(owner.selectMotorcycle("triumph-tiger-sport-660"))
+        assertTrue(owner.serviceResetAvailable)
+        assertEquals(25, owner.serviceIntervalConstraints?.stepKm)
+    }
+
+    @Test
     fun `motorcycle profile changes only while disconnected`() = runTest {
         val adapter = adapterProfile("vlinker-mc-android.adaptermap.yaml")
         val catalog = motorcycleCatalog()
